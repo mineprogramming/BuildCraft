@@ -38,9 +38,8 @@ var tank_interface = __config__.access("enable_tank_ui");
 
 function TileRenderModel(id, data){
     this.registerAsId = function(id, data){
-        var block = Unlimited.API.GetReal(id, data || 0);
-        this.id = block.id;
-        this.data = block.data;
+        this.id = id;
+        this.data = data || 0;
         this.convertedId = this.id * 16 + this.data;
         
         if (this.convertedId){
@@ -68,7 +67,6 @@ function TileRenderModel(id, data){
         ];
 
         if (block){
-            block = Unlimited.API.GetReal(block.id, block.data);
             box.push(parseInt(block.id) || 0);
             box.push(parseInt(block.data) || 0)
         }
@@ -122,8 +120,7 @@ function TileRenderModel(id, data){
             tileGroups: [],
             
             addBlock: function(id, data){
-                var block = Unlimited.API.GetReal(id, data || 0);
-                var convertedId = block.id * 16 + block.data;
+                var convertedId = block.id * 16 + (block.datadata || 0);
                 this.tiles[convertedId] = true;
             },
             
@@ -173,8 +170,7 @@ function TileRenderModel(id, data){
     }
     
     this.addConnection = function(id, data){
-        var block = Unlimited.API.GetReal(id, data || 0);
-        var convertedId = block.id * 16 + block.data;
+        var convertedId = id * 16 + (data || 0);
         this.connections[convertedId] = true;
         this.hasConnections = true;
     }
@@ -260,8 +256,7 @@ if (!ICRenderLib){
                 this.connectionGroups[name] = group;
             }
             
-            var block = Unlimited.API.GetReal(blockId, blockData);
-            group[block.id * 16 + block.data] = true;
+            group[blockId * 16 + blockData] = true;
         },
         
         addConnectionBlock: function(name, blockId){
