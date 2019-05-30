@@ -5,7 +5,7 @@ Block.createBlock("pipeItemCobble", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemCobble, count: 1, data: 0}, ["xax"], ['x', 4, -1, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemCobble, "pipe_item_cobble", ITEM_PIPE_CONNECTION_COBBLE, {
+registerItemPipe(BlockID.pipeItemCobble, {name: "pipe_item_cobble", data: 0}, ITEM_PIPE_CONNECTION_COBBLE, {
     friction: .005
 });
 
@@ -17,7 +17,7 @@ Block.createBlock("pipeItemStone", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemStone, count: 1, data: 0}, ["xax"], ['x', 1, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemStone, "pipe_item_stone", ITEM_PIPE_CONNECTION_STONE, {
+registerItemPipe(BlockID.pipeItemStone, {name: "pipe_item_stone", data: 0}, ITEM_PIPE_CONNECTION_STONE, {
     friction: .0015
 });
 
@@ -29,7 +29,7 @@ Block.createBlock("pipeItemSandstone", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemSandstone, count: 1, data: 0}, ["xax"], ['x', 24, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemSandstone, "pipe_item_sandstone", ITEM_PIPE_CONNECTION_SANDSTONE, {
+registerItemPipe(BlockID.pipeItemSandstone, {name: "pipe_item_sandstone", data: 0}, ITEM_PIPE_CONNECTION_SANDSTONE, {
     friction: .0025
 }); 
 
@@ -41,7 +41,7 @@ Block.createBlock("pipeItemObsidian", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemObsidian, count: 1, data: 0}, ["xax"], ['x', 49, -1, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemObsidian, "pipe_item_obsidian", ITEM_PIPE_CONNECTION_ANY);
+registerItemPipe(BlockID.pipeItemObsidian, {name: "pipe_item_obsidian", data: 0}, ITEM_PIPE_CONNECTION_ANY);
 
 
 

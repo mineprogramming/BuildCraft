@@ -5,7 +5,10 @@ Block.createBlock("pipeItemGolden", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemGolden, count: 1, data: 0}, ["xax"], ['x', 266, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemGolden, "pipe_item_gold", ITEM_PIPE_CONNECTION_ANY);
+var modelsItemGolden = registerItemPipe(BlockID.pipeItemGolden, [
+    {name: "pipe_item_gold", data: 0},
+    {name: "pipe_item_gold", data: 2}
+ ], ITEM_PIPE_CONNECTION_ANY);
 
 TileEntity.registerPrototype(BlockID.pipeItemGolden, {
     defaultValues: {
@@ -13,9 +16,9 @@ TileEntity.registerPrototype(BlockID.pipeItemGolden, {
     },
 
     redstone: function(signal){
-        this.data.redstone = signal.power > 8;
-        // TODO: change texture
-        // World.setBlock(this.x, this.y, this.z, World.getBlock(this.x, this.y, this.z).id, this.data.redstone ? 1 : 0);
+        this.data.redstone = signal.power > 8;  
+        var model = modelsItemGolden[this.data.redstone ? 1 : 0];
+        BlockRenderer.mapAtCoords(this.x, this.y, this.z, model);
     },
     
     getItemAcceleration: function(){

@@ -14,7 +14,7 @@ Block.createBlock("pipeItemDiamondRender", [
 ]);
 
 Recipes.addShaped({id: BlockID.pipeItemDiamond, count: 1, data: 0}, ["xax"], ['x', 264, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemDiamond, "pipe_item_diamond", ITEM_PIPE_CONNECTION_ANY);
+registerItemPipe(BlockID.pipeItemDiamond, {name: "pipe_item_diamond", data: 0}, ITEM_PIPE_CONNECTION_ANY);
 
 
 var DIAMOND_PIPE_COLORS = {

@@ -5,7 +5,7 @@ Block.createBlock("pipeItemWooden", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemWooden, count: 1, data: 0}, ["xax"], ['x', 5, -1, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemWooden, "pipe_item_wood", ITEM_PIPE_CONNECTION_ANY);
+registerItemPipe(BlockID.pipeItemWooden, {name: "pipe_item_wood", data: 0}, ITEM_PIPE_CONNECTION_ANY);
  
 
 TileEntity.registerPrototype(BlockID.pipeItemWooden, {

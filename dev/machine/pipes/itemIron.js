@@ -5,7 +5,7 @@ Block.createBlock("pipeItemIron", [
 ]);
 
 Recipes.addShaped({id: BlockID.pipeItemIron, count: 1, data: 0}, ["xax"], ['x', 265, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemIron, "pipe_item_iron", ITEM_PIPE_CONNECTION_ANY);
+registerItemPipe(BlockID.pipeItemIron, {name: "pipe_item_iron", data: 0}, ITEM_PIPE_CONNECTION_ANY);
 
 var IRON_PIPE_DIRECTIONS = [
     {x: 0, y: -1, z: 0},

@@ -9,7 +9,7 @@ items/other.js
 
 machine/engines.js
 
-machine/item_pipes.js
+machine/pipes/PipeRegistry.js
 machine/pipes/itemWood.js
 machine/pipes/itemIron.js
 machine/pipes/itemGold.js
