@@ -2418,7 +2418,8 @@ function getPipeRender(width, group, texture){
         var box = boxes[i];
        
         var model = BlockRenderer.createModel();
-        model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data + 1);
+        var data = texture.data + (texture.sides? 1 + parseInt(i) : 1);
+        model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, data);
        
         render.addEntry(model).asCondition(box.side[0], box.side[1], box.side[2], group, 0);
     }
@@ -2436,36 +2437,35 @@ function registerItemPipe(id, texture, connectionType, params){
         return [[id, 1, 0]];
     });
     
-    var width = 0.5
+    var width = 0.5;
     var group = ICRender.getGroup("bc-pipes");
     group.add(id, -1);
     
     var render;
     var renders = [];
 
-    if(!Array.isArray(texture)){
-        render = getPipeRender(, group, texture, false);
+    if(Array.isArray(texture))
+    
+    if(!Array.isArray(texture) && !texture.rotation){
+        render = getPipeRender(width, group, texture, false);
     } else {
+        
         for(var i in texture){
-            var current = getPipeRender(0.5, group, texture[i], false);
-            render.push(current);
-            BlockRenderer.enableCoordMapping(id, i, current);
+            var current = getPipeRender(width, group, texture[i], false);
+            renders.push(current);
         }
         render = renders[0];
     }
     
     
     BlockRenderer.setStaticICRender(id, 0, render);
-
-    width = Math.max(width, 0.5);
+    BlockRenderer.enableCoordMapping(id, 0, render);
     Block.setBlockShape(id, {x: 0.5 - width/2, y: 0.5 - width/2, z: 0.5 - width/2}, {x: 0.5 + width/2, y: 0.5 + width/2, z: 0.5 + width/2});
     
     /* params */
     ItemTransportingHelper.registerItemPipe(id, connectionType, params);
     
-    return {
-        renders: renders
-    }
+    return renders;
 }
 
 ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 54);
@@ -2592,7 +2592,7 @@ Block.createBlock("pipeItemIron", [
 ]);
 
 Recipes.addShaped({id: BlockID.pipeItemIron, count: 1, data: 0}, ["xax"], ['x', 265, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemIron, {name: "pipe_item_iron", data: 0}, ITEM_PIPE_CONNECTION_ANY);
+var modelsItemIron = registerItemPipe(BlockID.pipeItemIron, {name: "pipe_item_iron", data: 0, rotation: true}, ITEM_PIPE_CONNECTION_ANY);
 
 var IRON_PIPE_DIRECTIONS = [
     {x: 0, y: -1, z: 0},
@@ -2640,7 +2640,7 @@ TileEntity.registerPrototype(BlockID.pipeItemIron, {
 
     setDirection: function(dir){
         this.data.direction = dir % 6 || 0;
-        //World.setBlock(this.x, this.y, this.z, World.getBlock(this.x, this.y, this.z).id, this.data.direction);
+        BlockRenderer.mapAtCoords(this.x, this.y, this.z, modelsItemIron);
     },
 
     created: function(){
@@ -2684,11 +2684,9 @@ TileEntity.registerPrototype(BlockID.pipeItemGolden, {
     },
 
     redstone: function(signal){
-        this.data.redstone = signal.power > 8;
+        this.data.redstone = signal.power > 8;  
         var model = modelsItemGolden[this.data.redstone ? 1 : 0];
         BlockRenderer.mapAtCoords(this.x, this.y, this.z, model);
-        // TODO: change texture
-        // World.setBlock(this.x, this.y, this.z, World.getBlock(this.x, this.y, this.z).id, this.data.redstone ? 1 : 0);
     },
     
     getItemAcceleration: function(){
@@ -2880,19 +2878,8 @@ Block.createBlock("pipeItemDiamond", [
     {name: "Diamond Transport Pipe", texture: [["pipe_item_diamond", 0]], inCreative: true}
 ], BLOCK_TYPE_ITEM_PIPE);
 
-IDRegistry.genBlockID("pipeItemDiamondRender");
-Block.createBlock("pipeItemDiamondRender", [
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 1]], inCreative: false},
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 2]], inCreative: false},
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 3]], inCreative: false},
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 4]], inCreative: false},
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 5]], inCreative: false},
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 6]], inCreative: false}
-]);
-
 Recipes.addShaped({id: BlockID.pipeItemDiamond, count: 1, data: 0}, ["xax"], ['x', 264, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemDiamond, {name: "pipe_item_diamond", data: 0}, ITEM_PIPE_CONNECTION_ANY);
-
+registerItemPipe(BlockID.pipeItemDiamond, {name: "pipe_item_diamond", data: 0, sides: true}, ITEM_PIPE_CONNECTION_ANY);
 
 var DIAMOND_PIPE_COLORS = {
     BLACK: {slot: "black", data: 0},
@@ -2920,21 +2907,6 @@ var DIAMOND_PIPE_MODEL_BOXES = [
     [0.0, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH],
     [0.5 + PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 1.0, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH],
 ];
-
-// init renderer
-Callback.addCallback("PreLoaded", function(){
-    var diamondPipeRenderer = new TileRenderModel(BlockID.pipeItemDiamond, 0);
-    for(var i in DIAMOND_PIPE_DIRECTIONS){
-        var box = DIAMOND_PIPE_MODEL_BOXES[i];
-        var dir = DIAMOND_PIPE_DIRECTIONS[i];
-        
-        var condition = diamondPipeRenderer.createCondition(dir.x, dir.y, dir.z);
-        condition.addBoxF(box[0], box[1], box[2], box[3], box[4], box[5], {id: BlockID.pipeItemDiamondRender, data: dir.type.data});
-        condition.addBlockGroup(ITEM_PIPE_CONNECTION_ANY);
-        condition.addBlockGroup(ITEM_PIPE_CONNECTION_MACHINE);
-    }
-    diamondPipeRenderer.addBoxF(0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH);
-});
 
 var diamondPipeUI = new UI.StandartWindow({
     standart: {

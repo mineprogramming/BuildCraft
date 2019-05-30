@@ -9,6 +9,7 @@ var modelsItemGolden = registerItemPipe(BlockID.pipeItemGolden, [
     {name: "pipe_item_gold", data: 0},
     {name: "pipe_item_gold", data: 2}
  ], ITEM_PIPE_CONNECTION_ANY);
+ 
 
 TileEntity.registerPrototype(BlockID.pipeItemGolden, {
     defaultValues: {

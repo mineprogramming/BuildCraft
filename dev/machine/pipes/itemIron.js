@@ -5,65 +5,60 @@ Block.createBlock("pipeItemIron", [
 ]);
 
 Recipes.addShaped({id: BlockID.pipeItemIron, count: 1, data: 0}, ["xax"], ['x', 265, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemIron, {name: "pipe_item_iron", data: 0}, ITEM_PIPE_CONNECTION_ANY);
+var modelsItemIron = registerItemPipe(BlockID.pipeItemIron, {name: "pipe_item_iron", data: 0, rotation: true}, ITEM_PIPE_CONNECTION_ANY);
 
 var IRON_PIPE_DIRECTIONS = [
-    {x: 0, y: -1, z: 0},
-    {x: 0, y: 1, z: 0},
-    {x: 0, y: 0, z: -1},
-    {x: 0, y: 0, z: 1},
-    {x: -1, y: 0, z: 0},
     {x: 1, y: 0, z: 0},
+    {x: -1, y: 0, z: 0},
+    {x: 0, y: 1, z: 0},
+    {x: 0, y: -1, z: 0},
+    {x: 0, y: 0, z: 1},
+    {x: 0, y: 0, z: -1},
 ];
-
-var IRON_PIPE_MODEL_BOXES = [
-    [0.5 - PIPE_BLOCK_WIDTH, 0.0, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH],
-    [0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 1.0, 0.5 + PIPE_BLOCK_WIDTH],
-    [0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.0, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH],
-    [0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 1.0],
-    [0.0, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH],
-    [0.5 + PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 1.0, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH],
-];
-
-// init renderer
-//Callback.addCallback("PreLoaded", function(){
-//    for (var data in IRON_PIPE_DIRECTIONS){
-//        var ironPipeRender = new TileRenderModel(BlockID.pipeItemIron, data);
-//        for(var i in IRON_PIPE_MODEL_BOXES){
-//            var box = IRON_PIPE_MODEL_BOXES[i];
-//            var dir = IRON_PIPE_DIRECTIONS[i];
-//            if(i == data){
-//                ironPipeRender.addBoxF(box[0], box[1], box[2], box[3], box[4], box[5], {id: BlockID.pipeItemIronRender, data: 0});
-//            }
-//            else{
-//                var condition = ironPipeRender.createCondition(dir.x, dir.y, dir.z);
-//                condition.addBoxF(box[0], box[1], box[2], box[3], box[4], box[5]);
-//                condition.addBlockGroup(ITEM_PIPE_CONNECTION_ANY);
-//                condition.addBlockGroup(ITEM_PIPE_CONNECTION_MACHINE);
-//            }
-//        }
-//        ironPipeRender.addBoxF(0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH);
-//    }
-//});
 
 TileEntity.registerPrototype(BlockID.pipeItemIron, {
     defaultValues: {
-        direction: 0
+        direction: 0,
+        redstone: false
     },
 
     setDirection: function(dir){
-        this.data.direction = dir % 6 || 0;
-        //World.setBlock(this.x, this.y, this.z, World.getBlock(this.x, this.y, this.z).id, this.data.direction);
+        this.data.direction = dir || 0;
+        BlockRenderer.mapAtCoords(this.x, this.y, this.z, modelsItemIron[dir]);
     },
 
     created: function(){
         this.setDirection(1);
     },
+    
+    redstone: function(signal){
+        Game.message(signal.power + "; " + this.data.redstone);
+        if(signal.power > 8 && !this.data.redstone){
+            this.data.redstone = true;
+            this.changeDirection();
+        } else {
+            this.data.redstone = false;
+        }
+    },
 
     click: function(id, count, data){
         if (id == ItemID.bcWrench){
-            this.setDirection(this.data.direction + 1);
+            this.changeDirection();
         }
+    },
+    
+    changeDirection: function(){
+        var direction = this.data.direction;
+        for(var i = 0; i < 6; i++){
+            direction = (direction + 1) % 6;
+            var relative = IRON_PIPE_DIRECTIONS[direction];
+            var block = World.getBlockID(this.x + relative.x, this.y + relative.y, this.z + relative.z);
+            if(PipeRegistry.itemPipes.indexOf(block) != -1) { 
+                // Found next connected pipe
+                break;
+            }
+        }
+        this.setDirection(direction);
     },
 
     getTransportedItemDirs: function(){

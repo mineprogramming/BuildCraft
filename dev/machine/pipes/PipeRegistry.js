@@ -20,6 +20,10 @@ var ITEM_PIPE_CONNECTION_STONE = "bc-item-pipe-stone";
 var ITEM_PIPE_CONNECTION_COBBLE = "bc-item-pipe-cobble";
 var ITEM_PIPE_CONNECTION_SANDSTONE = "bc-item-pipe-sandstone";
 
+var PipeRegistry = {
+    itemPipes: []
+}
+
 
 function getPipeRender(width, group, texture){
     var render = new ICRender.Model();
@@ -37,7 +41,13 @@ function getPipeRender(width, group, texture){
         var box = boxes[i];
        
         var model = BlockRenderer.createModel();
-        model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data + 1);
+        
+        var data = texture.data + (texture.sides? 1 + parseInt(i) : 1);
+        if(texture.rotation && i != texture.index){
+            data += 1;
+        }
+        
+        model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, data);
        
         render.addEntry(model).asCondition(box.side[0], box.side[1], box.side[2], group, 0);
     }
@@ -62,16 +72,22 @@ function registerItemPipe(id, texture, connectionType, params){
     var render;
     var renders = [];
 
-    if(!Array.isArray(texture)){
-        render = getPipeRender(width, group, texture, false);
-    } else {
+    if(Array.isArray(texture)){
         for(var i in texture){
             var current = getPipeRender(width, group, texture[i], false);
             renders.push(current);
         }
         render = renders[0];
+    } else if(texture.rotation){
+        for(var i = 0; i < 6; i++){
+            texture.index = i;
+            var current = getPipeRender(width, group, texture, false);
+            renders.push(current);
+        }
+        render = renders[0];
+    } else {
+        render = getPipeRender(width, group, texture, false);
     }
-    
     
     BlockRenderer.setStaticICRender(id, 0, render);
     BlockRenderer.enableCoordMapping(id, 0, render);
@@ -79,6 +95,7 @@ function registerItemPipe(id, texture, connectionType, params){
     
     /* params */
     ItemTransportingHelper.registerItemPipe(id, connectionType, params);
+    PipeRegistry.itemPipes.push(id);
     
     return renders;
 }

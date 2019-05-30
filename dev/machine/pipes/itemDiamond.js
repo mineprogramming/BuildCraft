@@ -3,19 +3,8 @@ Block.createBlock("pipeItemDiamond", [
     {name: "Diamond Transport Pipe", texture: [["pipe_item_diamond", 0]], inCreative: true}
 ], BLOCK_TYPE_ITEM_PIPE);
 
-IDRegistry.genBlockID("pipeItemDiamondRender");
-Block.createBlock("pipeItemDiamondRender", [
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 1]], inCreative: false},
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 2]], inCreative: false},
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 3]], inCreative: false},
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 4]], inCreative: false},
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 5]], inCreative: false},
-    {name: "tile.diamondPipeRender.name", texture: [["pipe_item_diamond", 6]], inCreative: false}
-]);
-
 Recipes.addShaped({id: BlockID.pipeItemDiamond, count: 1, data: 0}, ["xax"], ['x', 264, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemDiamond, {name: "pipe_item_diamond", data: 0}, ITEM_PIPE_CONNECTION_ANY);
-
+registerItemPipe(BlockID.pipeItemDiamond, {name: "pipe_item_diamond", data: 0, sides: true}, ITEM_PIPE_CONNECTION_ANY);
 
 var DIAMOND_PIPE_COLORS = {
     BLACK: {slot: "black", data: 0},
@@ -43,21 +32,6 @@ var DIAMOND_PIPE_MODEL_BOXES = [
     [0.0, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH],
     [0.5 + PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 1.0, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH],
 ];
-
-// init renderer
-Callback.addCallback("PreLoaded", function(){
-    var diamondPipeRenderer = new TileRenderModel(BlockID.pipeItemDiamond, 0);
-    for(var i in DIAMOND_PIPE_DIRECTIONS){
-        var box = DIAMOND_PIPE_MODEL_BOXES[i];
-        var dir = DIAMOND_PIPE_DIRECTIONS[i];
-        
-        var condition = diamondPipeRenderer.createCondition(dir.x, dir.y, dir.z);
-        condition.addBoxF(box[0], box[1], box[2], box[3], box[4], box[5], {id: BlockID.pipeItemDiamondRender, data: dir.type.data});
-        condition.addBlockGroup(ITEM_PIPE_CONNECTION_ANY);
-        condition.addBlockGroup(ITEM_PIPE_CONNECTION_MACHINE);
-    }
-    diamondPipeRenderer.addBoxF(0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH);
-});
 
 var diamondPipeUI = new UI.StandartWindow({
     standart: {
