@@ -15,9 +15,17 @@ TileEntity.registerPrototype(BlockID.pipeItemGolden, {
     defaultValues: {
         redstone: false,
     },
+    
+    init: function(){
+        this.updateModel();
+    },
 
     redstone: function(signal){
         this.data.redstone = signal.power > 8;  
+        this.updateModel();
+    },
+    
+    updateModel: function(){
         var model = modelsItemGolden[this.data.redstone ? 1 : 0];
         BlockRenderer.mapAtCoords(this.x, this.y, this.z, model);
     },

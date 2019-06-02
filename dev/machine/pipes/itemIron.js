@@ -21,6 +21,10 @@ TileEntity.registerPrototype(BlockID.pipeItemIron, {
         direction: 0,
         redstone: false
     },
+    
+    init: function(){
+        this.setDirection(this.data.direction);
+    },
 
     setDirection: function(dir){
         this.data.direction = dir || 0;

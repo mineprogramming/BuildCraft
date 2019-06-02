@@ -2,7 +2,7 @@
 NIDE BUILD INFO:
   dir: dev
   target: main.js
-  files: 17
+  files: 18
 */
 
 
@@ -922,6 +922,679 @@ Callback.addCallback("PostLoaded", function(){
 });
 
 
+
+
+ModAPI.registerAPI("BuildcraftAPI", {
+ Transport: {
+  Helper: ItemTransportingHelper,
+  Item: TransportingItem,
+  Liquid: TransportedLiquid,
+  Cache: TransportingCache,
+  LiquidHelper: LiquidTransportHelper,
+  LiquidCache: LiquidTransportingCache,
+  LiquidMap: LiquidMap
+ },
+
+ ModelHelper: ModelHelper,
+
+ LiquidModelHelper: LiquidModels,
+
+ Engine: {
+  Part: EngineModelPartRegistry,
+  ModelHelper: EngineModelHelper,
+  Prototype: BUILDCRAFT_ENGINE_PROTOTYPE,
+  Types: ENGINE_TYPE_DATA
+ },
+
+ requireGlobal: function(str){
+  return eval(str);
+ },
+
+ registerPipe: registerItemPipe,
+
+ registerFluidPipe: setupFluidPipeRender
+});
+
+Logger.Log("Buildcraft API shared as BuildcraftAPI", "API");
+
+
+
+
+
+
+// file: translation.js
+
+Translation.addTranslation("Redstone Engine", {ru: "Двигатель на красном камне"});
+Translation.addTranslation("Stirling Engine", {ru: "Двигатель Стирлинга"});
+Translation.addTranslation("ICE", {ru: "ДВС"});
+Translation.addTranslation("Electric Engine", {ru: "Электрический двигатель"});
+Translation.addTranslation("Tank", {ru: "Цистерна"});
+Translation.addTranslation("Pump", {ru: "Помпа"});
+
+Translation.addTranslation("Wooden Transport Pipe", {ru: "Деревянная транспортная труба"});
+Translation.addTranslation("Cobblestone Transport Pipe", {ru: "Булыжниковая транспортная труба"});
+Translation.addTranslation("Stone Transport Pipe", {ru: "Каменная транспортная труба"});
+Translation.addTranslation("Sandstone Transport Pipe", {ru: "Песчаниковая транспортная труба"});
+Translation.addTranslation("Iron Transport Pipe", {ru: "Железная транспортная труба"});
+Translation.addTranslation("Golden Transport Pipe", {ru: "Золотая транспортная труба"});
+Translation.addTranslation("Obsidian Transport Pipe", {ru: "Обсидиановая транспортная труба"});
+Translation.addTranslation("Emerald Transport Pipe", {ru: "Изумрудная транспортная труба"});
+Translation.addTranslation("Diamond Transport Pipe", {ru: "Алмазная транспортная труба"});
+
+Translation.addTranslation("Wooden Fluid Pipe", {ru: "Деревянная жидкостная труба"});
+Translation.addTranslation("Cobblestone Fluid Pipe", {ru: "Булыжниковая жидкостная труба"});
+Translation.addTranslation("Stone Fluid Pipe", {ru: "Каменная жидкостная труба"});
+Translation.addTranslation("Iron Fluid Pipe", {ru: "Железная жидкостная труба"});
+Translation.addTranslation("Golden Fluid Pipe", {ru: "Золотая жидкостная труба"});
+Translation.addTranslation("Emerald Fluid Pipe", {ru: "Изумрудная жидкостная труба"});
+
+Translation.addTranslation("Wrench", {ru: "Гаечный ключ"});
+Translation.addTranslation("Wood Gear", {ru: "Деревянная шестерёнка"});
+Translation.addTranslation("Stone Gear", {ru: "Каменная шестерёнка"});
+Translation.addTranslation("Tin Gear", {ru: "Оловянная шестерёнка"});
+Translation.addTranslation("Iron Gear", {ru: "Железная шестерёнка"});
+Translation.addTranslation("Gold Gear", {ru: "Золотая шестерёнка"});
+Translation.addTranslation("Diamond Gear", {ru: "Алмазная шестерёнка"});
+Translation.addTranslation("Pipe Sealant", {ru: "Уплотнитель для труб"});
+
+
+
+// file: core/TransportedLiquid.js
+
+var TransportedLiquid = new GameObject("bc-transported-liquid", {
+    init: function(x, y, z, liquid, amount) {
+        this.pos = {
+            x: x,
+            y: y,
+            z: z
+        };
+
+        this.liquid = {
+            id: liquid,
+            amount: amount
+        };
+
+        this.frame = 0;
+
+        LiquidMap.registerLiquid(this.pos.x, this.pos.y, this.pos.z, this);
+
+    },
+
+    setLiquid: function(liquid, amount) {
+        this.liquid.id = liquid;
+        this.liquid.amount = amount;
+    },
+
+    addAmount: function(liquid, amount) {
+        if (this.liquid.id == liquid || !liquid) this.liquid.amount += amount;
+    },
+
+    validate: function() {
+        if (!this.liquid || this.liquid.amount <= 0.001 || !this.liquid.id || !this.liquid.amount) {
+            this.selfDestroy();
+        }
+        if (this.liquid.amount >= 0.12) this.liquid.amount = 0.12;
+    },
+
+    render: function(pos, dirs) {
+        var arr = [];
+        for (var a in dirs) {
+            arr.push({
+                x: dirs[a].x - pos.x,
+                y: dirs[a].y - pos.y,
+                z: dirs[a].z - pos.z
+            });
+        }
+        this.animation.describe({
+            skin: LiquidModels.getModelSkin(),
+            renderAPI: LiquidModels.getLiquidRender(6, this.liquid.amount <= 0.12 ? (this.liquid.amount / 20) * 100 : 6, 6, arr),
+            firmRotation: true,
+            hitbox: {
+                width: .0,
+                height: .0
+            }
+        });
+        this.animation.refresh();
+    },
+
+
+    //pouring
+
+    mean: function(amounts) {
+        var mean = 0;
+        for (var i in amounts) {
+            mean += amounts[i];
+        }
+        return +((mean / amounts.length).toFixed(3));
+    },
+
+    pouringAction: function() {
+        var amounts = [this.liquid.amount];
+        var deny = [true, true, true, true, true, true];
+        var te_counts = 0;
+        var env = LiquidTransportHelper.getEnviromentData(this.pos);
+        if (!env.inPipe) {
+            this.selfDestroy();
+            return;
+        }
+
+        this.render(this.pos, env.directions);
+
+        for (var d in env.directions) {
+            var dir = env.directions[d];
+            var liquid = LiquidMap.getLiquid(dir.x, dir.y, dir.z);
+            if (dir.liquidStorage) {
+                te_counts++;
+                continue;
+            }
+            if (liquid) {
+                if (liquid.liquid.id != this.liquid.id || liquid.liquid.amount > this.liquid.amount) {
+                    deny[d] = false;
+                } else amounts.push(liquid.liquid.amount);
+            }
+        }
+
+        var mean = this.mean(amounts);
+        for (var d in env.directions) {
+            var dir = env.directions[d];
+            if (!dir.liquidStorage && deny[d]) LiquidTransportHelper.flushLiquid(dir, this.liquid.id, mean);
+        }
+
+        if (te_counts > 0) {
+            var amountForTE = this.liquid.amount / te_counts;
+            this.liquid.amount = 0;
+            for (var d in env.directions) {
+                var dir = env.directions[d];
+                if (dir.addLiquidFromPipe) {
+                    this.liquid.amount += dir.addLiquidFromPipe(this.liquid.id, amountForTE);
+                } else if (dir.liquidStorage) {
+                    var liquidStored = dir.liquidStorage.getLiquidStored();
+                    var transportableLiquids;
+                    var transportDenied = false;
+                    if (dir.getTransportLiquids) {
+                        transportableLiquids = dir.getTransportLiquids();
+                    }
+                    if (transportableLiquids) {
+                        for (var id in transportableLiquids.input) {
+                            if (this.liquid.id == transportableLiquids.input[id]) transportDenied = true;
+                        }
+                    } else if (this.liquid.id == liquidStored) transportDenied = true;
+                    if (transportDenied) this.liquid.amount += dir.liquidStorage.addLiquid(this.liquid.id, amountForTE);
+                }
+            }
+            return;
+        }
+
+        this.liquid.amount = mean;
+    },
+
+    //standart callbacks
+    loaded: function() {
+        this.animation = new Animation.Base(this.pos.x + 7 / 16, this.pos.y + 6 / 16, this.pos.z + 10 / 16);
+        this.animation.load();
+        LiquidMap.registerLiquid(this.pos.x, this.pos.y, this.pos.z, this);
+    },
+
+    update: function() {
+        this.frame++;
+        if (this.frame % 5 == 0) {
+            this.pouringAction();
+            this.validate();
+        }
+    },
+
+    selfDestroy: function() {
+        if (this.animation) {
+            this.animation.destroy();
+        }
+        LiquidMap.deleteLiquid(this.pos.x, this.pos.y, this.pos.z);
+        this.destroy();
+    },
+});
+
+
+
+
+// file: core/TransportingItem.js
+
+var TransportingItem = new GameObject("bcTransportingItem", {
+    init: function(){
+        /* setup basics */
+        this.pos = {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+        this.item = {
+            id: 0,
+            count: 0,
+            data: 0
+        };
+        
+        this.inPipeFlag = false;
+        
+        this.animation = null;
+        
+        /* setup pathfinding */
+        this.target = null;
+        this.velocity = .05;
+        this.acceleration = .0;
+        this.friction = .0;
+        this.direction = {
+            x: 0, 
+            y: 0, 
+            z: 0
+        };
+        
+    },
+    
+    loaded: function(){
+        this.reloadAnimation();
+    },
+    
+    update: function(){
+        if (this.move()){
+            this.pathfind();
+        }
+        if (!this.item || this.item.count < 0 || !this.item.id){
+            this.destroy();
+        }
+        this.moveAnimation();
+    },
+    
+    destroySelf: function(){
+        if (this.animation){
+            this.animation.destroy();
+        }
+        this.destroy();
+    },
+    
+
+    
+    
+    /* basics */
+    
+    setPosition: function(x, y, z){
+        this.pos = {
+            x: x,
+            y: y,
+            z: z
+        };
+    },
+    
+    setItem: function(id, count, data){
+        this.item = {
+            id: id,
+            count: count, 
+            data: data
+        };
+        if (id > 0){
+            this.reloadAnimation();
+        }
+    },
+    
+    setItemSource: function(item){
+        this.item = item || {id: 0, count: 0, data: 0};
+        this.reloadAnimation();
+    },
+    
+    drop: function(){
+        this.destroySelf();
+        if (this.item && this.item.id > 0 && this.item.count > 0){
+            var item = World.drop(this.pos.x, this.pos.y, this.pos.z, this.item.id, this.item.count, this.item.data);
+            Entity.setVelocity(item, this.direction.x * this.velocity * 1.5,  this.direction.y * this.velocity * 1.5,  this.direction.z * this.velocity * 1.5)
+        }
+        this.setItem(0, 0, 0);
+    },
+    
+    validate: function(){
+        if (!this.item || this.item.count <= 0){
+            this.destroySelf();
+        }
+    },
+
+    turnBack: function(){
+        var delta = {
+            x: this.target.x - this.pos.x,
+            y: this.target.y - this.pos.y,
+            z: this.target.z - this.pos.z,
+        };
+        this.target = {
+            x: this.pos.x - delta.x,
+            y: this.pos.y - delta.y,
+            z: this.pos.z - delta.z,
+        };
+    },
+    
+    
+    /* animation */
+    
+    reloadAnimation: function(){
+        var OFFSET = .3;
+        
+        if (this.animation){
+            this.animation.destroy();
+        }
+        this.animation = new Animation.Item(this.pos.x + OFFSET, this.pos.y + OFFSET, this.pos.z + OFFSET);
+        
+        var modelCount = 1;
+        if (this.item.count > 1){
+            modelCount = 2;
+        }
+        if (this.item.count > 12){
+            modelCount = 3;
+        }
+        if (this.item.count > 56){
+            modelCount = 4;
+        }
+        
+        this.animation.describeItem({
+            id: this.item.id,
+            count: modelCount,
+            data: this.item.data,
+            size: .5,
+            rotation: "x"
+        }, {
+            x: -OFFSET,
+            y: -OFFSET,
+            z: -OFFSET,
+        });
+        this.animation.load();
+    },
+    
+    moveAnimation: function(){
+        var OFFSET = .3;
+        this.animation.setPos(this.pos.x + OFFSET, this.pos.y + OFFSET, this.pos.z + OFFSET);
+    },
+    
+    
+    /* pathfinding */
+    
+    setTarget: function(x, y, z){
+        this.target = {
+            x: Math.floor(x) + .5 || 0,
+            y: Math.floor(y) + .5 || 0,
+            z: Math.floor(z) + .5 || 0,
+        };
+    },
+    
+    move: function(){
+        this.velocity = Math.min(.5, Math.max(.02, this.velocity + this.acceleration - this.friction || 0));
+        if (this.target && this.velocity){
+            var delta = {
+                x: this.target.x - this.pos.x,
+                y: this.target.y - this.pos.y,
+                z: this.target.z - this.pos.z,
+            };
+            var dis = Math.sqrt(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
+            this.direction = {
+                x: Math.floor(delta.x / dis + .5) || 0,
+                y: Math.floor(delta.y / dis + .5) || 0,
+                z: Math.floor(delta.z / dis + .5) || 0,
+            };
+            var move = Math.min(dis, this.velocity) / dis || 0;
+            this.pos.x += delta.x * move;
+            this.pos.y += delta.y * move;
+            this.pos.z += delta.z * move;
+            return dis <= this.velocity;
+        }
+        return true;
+    },
+    
+    
+    addItemToContainer: function(container){
+        container.refreshSlots();
+        var tileEntity = container.tileEntity;
+        var slots = [];
+        var slotsInitialized = false;
+        if (tileEntity){
+            if (tileEntity.addTransportedItem){
+                tileEntity.addTransportedItem(this, this.item, this.direction);
+                return;
+            }
+            if (tileEntity.getTransportSlots){
+                slots = tileEntity.getTransportSlots().input || [];
+                slotsInitialized = true;
+            }
+        }
+        if (!slotsInitialized){
+            for (var name in container.slots){
+                slots.push(name);
+            }
+        }
+        for (var i in slots){
+            var slot = container.getSlot(slots[i]);
+            if (this.item.count <= 0){
+                break;
+            }
+            if (slot.id == 0 || slot.id == this.item.id && slot.data == this.item.data){
+                var maxstack = slot.id > 0 ? Item.getMaxStack(slot.id) : 64;
+                var add = Math.min(maxstack - slot.count, this.item.count);
+                this.item.count -= add;
+                slot.count += add;
+                slot.id = this.item.id;
+                slot.data = this.item.data;
+            }
+        }
+        container.applyChanges();
+        container.validateAll();
+    },
+    
+    pathfind: function(){
+        if (this.dropFlag){
+            this.drop();
+            return;
+        }
+        
+        var pathdata = ItemTransportingHelper.getPathData(this, this.item, this.pos, this.direction);
+        var directions = pathdata.directions;
+        var dir = directions[parseInt(directions.length * Math.random())];
+        
+        this.acceleration = pathdata.acceleration;
+        this.friction = pathdata.friction;
+        
+        if (pathdata.inPipe){           
+            if (!dir){
+                dir = this.direction;
+                this.dropFlag = true;
+            }
+            this.inPipeFlag = true;
+        }
+        else if (pathdata.container){
+            if (this.inPipeFlag){
+                this.addItemToContainer(pathdata.container);
+                this.validate();
+            }
+            this.inPipeFlag = false;
+        }
+        else {
+            if (this.inPipeFlag){
+                this.drop();
+            }
+            if (!dir){
+                this.drop();
+            }
+        }
+        
+        if (dir){
+            this.target = {
+                x: Math.floor(this.pos.x) + .5 + dir.x,
+                y: Math.floor(this.pos.y) + .5 + dir.y,
+                z: Math.floor(this.pos.z) + .5 + dir.z,
+            };
+        }
+    }
+});
+
+
+
+
+
+// file: items/gears.js
+
+IDRegistry.genItemID("gearWood");
+Item.createItem("gearWood", "Wood Gear", {name: "gear_wood"});
+
+IDRegistry.genItemID("gearStone");
+Item.createItem("gearStone", "Stone Gear", {name: "gear_stone"});
+
+IDRegistry.genItemID("gearIron");
+Item.createItem("gearIron", "Iron Gear", {name: "gear_iron"});
+
+IDRegistry.genItemID("gearGold");
+Item.createItem("gearGold", "Gold Gear", {name: "gear_gold"});
+
+IDRegistry.genItemID("gearDiamond");
+Item.createItem("gearDiamond", "Diamond Gear", {name: "gear_diamond"});
+
+Recipes.addShaped({id: ItemID.gearWood, count: 1, data: 0}, [
+    " x ",
+    "x x",
+    " x "
+], ['x', 280, 0]);
+
+Recipes.addShaped({id: ItemID.gearStone, count: 1, data: 0}, [
+    " x ",
+    "xox",
+    " x "
+], ['x', 4, -1, 'o', ItemID.gearWood, 0]);
+
+Recipes.addShaped({id: ItemID.gearIron, count: 1, data: 0}, [
+    " x ",
+    "xox",
+    " x "
+], ['x', 265, 0, 'o', ItemID.gearStone, 0]);
+
+Recipes.addShaped({id: ItemID.gearGold, count: 1, data: 0}, [
+    " x ",
+    "xox",
+    " x "
+], ['x', 266, 0, 'o', ItemID.gearIron, 0]);
+
+Recipes.addShaped({id: ItemID.gearDiamond, count: 1, data: 0}, [
+    " x ",
+    "xox",
+    " x "
+], ['x', 264, 0, 'o', ItemID.gearGold, 0]);
+
+
+Callback.addCallback("BC-ICore", function(ICore){
+    IDRegistry.genItemID("gearTin");
+    Item.createItem("gearTin", "Tin Gear", {name: "gear_tin"});
+    
+    Recipes.addShaped({id: ItemID.gearTin, count: 1, data: 0}, [
+        " x ",
+        "xox",
+        " x "
+    ], ['x', ItemID.ingotTin, 0, 'o', ItemID.gearStone, 0]);
+});
+
+
+
+
+// file: items/other.js
+
+// Pipe Sealant
+IDRegistry.genItemID("pipeSealant");
+Item.createItem("pipeSealant", "Pipe Sealant", {name: "pipe_sealant"});
+Recipes.addShapeless({id: ItemID.pipeSealant, count: 1, data: 0}, [{id: 351, data: 2}]);
+Recipes.addShapeless({id: ItemID.pipeSealant, count: 1, data: 0}, [{id: 341, data: 0}]);
+
+
+// Wrench
+IDRegistry.genItemID("bcWrench");
+Item.createItem("bcWrench", "Wrench", {name: "bc_wrench"});
+Recipes.addShaped({id: ItemID.bcWrench, count: 1, data: 0}, [
+    "x x",
+    " o ",
+    " x "
+], ['x', 265, 0, 'o', ItemID.gearStone, 0]);
+
+
+
+// file: machine/engines.js
+
+
+
+IDRegistry.genItemID("engineStone");
+Item.createItem("engineStone", "Stirling Engine", {name: "engine_stone"});
+
+IDRegistry.genItemID("engineIron");
+Item.createItem("engineIron", "ICE", {name: "engine_iron"});
+
+IDRegistry.genItemID("engineElectric");
+Item.createItem("engineElectric", "Electric Engine", {name: "engine_electric"});
+
+Recipes.addShaped({id: ItemID.engineWooden, count: 1, data: 0}, [
+    "aaa",
+    " b ",
+    "oxo"
+], ['x', 33, -1, 'a', 5, -1, 'b', 20, -1, 'o', ItemID.gearWood, 0]);
+
+Recipes.addShaped({id: ItemID.engineStone, count: 1, data: 0}, [
+    "aaa",
+    " b ",
+    "oxo"
+], ['x', 33, -1, 'a', 4, -1, 'b', 20, -1, 'o', ItemID.gearStone, 0]);
+
+Recipes.addShaped({id: ItemID.engineIron, count: 1, data: 0}, [
+    "aaa",
+    " b ",
+    "oxo"
+], ['x', 33, -1, 'a', 265, 0, 'b', 20, -1, 'o', ItemID.gearIron, 0]);
+
+
+Callback.addCallback("BC-ICore", function(ICore){
+    Recipes.addShaped({id: ItemID.engineElectric, count: 1, data: 0}, [
+        "aaa",
+        " b ",
+        "oxo"
+    ], ['x', 33, -1, 'a', ItemID.ingotTin, 0, 'b', 20, -1, 'o', ItemID.gearTin, 0]);
+});
+
+
+
+Item.registerUseFunction("engineStone", function(coords, item, block){
+    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
+    if (block.id == 0){
+        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
+        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_STONE);
+        Player.setCarriedItem(item.id, item.count - 1, item.data);
+    }
+});
+
+Item.registerUseFunction("engineIron", function(coords, item, block){
+    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
+    if (block.id == 0){
+        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
+        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_IRON);
+        Player.setCarriedItem(item.id, item.count - 1, item.data);
+    }
+});
+
+Item.registerUseFunction("engineElectric", function(coords, item, block){
+    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
+    if (block.id == 0){
+        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
+        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_ELECTRIC);
+        Player.setCarriedItem(item.id, item.count - 1, item.data);
+    }
+});
+
+IDRegistry.genBlockID("bcEngine");
+Block.createBlock("bcEngine", [
+    {name: "bcEngine", texture: [["empty", 0]], inCreative: false}
+], BLOCK_TYPE_ITEM_PIPE);
+
+Block.registerDropFunction("bcEngine", function(){
+    return [];
+});
+
+Block.setBlockShape(BlockID.bcEngine, {x: 1 / 16, y: 1 / 16, z: 1 / 16}, {x: 15 / 16, y: 15 / 16, z: 15 / 16});
+
+denyTransporting(BlockID.bcEngine, true, true);
+
+
 var EngineModelPartRegistry = {
     models: {},
     
@@ -1030,8 +1703,7 @@ var EngineModelHelper = {
             break;
         };
         
-        var renderName = [type, heat, rotation, direction, position] + "";
-        var render = new Render({name: renderName});
+        var render = new Render();
         if (render.isEmpty){
             var yOffset = 31;
             
@@ -1081,7 +1753,6 @@ var EngineModelHelper = {
                 });
             }
             render.setPart("body", modelData, pistonMaterial.getSize());
-            render.saveState(renderName);
         }
         else{
             //alert("render already cached: " + renderName);
@@ -1098,22 +1769,6 @@ var EngineModelHelper = {
         };
     }
 }
-
-
-
-
-IDRegistry.genBlockID("bcEngine");
-Block.createBlock("bcEngine", [
-    {name: "bcEngine", texture: [["empty", 0]], inCreative: false}
-], BLOCK_TYPE_ITEM_PIPE);
-
-Block.registerDropFunction("bcEngine", function(){
-    return [];
-});
-
-Block.setBlockShape(BlockID.bcEngine, {x: 1 / 16, y: 1 / 16, z: 1 / 16}, {x: 15 / 16, y: 15 / 16, z: 15 / 16});
-
-denyTransporting(BlockID.bcEngine, true, true);
 
 
 
@@ -1708,669 +2363,19 @@ ENGINE_TYPE_DATA[ENGINE_TYPE_ELECTRIC] = {
 };
 
 
-ModAPI.registerAPI("BuildcraftAPI", {
- Transport: {
-  Helper: ItemTransportingHelper,
-  Item: TransportingItem,
-  Liquid: TransportedLiquid,
-  Cache: TransportingCache,
-  LiquidHelper: LiquidTransportHelper,
-  LiquidCache: LiquidTransportingCache,
-  LiquidMap: LiquidMap
- },
 
- ModelHelper: ModelHelper,
 
- LiquidModelHelper: LiquidModels,
+// file: machine/engines/engineRedstone.js
 
- Engine: {
-  Part: EngineModelPartRegistry,
-  ModelHelper: EngineModelHelper,
-  Prototype: BUILDCRAFT_ENGINE_PROTOTYPE,
-  Types: ENGINE_TYPE_DATA
- },
-
- requireGlobal: function(str){
-  return eval(str);
- },
-
- registerPipe: registerItemPipe,
-
- registerFluidPipe: setupFluidPipeRender
-});
-
-Logger.Log("Buildcraft API shared as BuildcraftAPI", "API");
-
-
-
-
-
-
-// file: translation.js
-
-Translation.addTranslation("Redstone Engine", {ru: "Двигатель на красном камне"});
-Translation.addTranslation("Stirling Engine", {ru: "Двигатель Стирлинга"});
-Translation.addTranslation("ICE", {ru: "ДВС"});
-Translation.addTranslation("Electric Engine", {ru: "Электрический двигатель"});
-Translation.addTranslation("Tank", {ru: "Цистерна"});
-Translation.addTranslation("Pump", {ru: "Помпа"});
-
-Translation.addTranslation("Wooden Transport Pipe", {ru: "Деревянная транспортная труба"});
-Translation.addTranslation("Cobblestone Transport Pipe", {ru: "Булыжниковая транспортная труба"});
-Translation.addTranslation("Stone Transport Pipe", {ru: "Каменная транспортная труба"});
-Translation.addTranslation("Sandstone Transport Pipe", {ru: "Песчаниковая транспортная труба"});
-Translation.addTranslation("Iron Transport Pipe", {ru: "Железная транспортная труба"});
-Translation.addTranslation("Golden Transport Pipe", {ru: "Золотая транспортная труба"});
-Translation.addTranslation("Obsidian Transport Pipe", {ru: "Обсидиановая транспортная труба"});
-Translation.addTranslation("Emerald Transport Pipe", {ru: "Изумрудная транспортная труба"});
-Translation.addTranslation("Diamond Transport Pipe", {ru: "Алмазная транспортная труба"});
-
-Translation.addTranslation("Wooden Fluid Pipe", {ru: "Деревянная жидкостная труба"});
-Translation.addTranslation("Cobblestone Fluid Pipe", {ru: "Булыжниковая жидкостная труба"});
-Translation.addTranslation("Stone Fluid Pipe", {ru: "Каменная жидкостная труба"});
-Translation.addTranslation("Iron Fluid Pipe", {ru: "Железная жидкостная труба"});
-Translation.addTranslation("Golden Fluid Pipe", {ru: "Золотая жидкостная труба"});
-Translation.addTranslation("Emerald Fluid Pipe", {ru: "Изумрудная жидкостная труба"});
-
-Translation.addTranslation("Wrench", {ru: "Гаечный ключ"});
-Translation.addTranslation("Wood Gear", {ru: "Деревянная шестерёнка"});
-Translation.addTranslation("Stone Gear", {ru: "Каменная шестерёнка"});
-Translation.addTranslation("Tin Gear", {ru: "Оловянная шестерёнка"});
-Translation.addTranslation("Iron Gear", {ru: "Железная шестерёнка"});
-Translation.addTranslation("Gold Gear", {ru: "Золотая шестерёнка"});
-Translation.addTranslation("Diamond Gear", {ru: "Алмазная шестерёнка"});
-Translation.addTranslation("Pipe Sealant", {ru: "Уплотнитель для труб"});
-
-
-
-// file: core/TransportedLiquid.js
-
-var TransportedLiquid = new GameObject("bc-transported-liquid", {
-    init: function(x, y, z, liquid, amount) {
-        this.pos = {
-            x: x,
-            y: y,
-            z: z
-        };
-
-        this.liquid = {
-            id: liquid,
-            amount: amount
-        };
-
-        this.frame = 0;
-
-        LiquidMap.registerLiquid(this.pos.x, this.pos.y, this.pos.z, this);
-
-    },
-
-    setLiquid: function(liquid, amount) {
-        this.liquid.id = liquid;
-        this.liquid.amount = amount;
-    },
-
-    addAmount: function(liquid, amount) {
-        if (this.liquid.id == liquid || !liquid) this.liquid.amount += amount;
-    },
-
-    validate: function() {
-        if (!this.liquid || this.liquid.amount <= 0.001 || !this.liquid.id || !this.liquid.amount) {
-            this.selfDestroy();
-        }
-        if (this.liquid.amount >= 0.12) this.liquid.amount = 0.12;
-    },
-
-    render: function(pos, dirs) {
-        var arr = [];
-        for (var a in dirs) {
-            arr.push({
-                x: dirs[a].x - pos.x,
-                y: dirs[a].y - pos.y,
-                z: dirs[a].z - pos.z
-            });
-        }
-        this.animation.describe({
-            skin: LiquidModels.getModelSkin(),
-            renderAPI: LiquidModels.getLiquidRender(6, this.liquid.amount <= 0.12 ? (this.liquid.amount / 20) * 100 : 6, 6, arr),
-            firmRotation: true,
-            hitbox: {
-                width: .0,
-                height: .0
-            }
-        });
-        this.animation.refresh();
-    },
-
-
-    //pouring
-
-    mean: function(amounts) {
-        var mean = 0;
-        for (var i in amounts) {
-            mean += amounts[i];
-        }
-        return +((mean / amounts.length).toFixed(3));
-    },
-
-    pouringAction: function() {
-        var amounts = [this.liquid.amount];
-        var deny = [true, true, true, true, true, true];
-        var te_counts = 0;
-        var env = LiquidTransportHelper.getEnviromentData(this.pos);
-        if (!env.inPipe) {
-            this.selfDestroy();
-            return;
-        }
-
-        this.render(this.pos, env.directions);
-
-        for (var d in env.directions) {
-            var dir = env.directions[d];
-            var liquid = LiquidMap.getLiquid(dir.x, dir.y, dir.z);
-            if (dir.liquidStorage) {
-                te_counts++;
-                continue;
-            }
-            if (liquid) {
-                if (liquid.liquid.id != this.liquid.id || liquid.liquid.amount > this.liquid.amount) {
-                    deny[d] = false;
-                } else amounts.push(liquid.liquid.amount);
-            }
-        }
-
-        var mean = this.mean(amounts);
-        for (var d in env.directions) {
-            var dir = env.directions[d];
-            if (!dir.liquidStorage && deny[d]) LiquidTransportHelper.flushLiquid(dir, this.liquid.id, mean);
-        }
-
-        if (te_counts > 0) {
-            var amountForTE = this.liquid.amount / te_counts;
-            this.liquid.amount = 0;
-            for (var d in env.directions) {
-                var dir = env.directions[d];
-                if (dir.addLiquidFromPipe) {
-                    this.liquid.amount += dir.addLiquidFromPipe(this.liquid.id, amountForTE);
-                } else if (dir.liquidStorage) {
-                    var liquidStored = dir.liquidStorage.getLiquidStored();
-                    var transportableLiquids;
-                    var transportDenied = false;
-                    if (dir.getTransportLiquids) {
-                        transportableLiquids = dir.getTransportLiquids();
-                    }
-                    if (transportableLiquids) {
-                        for (var id in transportableLiquids.input) {
-                            if (this.liquid.id == transportableLiquids.input[id]) transportDenied = true;
-                        }
-                    } else if (this.liquid.id == liquidStored) transportDenied = true;
-                    if (transportDenied) this.liquid.amount += dir.liquidStorage.addLiquid(this.liquid.id, amountForTE);
-                }
-            }
-            return;
-        }
-
-        this.liquid.amount = mean;
-    },
-
-    //standart callbacks
-    loaded: function() {
-        this.animation = new Animation.Base(this.pos.x + 7 / 16, this.pos.y + 6 / 16, this.pos.z + 10 / 16);
-        this.animation.load();
-        LiquidMap.registerLiquid(this.pos.x, this.pos.y, this.pos.z, this);
-    },
-
-    update: function() {
-        this.frame++;
-        if (this.frame % 5 == 0) {
-            this.pouringAction();
-            this.validate();
-        }
-    },
-
-    selfDestroy: function() {
-        if (this.animation) {
-            this.animation.destroy();
-        }
-        LiquidMap.deleteLiquid(this.pos.x, this.pos.y, this.pos.z);
-        this.destroy();
-    },
-});
-
-
-
-
-// file: core/TransportingItem.js
-
-var TransportingItem = new GameObject("bcTransportingItem", {
-    init: function(){
-        /* setup basics */
-        this.pos = {
-            x: 0,
-            y: 0,
-            z: 0
-        };
-        this.item = {
-            id: 0,
-            count: 0,
-            data: 0
-        };
-        
-        this.inPipeFlag = false;
-        
-        this.animation = null;
-        
-        /* setup pathfinding */
-        this.target = null;
-        this.velocity = .05;
-        this.acceleration = .0;
-        this.friction = .0;
-        this.direction = {
-            x: 0, 
-            y: 0, 
-            z: 0
-        };
-        
-    },
-    
-    loaded: function(){
-        this.reloadAnimation();
-    },
-    
-    update: function(){
-        if (this.move()){
-            this.pathfind();
-        }
-        if (!this.item || this.item.count < 0 || !this.item.id){
-            this.destroy();
-        }
-        this.moveAnimation();
-    },
-    
-    destroySelf: function(){
-        if (this.animation){
-            this.animation.destroy();
-        }
-        this.destroy();
-    },
-    
-
-    
-    
-    /* basics */
-    
-    setPosition: function(x, y, z){
-        this.pos = {
-            x: x,
-            y: y,
-            z: z
-        };
-    },
-    
-    setItem: function(id, count, data){
-        this.item = {
-            id: id,
-            count: count, 
-            data: data
-        };
-        if (id > 0){
-            this.reloadAnimation();
-        }
-    },
-    
-    setItemSource: function(item){
-        this.item = item || {id: 0, count: 0, data: 0};
-        this.reloadAnimation();
-    },
-    
-    drop: function(){
-        this.destroySelf();
-        if (this.item && this.item.id > 0 && this.item.count > 0){
-            var item = World.drop(this.pos.x, this.pos.y, this.pos.z, this.item.id, this.item.count, this.item.data);
-            Entity.setVelocity(item, this.direction.x * this.velocity * 1.5,  this.direction.y * this.velocity * 1.5,  this.direction.z * this.velocity * 1.5)
-        }
-        this.setItem(0, 0, 0);
-    },
-    
-    validate: function(){
-        if (!this.item || this.item.count <= 0){
-            this.destroySelf();
-        }
-    },
-
-    turnBack: function(){
-        var delta = {
-            x: this.target.x - this.pos.x,
-            y: this.target.y - this.pos.y,
-            z: this.target.z - this.pos.z,
-        };
-        this.target = {
-            x: this.pos.x - delta.x,
-            y: this.pos.y - delta.y,
-            z: this.pos.z - delta.z,
-        };
-    },
-    
-    
-    /* animation */
-    
-    reloadAnimation: function(){
-        var OFFSET = .3;
-        
-        if (this.animation){
-            this.animation.destroy();
-        }
-        this.animation = new Animation.Item(this.pos.x + OFFSET, this.pos.y + OFFSET, this.pos.z + OFFSET);
-        
-        var modelCount = 1;
-        if (this.item.count > 1){
-            modelCount = 2;
-        }
-        if (this.item.count > 12){
-            modelCount = 3;
-        }
-        if (this.item.count > 56){
-            modelCount = 4;
-        }
-        
-        this.animation.describeItem({
-            id: this.item.id,
-            count: modelCount,
-            data: this.item.data,
-            size: .5,
-            rotation: "x"
-        }, {
-            x: -OFFSET,
-            y: -OFFSET,
-            z: -OFFSET,
-        });
-        this.animation.load();
-    },
-    
-    moveAnimation: function(){
-        var OFFSET = .3;
-        this.animation.setPos(this.pos.x + OFFSET, this.pos.y + OFFSET, this.pos.z + OFFSET);
-    },
-    
-    
-    /* pathfinding */
-    
-    setTarget: function(x, y, z){
-        this.target = {
-            x: Math.floor(x) + .5 || 0,
-            y: Math.floor(y) + .5 || 0,
-            z: Math.floor(z) + .5 || 0,
-        };
-    },
-    
-    move: function(){
-        this.velocity = Math.min(.5, Math.max(.02, this.velocity + this.acceleration - this.friction || 0));
-        if (this.target && this.velocity){
-            var delta = {
-                x: this.target.x - this.pos.x,
-                y: this.target.y - this.pos.y,
-                z: this.target.z - this.pos.z,
-            };
-            var dis = Math.sqrt(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
-            this.direction = {
-                x: Math.floor(delta.x / dis + .5) || 0,
-                y: Math.floor(delta.y / dis + .5) || 0,
-                z: Math.floor(delta.z / dis + .5) || 0,
-            };
-            var move = Math.min(dis, this.velocity) / dis || 0;
-            this.pos.x += delta.x * move;
-            this.pos.y += delta.y * move;
-            this.pos.z += delta.z * move;
-            return dis <= this.velocity;
-        }
-        return true;
-    },
-    
-    
-    addItemToContainer: function(container){
-        container.refreshSlots();
-        var tileEntity = container.tileEntity;
-        var slots = [];
-        var slotsInitialized = false;
-        if (tileEntity){
-            if (tileEntity.addTransportedItem){
-                tileEntity.addTransportedItem(this, this.item, this.direction);
-                return;
-            }
-            if (tileEntity.getTransportSlots){
-                slots = tileEntity.getTransportSlots().input || [];
-                slotsInitialized = true;
-            }
-        }
-        if (!slotsInitialized){
-            for (var name in container.slots){
-                slots.push(name);
-            }
-        }
-        for (var i in slots){
-            var slot = container.getSlot(slots[i]);
-            if (this.item.count <= 0){
-                break;
-            }
-            if (slot.id == 0 || slot.id == this.item.id && slot.data == this.item.data){
-                var maxstack = slot.id > 0 ? Item.getMaxStack(slot.id) : 64;
-                var add = Math.min(maxstack - slot.count, this.item.count);
-                this.item.count -= add;
-                slot.count += add;
-                slot.id = this.item.id;
-                slot.data = this.item.data;
-            }
-        }
-        container.applyChanges();
-        container.validateAll();
-    },
-    
-    pathfind: function(){
-        if (this.dropFlag){
-            this.drop();
-            return;
-        }
-        
-        var pathdata = ItemTransportingHelper.getPathData(this, this.item, this.pos, this.direction);
-        var directions = pathdata.directions;
-        var dir = directions[parseInt(directions.length * Math.random())];
-        
-        this.acceleration = pathdata.acceleration;
-        this.friction = pathdata.friction;
-        
-        if (pathdata.inPipe){           
-            if (!dir){
-                dir = this.direction;
-                this.dropFlag = true;
-            }
-            this.inPipeFlag = true;
-        }
-        else if (pathdata.container){
-            if (this.inPipeFlag){
-                this.addItemToContainer(pathdata.container);
-                this.validate();
-            }
-            this.inPipeFlag = false;
-        }
-        else {
-            if (this.inPipeFlag){
-                this.drop();
-            }
-            if (!dir){
-                this.drop();
-            }
-        }
-        
-        if (dir){
-            this.target = {
-                x: Math.floor(this.pos.x) + .5 + dir.x,
-                y: Math.floor(this.pos.y) + .5 + dir.y,
-                z: Math.floor(this.pos.z) + .5 + dir.z,
-            };
-        }
-    }
-});
-
-
-
-
-
-// file: items/gears.js
-
-IDRegistry.genItemID("gearWood");
-Item.createItem("gearWood", "Wood Gear", {name: "gear_wood"});
-
-IDRegistry.genItemID("gearStone");
-Item.createItem("gearStone", "Stone Gear", {name: "gear_stone"});
-
-IDRegistry.genItemID("gearIron");
-Item.createItem("gearIron", "Iron Gear", {name: "gear_iron"});
-
-IDRegistry.genItemID("gearGold");
-Item.createItem("gearGold", "Gold Gear", {name: "gear_gold"});
-
-IDRegistry.genItemID("gearDiamond");
-Item.createItem("gearDiamond", "Diamond Gear", {name: "gear_diamond"});
-
-Recipes.addShaped({id: ItemID.gearWood, count: 1, data: 0}, [
-    " x ",
-    "x x",
-    " x "
-], ['x', 280, 0]);
-
-Recipes.addShaped({id: ItemID.gearStone, count: 1, data: 0}, [
-    " x ",
-    "xox",
-    " x "
-], ['x', 4, -1, 'o', ItemID.gearWood, 0]);
-
-Recipes.addShaped({id: ItemID.gearIron, count: 1, data: 0}, [
-    " x ",
-    "xox",
-    " x "
-], ['x', 265, 0, 'o', ItemID.gearStone, 0]);
-
-Recipes.addShaped({id: ItemID.gearGold, count: 1, data: 0}, [
-    " x ",
-    "xox",
-    " x "
-], ['x', 266, 0, 'o', ItemID.gearIron, 0]);
-
-Recipes.addShaped({id: ItemID.gearDiamond, count: 1, data: 0}, [
-    " x ",
-    "xox",
-    " x "
-], ['x', 264, 0, 'o', ItemID.gearGold, 0]);
-
-
-Callback.addCallback("BC-ICore", function(ICore){
-    IDRegistry.genItemID("gearTin");
-    Item.createItem("gearTin", "Tin Gear", {name: "gear_tin"});
-    
-    Recipes.addShaped({id: ItemID.gearTin, count: 1, data: 0}, [
-        " x ",
-        "xox",
-        " x "
-    ], ['x', ItemID.ingotTin, 0, 'o', ItemID.gearStone, 0]);
-});
-
-
-
-
-// file: items/other.js
-
-// Pipe Sealant
-IDRegistry.genItemID("pipeSealant");
-Item.createItem("pipeSealant", "Pipe Sealant", {name: "pipe_sealant"});
-Recipes.addShapeless({id: ItemID.pipeSealant, count: 1, data: 0}, [{id: 351, data: 2}]);
-Recipes.addShapeless({id: ItemID.pipeSealant, count: 1, data: 0}, [{id: 341, data: 0}]);
-
-
-// Wrench
-IDRegistry.genItemID("bcWrench");
-Item.createItem("bcWrench", "Wrench", {name: "bc_wrench"});
-Recipes.addShaped({id: ItemID.bcWrench, count: 1, data: 0}, [
-    "x x",
-    " o ",
-    " x "
-], ['x', 265, 0, 'o', ItemID.gearStone, 0]);
-
-
-
-// file: machine/engines.js
-
+// Redstone Enhine
 IDRegistry.genItemID("engineWooden");
 Item.createItem("engineWooden", "Redstone Engine", {name: "engine_wooden"});
-
-IDRegistry.genItemID("engineStone");
-Item.createItem("engineStone", "Stirling Engine", {name: "engine_stone"});
-
-IDRegistry.genItemID("engineIron");
-Item.createItem("engineIron", "ICE", {name: "engine_iron"});
-
-IDRegistry.genItemID("engineElectric");
-Item.createItem("engineElectric", "Electric Engine", {name: "engine_electric"});
-
-Recipes.addShaped({id: ItemID.engineWooden, count: 1, data: 0}, [
-    "aaa",
-    " b ",
-    "oxo"
-], ['x', 33, -1, 'a', 5, -1, 'b', 20, -1, 'o', ItemID.gearWood, 0]);
-
-Recipes.addShaped({id: ItemID.engineStone, count: 1, data: 0}, [
-    "aaa",
-    " b ",
-    "oxo"
-], ['x', 33, -1, 'a', 4, -1, 'b', 20, -1, 'o', ItemID.gearStone, 0]);
-
-Recipes.addShaped({id: ItemID.engineIron, count: 1, data: 0}, [
-    "aaa",
-    " b ",
-    "oxo"
-], ['x', 33, -1, 'a', 265, 0, 'b', 20, -1, 'o', ItemID.gearIron, 0]);
-
-
-Callback.addCallback("BC-ICore", function(ICore){
-    Recipes.addShaped({id: ItemID.engineElectric, count: 1, data: 0}, [
-        "aaa",
-        " b ",
-        "oxo"
-    ], ['x', 33, -1, 'a', ItemID.ingotTin, 0, 'b', 20, -1, 'o', ItemID.gearTin, 0]);
-});
-
-
 
 Item.registerUseFunction("engineWooden", function(coords, item, block){
     var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
     if (block.id == 0){
         World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
         World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_WOOD);
-        Player.setCarriedItem(item.id, item.count - 1, item.data);
-    }
-});
-
-Item.registerUseFunction("engineStone", function(coords, item, block){
-    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
-    if (block.id == 0){
-        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
-        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_STONE);
-        Player.setCarriedItem(item.id, item.count - 1, item.data);
-    }
-});
-
-Item.registerUseFunction("engineIron", function(coords, item, block){
-    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
-    if (block.id == 0){
-        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
-        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_IRON);
-        Player.setCarriedItem(item.id, item.count - 1, item.data);
-    }
-});
-
-Item.registerUseFunction("engineElectric", function(coords, item, block){
-    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
-    if (block.id == 0){
-        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
-        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_ELECTRIC);
         Player.setCarriedItem(item.id, item.count - 1, item.data);
     }
 });
@@ -2401,6 +2406,10 @@ var ITEM_PIPE_CONNECTION_STONE = "bc-item-pipe-stone";
 var ITEM_PIPE_CONNECTION_COBBLE = "bc-item-pipe-cobble";
 var ITEM_PIPE_CONNECTION_SANDSTONE = "bc-item-pipe-sandstone";
 
+var PipeRegistry = {
+    itemPipes: []
+}
+
 
 function getPipeRender(width, group, texture){
     var render = new ICRender.Model();
@@ -2418,7 +2427,12 @@ function getPipeRender(width, group, texture){
         var box = boxes[i];
        
         var model = BlockRenderer.createModel();
+        
         var data = texture.data + (texture.sides? 1 + parseInt(i) : 1);
+        if(texture.rotation && i != texture.index){
+            data += 1;
+        }
+        
         model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, data);
        
         render.addEntry(model).asCondition(box.side[0], box.side[1], box.side[2], group, 0);
@@ -2444,19 +2458,22 @@ function registerItemPipe(id, texture, connectionType, params){
     var render;
     var renders = [];
 
-    if(Array.isArray(texture))
-    
-    if(!Array.isArray(texture) && !texture.rotation){
-        render = getPipeRender(width, group, texture, false);
-    } else {
-        
+    if(Array.isArray(texture)){
         for(var i in texture){
             var current = getPipeRender(width, group, texture[i], false);
             renders.push(current);
         }
         render = renders[0];
+    } else if(texture.rotation){
+        for(var i = 0; i < 6; i++){
+            texture.index = i;
+            var current = getPipeRender(width, group, texture, false);
+            renders.push(current);
+        }
+        render = renders[0];
+    } else {
+        render = getPipeRender(width, group, texture, false);
     }
-    
     
     BlockRenderer.setStaticICRender(id, 0, render);
     BlockRenderer.enableCoordMapping(id, 0, render);
@@ -2464,6 +2481,7 @@ function registerItemPipe(id, texture, connectionType, params){
     
     /* params */
     ItemTransportingHelper.registerItemPipe(id, connectionType, params);
+    PipeRegistry.itemPipes.push(id);
     
     return renders;
 }
@@ -2595,62 +2613,61 @@ Recipes.addShaped({id: BlockID.pipeItemIron, count: 1, data: 0}, ["xax"], ['x', 
 var modelsItemIron = registerItemPipe(BlockID.pipeItemIron, {name: "pipe_item_iron", data: 0, rotation: true}, ITEM_PIPE_CONNECTION_ANY);
 
 var IRON_PIPE_DIRECTIONS = [
-    {x: 0, y: -1, z: 0},
-    {x: 0, y: 1, z: 0},
-    {x: 0, y: 0, z: -1},
-    {x: 0, y: 0, z: 1},
-    {x: -1, y: 0, z: 0},
     {x: 1, y: 0, z: 0},
+    {x: -1, y: 0, z: 0},
+    {x: 0, y: 1, z: 0},
+    {x: 0, y: -1, z: 0},
+    {x: 0, y: 0, z: 1},
+    {x: 0, y: 0, z: -1},
 ];
-
-var IRON_PIPE_MODEL_BOXES = [
-    [0.5 - PIPE_BLOCK_WIDTH, 0.0, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH],
-    [0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 1.0, 0.5 + PIPE_BLOCK_WIDTH],
-    [0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.0, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH],
-    [0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 1.0],
-    [0.0, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH],
-    [0.5 + PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 1.0, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH],
-];
-
-// init renderer
-//Callback.addCallback("PreLoaded", function(){
-//    for (var data in IRON_PIPE_DIRECTIONS){
-//        var ironPipeRender = new TileRenderModel(BlockID.pipeItemIron, data);
-//        for(var i in IRON_PIPE_MODEL_BOXES){
-//            var box = IRON_PIPE_MODEL_BOXES[i];
-//            var dir = IRON_PIPE_DIRECTIONS[i];
-//            if(i == data){
-//                ironPipeRender.addBoxF(box[0], box[1], box[2], box[3], box[4], box[5], {id: BlockID.pipeItemIronRender, data: 0});
-//            }
-//            else{
-//                var condition = ironPipeRender.createCondition(dir.x, dir.y, dir.z);
-//                condition.addBoxF(box[0], box[1], box[2], box[3], box[4], box[5]);
-//                condition.addBlockGroup(ITEM_PIPE_CONNECTION_ANY);
-//                condition.addBlockGroup(ITEM_PIPE_CONNECTION_MACHINE);
-//            }
-//        }
-//        ironPipeRender.addBoxF(0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH);
-//    }
-//});
 
 TileEntity.registerPrototype(BlockID.pipeItemIron, {
     defaultValues: {
-        direction: 0
+        direction: 0,
+        redstone: false
+    },
+    
+    init: function(){
+        this.setDirection(this.data.direction);
     },
 
     setDirection: function(dir){
-        this.data.direction = dir % 6 || 0;
-        BlockRenderer.mapAtCoords(this.x, this.y, this.z, modelsItemIron);
+        this.data.direction = dir || 0;
+        BlockRenderer.mapAtCoords(this.x, this.y, this.z, modelsItemIron[dir]);
     },
 
     created: function(){
         this.setDirection(1);
     },
+    
+    redstone: function(signal){
+        Game.message(signal.power + "; " + this.data.redstone);
+        if(signal.power > 8 && !this.data.redstone){
+            this.data.redstone = true;
+            this.changeDirection();
+        } else {
+            this.data.redstone = false;
+        }
+    },
 
     click: function(id, count, data){
         if (id == ItemID.bcWrench){
-            this.setDirection(this.data.direction + 1);
+            this.changeDirection();
         }
+    },
+    
+    changeDirection: function(){
+        var direction = this.data.direction;
+        for(var i = 0; i < 6; i++){
+            direction = (direction + 1) % 6;
+            var relative = IRON_PIPE_DIRECTIONS[direction];
+            var block = World.getBlockID(this.x + relative.x, this.y + relative.y, this.z + relative.z);
+            if(PipeRegistry.itemPipes.indexOf(block) != -1) { 
+                // Found next connected pipe
+                break;
+            }
+        }
+        this.setDirection(direction);
     },
 
     getTransportedItemDirs: function(){
@@ -2677,14 +2694,23 @@ var modelsItemGolden = registerItemPipe(BlockID.pipeItemGolden, [
     {name: "pipe_item_gold", data: 0},
     {name: "pipe_item_gold", data: 2}
  ], ITEM_PIPE_CONNECTION_ANY);
+ 
 
 TileEntity.registerPrototype(BlockID.pipeItemGolden, {
     defaultValues: {
         redstone: false,
     },
+    
+    init: function(){
+        this.updateModel();
+    },
 
     redstone: function(signal){
         this.data.redstone = signal.power > 8;  
+        this.updateModel();
+    },
+    
+    updateModel: function(){
         var model = modelsItemGolden[this.data.redstone ? 1 : 0];
         BlockRenderer.mapAtCoords(this.x, this.y, this.z, model);
     },

@@ -3,11 +3,16 @@ translation.js
 
 core/TransportedLiquid.js
 core/TransportingItem.js
+core/ModelHelper.js
 
 items/gears.js
 items/other.js
 
-machine/engines.js
+machine/engines/engines.js
+machine/engines/engineRedstone.js
+machine/engines/engineICE.js
+machine/engines/engineElectric.js
+machine/engines/engineStirling.js
 
 machine/pipes/PipeRegistry.js
 machine/pipes/itemWood.js
