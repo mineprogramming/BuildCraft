@@ -327,11 +327,6 @@ var BUILDCRAFT_ENGINE_PROTOTYPE = {
         return this.data.position > 24;
     },
     
-    
-    
-    
-    
-    
     setEngineType: function(type){
         this.data.type = type;
         var typeData = getEngineType(this.data.type);

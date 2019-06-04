@@ -11,7 +11,6 @@ var BLOCK_TYPE_LIQUID_PIPE = Block.createSpecialType({
 var PIPE_BLOCK_WIDTH = 0.25;
 
 
-// item pipe render setup
 
 var ITEM_PIPE_CONNECTION_MACHINE = "bc-container";
 
@@ -19,6 +18,16 @@ var ITEM_PIPE_CONNECTION_ANY = "bc-item-pipe-any";
 var ITEM_PIPE_CONNECTION_STONE = "bc-item-pipe-stone";
 var ITEM_PIPE_CONNECTION_COBBLE = "bc-item-pipe-cobble";
 var ITEM_PIPE_CONNECTION_SANDSTONE = "bc-item-pipe-sandstone";
+
+
+
+var FLUID_PIPE_CONNECTION_MACHINE = "bc-fluid";
+
+var FLUID_PIPE_CONNECTION_ANY = "bc-fluid-pipe-any";
+var FLUID_PIPE_CONNECTION_STONE = "bc-fluid-pipe-stone";
+var FLUID_PIPE_CONNECTION_COBBLE = "bc-fluid-pipe-cobble";
+var FLUID_PIPE_CONNECTION_SANDSTONE = "bc-fluid-pipe-sandstone";
+
 
 var PipeRegistry = {
     itemPipes: []
@@ -100,12 +109,34 @@ function registerItemPipe(id, texture, connectionType, params){
     return renders;
 }
 
-ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 54);
-ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 61);
-ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 62);
+//ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 54);
+//ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 61);
+//ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 62);
 
 
-// item pipes 
+function setupFluidPipeRender(id, connectionType){
+    /* drop func */
+    Block.registerDropFunctionForID(id, function(){
+        return [[id, 1, 0]];
+    });
+
+    /* render */
+    var model = new TileRenderModel(id, 0);
+    model.addConnectionGroup(connectionType);
+    model.addConnectionGroup(FLUID_PIPE_CONNECTION_MACHINE);
+    model.setConnectionWidth(PIPE_BLOCK_WIDTH * 2);
+    model.addBoxF(0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH);
+    
+    ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_ANY, id);
+    ICRenderLib.addConnectionBlock(connectionType, id);
+    if (connectionType == FLUID_PIPE_CONNECTION_ANY){
+        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_STONE, id);
+        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_COBBLE, id);
+        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_SANDSTONE, id);
+    }
+
+  LiquidTransportHelper.registerFluidPipe(id, connectionType);
+}
 
 
 

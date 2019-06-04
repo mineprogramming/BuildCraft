@@ -1,35 +1,6 @@
-// fluid pipe render setup
 
-var FLUID_PIPE_CONNECTION_MACHINE = "bc-fluid";
 
-var FLUID_PIPE_CONNECTION_ANY = "bc-fluid-pipe-any";
-var FLUID_PIPE_CONNECTION_STONE = "bc-fluid-pipe-stone";
-var FLUID_PIPE_CONNECTION_COBBLE = "bc-fluid-pipe-cobble";
-var FLUID_PIPE_CONNECTION_SANDSTONE = "bc-fluid-pipe-sandstone";
 
-function setupFluidPipeRender(id, connectionType){
-    /* drop func */
-    Block.registerDropFunctionForID(id, function(){
-        return [[id, 1, 0]];
-    });
-
-    /* render */
-    var model = new TileRenderModel(id, 0);
-    model.addConnectionGroup(connectionType);
-    model.addConnectionGroup(FLUID_PIPE_CONNECTION_MACHINE);
-    model.setConnectionWidth(PIPE_BLOCK_WIDTH * 2);
-    model.addBoxF(0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH);
-    
-    ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_ANY, id);
-    ICRenderLib.addConnectionBlock(connectionType, id);
-    if (connectionType == FLUID_PIPE_CONNECTION_ANY){
-        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_STONE, id);
-        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_COBBLE, id);
-        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_SANDSTONE, id);
-    }
-
-  LiquidTransportHelper.registerFluidPipe(id, connectionType);
-}
 
 
 // fluid pipes

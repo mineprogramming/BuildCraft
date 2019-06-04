@@ -131,38 +131,55 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
         }
     },
     
-    getItemFrom: function(container, maxCount, filter){
-        container.refreshSlots();
-        var tileEntity = container.tileEntity;
-        var slots = [];
-        var slotsInitialized = false;
-        if (tileEntity){
-            if (tileEntity.getTransportedItem){
-                tileEntity.getTransportedItem();
+    getItemFrom: function(container, maxCount){
+        // Native TileEntity
+        if(container.getType && container.getSize){
+            let size = container.getSize();
+            let slot;
+            for(var i = 0; i < size; i++){
+                var slot = container.getSlot(i);
+                if(slot.id > 0){
+                    var count = Math.min(maxCount, slot.count);
+                    item = {id: slot.id, count: count, data: slot.data};
+                    container.setSlot(i, slot.id, slot.count - count, slot.data);
+                    break;
+                }
             }
-            if (tileEntity.getTransportSlots){
-                slots = tileEntity.getTransportSlots().output || [];
-                slotsInitialized = true;
+        } 
+        
+        // TileEntity
+        else {
+            var tileEntity = container.tileEntity;
+            var slots = [];
+            var slotsInitialized = false;
+            if (tileEntity){
+                if (tileEntity.getTransportedItem){
+                    tileEntity.getTransportedItem();
+                }
+                if (tileEntity.getTransportSlots){
+                    slots = tileEntity.getTransportSlots().output || [];
+                    slotsInitialized = true;
+                }
             }
-        }
-        if (!slotsInitialized){
-            for (var name in container.slots){
-                slots.push(name);
+            
+            if (!slotsInitialized){
+                for (var name in container.slots){
+                    slots.push(name);
+                }
+            }  
+            
+            var item = null;
+            for (var i in slots){
+                var slot = container.getSlot(slots[i]);
+                if (slot.id > 0){
+                    var count = Math.min(maxCount, slot.count);
+                    item = {id: slot.id, count: count, data: slot.data};
+                    slot.count -= count;
+                    break;
+                }
             }
         }
         
-        var item = null;
-        for (var i in slots){
-            var slot = container.getSlot(slots[i]);
-            if (slot.id > 0 && this.checkItem(slot.id, slot.data)){
-                var count = Math.min(maxCount, slot.count);
-                item = {id: slot.id, count: count, data: slot.data};
-                slot.count -= count;
-                break;
-            }
-        }
-        container.validateAll();
-        container.applyChanges();
         return item;
     }
 });
