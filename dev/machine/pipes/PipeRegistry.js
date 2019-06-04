@@ -114,28 +114,44 @@ function registerItemPipe(id, texture, connectionType, params){
 //ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 62);
 
 
-function setupFluidPipeRender(id, connectionType){
+function setupFluidPipeRender(id, texture, connectionType){
     /* drop func */
     Block.registerDropFunctionForID(id, function(){
         return [[id, 1, 0]];
     });
+    
+    var width = 0.5;
+    var group = ICRender.getGroup("bc-liquid-pipes");
+    group.add(id, -1);
 
     /* render */
-    var model = new TileRenderModel(id, 0);
-    model.addConnectionGroup(connectionType);
-    model.addConnectionGroup(FLUID_PIPE_CONNECTION_MACHINE);
-    model.setConnectionWidth(PIPE_BLOCK_WIDTH * 2);
-    model.addBoxF(0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH);
+    var render = new ICRender.Model();
     
-    ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_ANY, id);
-    ICRenderLib.addConnectionBlock(connectionType, id);
-    if (connectionType == FLUID_PIPE_CONNECTION_ANY){
-        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_STONE, id);
-        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_COBBLE, id);
-        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_SANDSTONE, id);
+    var boxes = [
+        {side: [1, 0, 0], box: [0.5 + width / 2, 0.5 - width / 2, 0.5 - width / 2, 1, 0.5 + width / 2, 0.5 + width / 2]},
+        {side: [-1, 0, 0], box: [0, 0.5 - width / 2, 0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2]},
+        {side: [0, 1, 0], box: [0.5 - width / 2, 0.5 + width / 2, 0.5 - width / 2, 0.5 + width / 2, 1, 0.5 + width / 2]},
+        {side: [0, -1, 0], box: [0.5 - width / 2, 0, 0.5 - width / 2, 0.5 + width / 2, 0.5 - width / 2, 0.5 + width / 2]},
+        {side: [0, 0, 1], box: [0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2, 0.5 + width / 2, 1]},
+        {side: [0, 0, -1], box: [0.5 - width / 2, 0.5 - width / 2, 0, 0.5 + width / 2, 0.5 + width / 2, 0.5 - width / 2]},
+    ]
+
+    for (var i in boxes) {
+        var box = boxes[i];
+       
+        var model = BlockRenderer.createModel();
+        
+        model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data + 1);
+       
+        render.addEntry(model).asCondition(box.side[0], box.side[1], box.side[2], group, 0);
     }
 
-  LiquidTransportHelper.registerFluidPipe(id, connectionType);
+    var model = BlockRenderer.createModel();
+    model.addBox(0.5 - width / 2, 0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2, 0.5 + width / 2, texture.name, texture.data);
+    render.addEntry(model);
+    BlockRenderer.setStaticICRender(id, 0, render);
+    
+    LiquidTransportHelper.registerFluidPipe(id, connectionType);
 }
 
 

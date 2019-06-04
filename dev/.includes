@@ -21,8 +21,9 @@ machine/pipes/itemGold.js
 machine/pipes/itemEmerald.js
 machine/pipes/itemDiamond.js
 machine/pipes/itemOther.js
-
-machine/liquid_pipes.js
+machine/pipes/liquidWooden.js
+machine/pipes/liquidEmerald.js
+machine/pipes/liquidOther.js
 
 machine/tank.js
 machine/pump.js
