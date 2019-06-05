@@ -94,6 +94,8 @@ TileEntity.registerPrototype(BlockID.pipeItemWooden, {
                     break;
                 }
             }
+            
+            container.validateAll();
         }
         
         return item;

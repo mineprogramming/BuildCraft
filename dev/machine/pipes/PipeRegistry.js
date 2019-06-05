@@ -1,10 +1,10 @@
 var BLOCK_TYPE_ITEM_PIPE = Block.createSpecialType({
-    base: 20,
+    base: 1,
     opaque: false
 }, "bc-item-pipe");
 
 var BLOCK_TYPE_LIQUID_PIPE = Block.createSpecialType({
-    base: 20,
+    base: 1,
     opaque: false
 }, "bc-liquid-pipe");
 

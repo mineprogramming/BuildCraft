@@ -339,41 +339,58 @@ var TransportingItem = new GameObject("bcTransportingItem", {
     
     
     addItemToContainer: function(container){
-        // container.refreshSlots();
-        var tileEntity = container.tileEntity;
-        var slots = [];
-        var slotsInitialized = false;
-        if (tileEntity){
-            if (tileEntity.addTransportedItem){
-                tileEntity.addTransportedItem(this, this.item, this.direction);
-                return;
-            }
-            if (tileEntity.getTransportSlots){
-                slots = tileEntity.getTransportSlots().input || [];
-                slotsInitialized = true;
+        if (this.item.count <= 0){
+            return;
+        }
+        
+        // Native TileEntity
+        if(container.getType && container.getSize){
+            let size = container.getSize();
+            for (var i = 0; i < size; i++){
+                var slot = container.getSlot(i);
+                if (slot.id == 0 || slot.id == this.item.id && slot.data == this.item.data){
+                    var maxstack = slot.id > 0 ? Item.getMaxStack(slot.id) : 64;
+                    var add = Math.min(maxstack - slot.count, this.item.count);
+                    this.item.count -= add;
+                    container.setSlot(i, this.item.id, slot.count + add, this.item.data);
+                }
             }
         }
-        if (!slotsInitialized){
-            for (var name in container.slots){
-                slots.push(name);
+        
+        // TileEntity
+        else {
+            var tileEntity = container.tileEntity;
+            var slots = [];
+            var slotsInitialized = false;
+            if (tileEntity){
+                if (tileEntity.addTransportedItem){
+                    tileEntity.addTransportedItem(this, this.item, this.direction);
+                    return;
+                }
+                if (tileEntity.getTransportSlots){
+                    slots = tileEntity.getTransportSlots().input || [];
+                    slotsInitialized = true;
+                }
             }
+            if (!slotsInitialized){
+                for (var name in container.slots){
+                    slots.push(name);
+                }
+            }
+            for (var i in slots){
+                var slot = container.getSlot(slots[i]);
+                if (slot.id == 0 || slot.id == this.item.id && slot.data == this.item.data){
+                    var maxstack = slot.id > 0 ? Item.getMaxStack(slot.id) : 64;
+                    var add = Math.min(maxstack - slot.count, this.item.count);
+                    this.item.count -= add;
+                    slot.count += add;
+                    slot.id = this.item.id;
+                    slot.data = this.item.data;
+                }
+            }
+            
+            container.validateAll();
         }
-        for (var i in slots){
-            var slot = container.getSlot(slots[i]);
-            if (this.item.count <= 0){
-                break;
-            }
-            if (slot.id == 0 || slot.id == this.item.id && slot.data == this.item.data){
-                var maxstack = slot.id > 0 ? Item.getMaxStack(slot.id) : 64;
-                var add = Math.min(maxstack - slot.count, this.item.count);
-                this.item.count -= add;
-                slot.count += add;
-                slot.id = this.item.id;
-                slot.data = this.item.data;
-            }
-        }
-        container.applyChanges();
-        container.validateAll();
     },
     
     pathfind: function(){

@@ -16,10 +16,10 @@ var IRON_PIPE_DIRECTIONS = [
     {x: 0, y: 0, z: -1},
 ];
 
-TileEntity.registerPrototype(BlockID.pipeItemIron, {
+
+var PIPE_ITEM_IRON_PROTOTYPE = {
     defaultValues: {
-        direction: 0,
-        redstone: false
+        direction: 0
     },
     
     init: function(){
@@ -33,16 +33,6 @@ TileEntity.registerPrototype(BlockID.pipeItemIron, {
 
     created: function(){
         this.setDirection(1);
-    },
-    
-    redstone: function(signal){
-        Game.message(signal.power + "; " + this.data.redstone);
-        if(signal.power > 8 && !this.data.redstone){
-            this.data.redstone = true;
-            this.changeDirection();
-        } else {
-            this.data.redstone = false;
-        }
     },
 
     click: function(id, count, data){
@@ -70,5 +60,25 @@ TileEntity.registerPrototype(BlockID.pipeItemIron, {
             IRON_PIPE_DIRECTIONS[this.data.direction]
         ];
     }
-});
+}
+
+
+if(__config__.getBool('use_redstone')){ 
+    PIPE_ITEM_IRON_PROTOTYPE.redstone = function(signal){
+        Game.message(signal.power + "; " + this.data.redstone);
+        if(signal.power > 8 && !this.data.redstone){
+            this.data.redstone = true;
+            this.changeDirection();
+        } else {
+            this.data.redstone = false;
+        }
+    }
+    PIPE_ITEM_IRON_PROTOTYPE.defaultValues.redstone = false;
+}
+
+
+TileEntity.registerPrototype(BlockID.pipeItemIron, );
+
+
+
 

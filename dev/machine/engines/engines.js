@@ -376,10 +376,6 @@ var BUILDCRAFT_ENGINE_PROTOTYPE = {
         }
     },
     
-    redstone: function(signal){
-        this.data.redstone = signal.power > 8;
-    },
-    
     getGuiScreen: function(){
         if (this.getEngineGui){
             return this.getEngineGui();
@@ -396,6 +392,14 @@ var BUILDCRAFT_ENGINE_PROTOTYPE = {
         }
     }
 };
+
+if(__config__.getBool('use_redstone')){
+    BUILDCRAFT_ENGINE_PROTOTYPE.redstone = function(signal){
+        this.data.redstone = signal.power > 8;
+    };
+} else {
+    BUILDCRAFT_ENGINE_PROTOTYPE.defaultValues.redstone = true;
+}
 
 
 Callback.addCallback("BC-DefineEngines", function(ICore){

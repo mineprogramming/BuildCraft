@@ -9,19 +9,13 @@ var modelsItemGolden = registerItemPipe(BlockID.pipeItemGolden, [
     {name: "pipe_item_gold", data: 0},
     {name: "pipe_item_gold", data: 2}
  ], ITEM_PIPE_CONNECTION_ANY);
- 
 
-TileEntity.registerPrototype(BlockID.pipeItemGolden, {
+var PIPE_ITEM_GOLDEN_PROTOTYPE = {
     defaultValues: {
         redstone: false,
     },
     
     init: function(){
-        this.updateModel();
-    },
-
-    redstone: function(signal){
-        this.data.redstone = signal.power > 8;  
         this.updateModel();
     },
     
@@ -33,4 +27,19 @@ TileEntity.registerPrototype(BlockID.pipeItemGolden, {
     getItemAcceleration: function(){
         return this.data.redstone ? 0.0025 : 0.02;
     }
-});
+};
+
+
+if(__config__.getBool('use_redstone')){
+    PIPE_ITEM_GOLDEN_PROTOTYPE.redstone = function(signal){
+        this.data.redstone = signal.power > 8;  
+        this.updateModel();
+    };
+} else {
+    PIPE_ITEM_GOLDEN_PROTOTYPE.defaultValues.redstone = true;
+}
+
+
+TileEntity.registerPrototype(BlockID.pipeItemGolden, PIPE_ITEM_GOLDEN_PROTOTYPE);
+
+

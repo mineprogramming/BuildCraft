@@ -178,6 +178,8 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
                     break;
                 }
             }
+            
+            container.validateAll();
         }
         
         return item;
