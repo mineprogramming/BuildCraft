@@ -29,7 +29,7 @@ Block.createBlock("pipeItemSandstone", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemSandstone, count: 1, data: 0}, ["xax"], ['x', 24, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemSandstone, {name: "pipe_item_sandstone", data: 0}, ITEM_PIPE_CONNECTION_SANDSTONE, {
+registerItemPipe(BlockID.pipeItemSandstone, {name: "pipe_item_sandstone", data: 0}, ITEM_PIPE_CONNECTION_ANY, {
     friction: .0025
 }); 
 

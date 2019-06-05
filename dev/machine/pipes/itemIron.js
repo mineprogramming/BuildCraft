@@ -65,7 +65,6 @@ var PIPE_ITEM_IRON_PROTOTYPE = {
 
 if(__config__.getBool('use_redstone')){ 
     PIPE_ITEM_IRON_PROTOTYPE.redstone = function(signal){
-        Game.message(signal.power + "; " + this.data.redstone);
         if(signal.power > 8 && !this.data.redstone){
             this.data.redstone = true;
             this.changeDirection();
@@ -77,7 +76,7 @@ if(__config__.getBool('use_redstone')){
 }
 
 
-TileEntity.registerPrototype(BlockID.pipeItemIron, );
+TileEntity.registerPrototype(BlockID.pipeItemIron, PIPE_ITEM_IRON_PROTOTYPE);
 
 
 
