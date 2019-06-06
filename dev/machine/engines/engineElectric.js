@@ -88,7 +88,7 @@ ENGINE_TYPE_DATA[ENGINE_TYPE_ELECTRIC] = {
         this.container.setScale("energyScale", this.data.energyStored / 50);
         this.container.setText("textInfo1", parseInt(this.data.heat) + "°C   " + (this.data.redstone ? parseInt(this.data.energyInfo * 100 || 0) / 100 + " MJ/t": ""));
         this.container.setText("textInfo2", (this.data.redstone && this.data.energyStored > 0 ? "ON" : "OFF") + (this.data.energyStored > 0 ? "" : ": NO ENERGY"));
-        this.container.setTextColor("textInfo2", this.data.redstone && this.data.energyStored > 0 ? android.graphics.Color.GREEN : android.graphics.Color.RED);
+        // this.container.setTextColor("textInfo2", this.data.redstone && this.data.energyStored > 0 ? android.graphics.Color.GREEN : android.graphics.Color.RED);
         
         this.data.heat = Math.min(Math.max(this.data.heat, 0), MAX_HEAT);
     },
