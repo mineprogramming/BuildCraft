@@ -35,10 +35,10 @@ var ItemTransportingHelper = {
     canPipesConnect: function(pipe1, pipe2){
         var type1 = this.PipeTiles[pipe1] || ITEM_PIPE_CONNECTION_ANY;
         var type2 = this.PipeTiles[pipe2] || ITEM_PIPE_CONNECTION_ANY;
-        return type1 == type2 && type1 != ITEM_PIPE_CONNECTION_WOOD 
-            || type1 == ITEM_PIPE_CONNECTION_ANY || type2 == ITEM_PIPE_CONNECTION_ANY
-            || type1 == ITEM_PIPE_CONNECTION_STONE && type2 != ITEM_PIPE_CONNECTION_COBBLE
-            || type1 == ITEM_PIPE_CONNECTION_COBBLE && type2 != ITEM_PIPE_CONNECTION_STONE;
+        return (type1 == type2 && type1 != ITEM_PIPE_CONNECTION_WOOD) 
+            || (type1 == ITEM_PIPE_CONNECTION_ANY || type2 == ITEM_PIPE_CONNECTION_ANY)
+            || (type1 == ITEM_PIPE_CONNECTION_STONE && type2 != ITEM_PIPE_CONNECTION_COBBLE)
+            || (type1 == ITEM_PIPE_CONNECTION_COBBLE && type2 != ITEM_PIPE_CONNECTION_STONE);
     },
     
     canTransportTo: function(pipe, x, y, z){
@@ -46,7 +46,7 @@ var ItemTransportingHelper = {
         if (this.BasicItemContainers[block])
             return true; 
         if (block > 4096 && !this.TransportingDenied[block]){
-            return TileEntity.isTileEntityBlock(block) || this.canPipesConnect(block, pipe);
+            return (!this.isPipe(block) && TileEntity.isTileEntityBlock(block)) || this.canPipesConnect(block, pipe);
         }
         return false;
     },
