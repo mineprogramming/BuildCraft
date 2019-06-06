@@ -59,6 +59,10 @@ var PIPE_ITEM_IRON_PROTOTYPE = {
         return [
             IRON_PIPE_DIRECTIONS[this.data.direction]
         ];
+    },
+    
+    destroyBlock: function(){
+        BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
     }
 }
 

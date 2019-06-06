@@ -26,6 +26,10 @@ var PIPE_ITEM_GOLDEN_PROTOTYPE = {
     
     getItemAcceleration: function(){
         return this.data.redstone ? 0.0025 : 0.02;
+    },
+    
+    destroyBlock: function(){
+        BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
     }
 };
 
