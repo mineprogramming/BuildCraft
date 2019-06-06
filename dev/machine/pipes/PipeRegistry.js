@@ -15,18 +15,18 @@ var PIPE_BLOCK_WIDTH = 0.25;
 var ITEM_PIPE_CONNECTION_MACHINE = "bc-container";
 
 var ITEM_PIPE_CONNECTION_ANY = "bc-item-pipe-any";
+var ITEM_PIPE_CONNECTION_WOOD = "bc-item-pipe-wood";
 var ITEM_PIPE_CONNECTION_STONE = "bc-item-pipe-stone";
 var ITEM_PIPE_CONNECTION_COBBLE = "bc-item-pipe-cobble";
-var ITEM_PIPE_CONNECTION_SANDSTONE = "bc-item-pipe-sandstone";
 
 
 
 var FLUID_PIPE_CONNECTION_MACHINE = "bc-fluid";
 
 var FLUID_PIPE_CONNECTION_ANY = "bc-fluid-pipe-any";
+var FLUID_PIPE_CONNECTION_WOOD = "bc-fluid-pipe-wood";
 var FLUID_PIPE_CONNECTION_STONE = "bc-fluid-pipe-stone";
 var FLUID_PIPE_CONNECTION_COBBLE = "bc-fluid-pipe-cobble";
-var FLUID_PIPE_CONNECTION_SANDSTONE = "bc-fluid-pipe-sandstone";
 
 
 var PipeRegistry = {
@@ -34,7 +34,7 @@ var PipeRegistry = {
 }
 
 
-function getPipeRender(width, group, texture){
+function getPipeRender(width, group, connectionType, texture){
     var render = new ICRender.Model();
     
     var boxes = [
@@ -57,8 +57,19 @@ function getPipeRender(width, group, texture){
         }
         
         model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, data);
-       
-        render.addEntry(model).asCondition(box.side[0], box.side[1], box.side[2], group, 0);
+        
+        var condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], group, false);
+        if(connectionType == ITEM_PIPE_CONNECTION_WOOD){
+            condition = ICRender.AND(condition, ICRender.BLOCK(box.side[0], box.side[1], box.side[2], ICRender.getGroup(ITEM_PIPE_CONNECTION_WOOD), true));
+        } 
+        else if(connectionType == ITEM_PIPE_CONNECTION_STONE){
+            condition = ICRender.AND(condition, ICRender.BLOCK(box.side[0], box.side[1], box.side[2], ICRender.getGroup(ITEM_PIPE_CONNECTION_COBBLE), true));
+        }
+        else if(connectionType == ITEM_PIPE_CONNECTION_COBBLE){
+            condition = ICRender.AND(condition, ICRender.BLOCK(box.side[0], box.side[1], box.side[2], ICRender.getGroup(ITEM_PIPE_CONNECTION_STONE), true));
+        }
+        
+        render.addEntry(model).setCondition(condition);
     }
 
     var model = BlockRenderer.createModel();
@@ -75,6 +86,7 @@ function registerItemPipe(id, texture, connectionType, params){
     });
     
     var width = 0.5;
+    ICRender.getGroup(connectionType).add(id, -1);
     var group = ICRender.getGroup("bc-pipes");
     group.add(id, -1);
     
@@ -83,19 +95,19 @@ function registerItemPipe(id, texture, connectionType, params){
 
     if(Array.isArray(texture)){
         for(var i in texture){
-            var current = getPipeRender(width, group, texture[i], false);
+            var current = getPipeRender(width, group, connectionType, texture[i]);
             renders.push(current);
         }
         render = renders[0];
     } else if(texture.rotation){
         for(var i = 0; i < 6; i++){
             texture.index = i;
-            var current = getPipeRender(width, group, texture, false);
+            var current = getPipeRender(width, group, connectionType, texture);
             renders.push(current);
         }
         render = renders[0];
     } else {
-        render = getPipeRender(width, group, texture, false);
+        render = getPipeRender(width, group, connectionType, texture);
     }
     
     BlockRenderer.setStaticICRender(id, 0, render);

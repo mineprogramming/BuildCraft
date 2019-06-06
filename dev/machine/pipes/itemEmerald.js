@@ -5,7 +5,7 @@ Block.createBlock("pipeItemEmerald", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemEmerald, count: 1, data: 0}, ["xax"], ['x', 388, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemEmerald, {name: "pipe_item_emerald", data: 0}, ITEM_PIPE_CONNECTION_ANY);
+registerItemPipe(BlockID.pipeItemEmerald, {name: "pipe_item_emerald", data: 0}, ITEM_PIPE_CONNECTION_WOOD);
 
 
 var emeraldPipeUI = new UI.StandartWindow({
