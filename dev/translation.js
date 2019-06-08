@@ -29,4 +29,4 @@ Translation.addTranslation("Tin Gear", {ru: "Оловянная шестерён
 Translation.addTranslation("Iron Gear", {ru: "Железная шестерёнка"});
 Translation.addTranslation("Gold Gear", {ru: "Золотая шестерёнка"});
 Translation.addTranslation("Diamond Gear", {ru: "Алмазная шестерёнка"});
-Translation.addTranslation("Pipe Sealant", {ru: "Водяная изоляция для труб"});
+Translation.addTranslation("Pipe Waterproof", {ru: "Водяная изоляция для труб"});
