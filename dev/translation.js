@@ -1,7 +1,7 @@
 Translation.addTranslation("Redstone Engine", {ru: "Двигатель на красном камне"});
 Translation.addTranslation("Stirling Engine", {ru: "Двигатель Стирлинга"});
 Translation.addTranslation("ICE", {ru: "ДВС"});
-Translation.addTranslation("Electric Engine", {ru: "Электрический двигатель"});
+Translation.addTranslation("Creative Engine", {ru: "Творческий двигатель"});
 Translation.addTranslation("Tank", {ru: "Цистерна"});
 Translation.addTranslation("Pump", {ru: "Помпа"});
 
