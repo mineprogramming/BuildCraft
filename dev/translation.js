@@ -1,6 +1,6 @@
 Translation.addTranslation("Redstone Engine", {ru: "Двигатель на красном камне"});
-Translation.addTranslation("Stirling Engine", {ru: "Двигатель Стирлинга"});
-Translation.addTranslation("ICE", {ru: "ДВС"});
+Translation.addTranslation("Steam Engine", {ru: "Паровой Двигатель"});
+Translation.addTranslation("Fuel Engine", {ru: "Бензиновый Двигатель"});
 Translation.addTranslation("Creative Engine", {ru: "Творческий двигатель"});
 Translation.addTranslation("Tank", {ru: "Цистерна"});
 Translation.addTranslation("Pump", {ru: "Помпа"});
@@ -29,4 +29,4 @@ Translation.addTranslation("Tin Gear", {ru: "Оловянная шестерён
 Translation.addTranslation("Iron Gear", {ru: "Железная шестерёнка"});
 Translation.addTranslation("Gold Gear", {ru: "Золотая шестерёнка"});
 Translation.addTranslation("Diamond Gear", {ru: "Алмазная шестерёнка"});
-Translation.addTranslation("Pipe Sealant", {ru: "Уплотнитель для труб"});
+Translation.addTranslation("Pipe Sealant", {ru: "Водяная изоляция для труб"});
