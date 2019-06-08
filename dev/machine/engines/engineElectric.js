@@ -2,7 +2,7 @@ var ENGINE_TYPE_ELECTRIC = "Electric";
 
 // Electric Engine
 IDRegistry.genItemID("engineElectric");
-Item.createItem("engineElectric", "Electric Engine", {name: "engine_electric"});
+Item.createItem("engineElectric", "Electric Engine", {name: "engine_electric"}, {isTech: true});
 
 Callback.addCallback("BC-ICore", function(ICore){
     Recipes.addShaped({id: ItemID.engineElectric, count: 1, data: 0}, [

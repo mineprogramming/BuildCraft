@@ -42,11 +42,16 @@ EngineModelPartRegistry.Add("trunkRed0", new ModelHelper.Texture("buildcraft_eng
 EngineModelPartRegistry.Add("trunkRed1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 64, y: 96}, {width: 512, height: 512}));
 EngineModelPartRegistry.Add("trunkRed2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 128, y: 96}, {width: 512, height: 512}));
 
+EngineModelPartRegistry.Add("trunkBlack0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 0, y: 128}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("trunkBlack1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 64, y: 128}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("trunkBlack2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 128, y: 128}, {width: 512, height: 512}));
+
 
 var ENGINE_HEAT_BLUE = "Blue";
 var ENGINE_HEAT_GREEN = "Green";
 var ENGINE_HEAT_ORANGE = "Orange";
 var ENGINE_HEAT_RED = "Red";
+var ENGINE_HEAT_BLACK = "Black";
 
 var ENGINE_HEAT_ORDER = [
     ENGINE_HEAT_BLUE,
@@ -359,9 +364,13 @@ var BUILDCRAFT_ENGINE_PROTOTYPE = {
         if (this.engineTick){
             this.engineTick();
         }
+        
         if (this.getHeatStage){
             this.data.heatStage = ENGINE_HEAT_ORDER[Math.min(3, Math.max(0, this.getHeatStage() || 0))];
+        }  else {
+            this.data.heatStage = ENGINE_HEAT_BLACK;
         }
+        
         if (this.data.position > 48){
             this.data.position -= 48;
             this.deployEnergyToTarget();
