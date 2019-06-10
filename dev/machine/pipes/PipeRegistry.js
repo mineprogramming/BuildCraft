@@ -70,6 +70,13 @@ function getPipeRender(width, group, connectionType, texture){
         }
         
         render.addEntry(model).setCondition(condition);
+        
+        // Connecting to TileEntities
+        data = connectionType == ITEM_PIPE_CONNECTION_WOOD? texture.data + 2: texture.data;
+        model = BlockRenderer.createModel();
+        model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, data);
+        var condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], ICRender.getGroup(ITEM_PIPE_CONNECTION_MACHINE), false);
+        render.addEntry(model).setCondition(condition);
     }
 
     var model = BlockRenderer.createModel();
@@ -121,9 +128,23 @@ function registerItemPipe(id, texture, connectionType, params){
     return renders;
 }
 
-//ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 54);
-//ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 61);
-//ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 62);
+var blockGroupMachine = ICRender.getGroup(ITEM_PIPE_CONNECTION_MACHINE);
+blockGroupMachine.add(54, -1);
+blockGroupMachine.add(61, -1);
+blockGroupMachine.add(62, -1);
+blockGroupMachine.add(154, -1);
+
+Callback.addCallback("PostLoaded", function(){
+    var prototypes = TileEntity.tileEntityPrototypes;
+    for(var id in prototypes){
+        if(prototypes[id].getTransportSlots){
+            let slots = prototypes[id].getTransportSlots();
+            if(slots.output && slots.output.length > 0 || slots.input && slots.input.length > 0){
+                blockGroupMachine.add(id, -1);
+            }
+        }
+    }
+});
 
 
 function setupFluidPipeRender(id, texture, connectionType){
