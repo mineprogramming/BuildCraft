@@ -38,7 +38,9 @@ var ItemTransportingHelper = {
         return (type1 == type2 && type1 != ITEM_PIPE_CONNECTION_WOOD) 
             || (type1 == ITEM_PIPE_CONNECTION_ANY || type2 == ITEM_PIPE_CONNECTION_ANY)
             || (type1 == ITEM_PIPE_CONNECTION_STONE && type2 != ITEM_PIPE_CONNECTION_COBBLE)
-            || (type1 == ITEM_PIPE_CONNECTION_COBBLE && type2 != ITEM_PIPE_CONNECTION_STONE);
+            || (type2 == ITEM_PIPE_CONNECTION_STONE && type1 != ITEM_PIPE_CONNECTION_COBBLE)
+            || (type1 == ITEM_PIPE_CONNECTION_COBBLE && type2 != ITEM_PIPE_CONNECTION_STONE)
+            || (type2 == ITEM_PIPE_CONNECTION_COBBLE && type1 != ITEM_PIPE_CONNECTION_STONE);
     },
     
     canTransportTo: function(pipe, x, y, z){

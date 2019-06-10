@@ -72,7 +72,7 @@ function getPipeRender(width, group, connectionType, texture){
         render.addEntry(model).setCondition(condition);
         
         // Connecting to TileEntities
-        data = connectionType == ITEM_PIPE_CONNECTION_WOOD? texture.data + 2: texture.data;
+        data = connectionType == ITEM_PIPE_CONNECTION_WOOD? texture.data + 2: data;
         model = BlockRenderer.createModel();
         model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, data);
         var condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], ICRender.getGroup(ITEM_PIPE_CONNECTION_MACHINE), false);
