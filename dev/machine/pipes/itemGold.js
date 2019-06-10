@@ -34,9 +34,9 @@ var PIPE_ITEM_GOLDEN_PROTOTYPE = {
 };
 
 
-if(__config__.getBool('use_redstone')){
+if(__config__.getBool('pipes_use_redstone')){
     PIPE_ITEM_GOLDEN_PROTOTYPE.redstone = function(signal){
-        this.data.redstone = signal.power > 8;  
+        this.data.redstone = redstoneInverse? signal.power <= 8: signal.power > 8;  
         this.updateModel();
     };
 } else {
