@@ -13,7 +13,6 @@ machine/engines/engineRedstone.js
 machine/engines/engineStirling.js
 machine/engines/engineICE.js
 machine/engines/engineCreative.js
-machine/engines/engineElectric.js
 
 machine/pipes/PipeRegistry.js
 machine/pipes/itemWood.js
