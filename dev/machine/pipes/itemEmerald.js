@@ -22,22 +22,31 @@ var emeraldPipeUI = new UI.StandartWindow({
     },
 
     elements: {
-        "modeSwitch": {
-            type: "button", isTextButton: true, x: 380, y: 200, bitmap: "button_36x12_up", bitmap2: "button_36x12_down", text: "Filter", scale: 6, 
-            font: {
-                color: android.graphics.Color.WHITE,
-                size: 24,
-                shadow: 0.75
-            },
-            textOffset: {
-                x: 48,
-                y: 45
-            },
+        "modeWhitelist": {
+            type: "button", x: 380, y: 200, bitmap: "emerald_button_inactive", bitmap2: "emerald_button_active", scale: 3.5, 
             clicker: {
                 onClick: function(container, tileEntity){
-                    tileEntity.data.inverseMode = !tileEntity.data.inverseMode;
+                    tileEntity.setMode(EMERALD_MODE_WHITELIST);
                 }
             }
+        },
+        
+        "iconWhitelist": {
+            type: "image", bitmap: "emerald_whitelist", x: 383, y: 203, z: 5, scale: 3.5
+        },
+        
+        "modeBlacklist": {
+            type: "button", x: 450, y: 200, bitmap: "emerald_button_inactive", bitmap2: "emerald_button_active", scale: 3.5, 
+            clicker: {
+                onClick: function(container, tileEntity){
+                    tileEntity.setMode(EMERALD_MODE_BLACKLIST);
+                }
+            }
+        },
+        
+        
+        "iconBlacklist": {
+            type: "image", bitmap: "emerald_blacklist", x: 453, y: 203, z: 5, scale: 3.5
         }
     }
 });
@@ -45,15 +54,23 @@ var emeraldPipeUI = new UI.StandartWindow({
 for (var i = 0; i < 9; i++){
     emeraldPipeUI.content.elements["slot" + i] = {
         type: "slot",
-        x: 370 + i * 65, y: 285
+        x: 370 + i * 65, y: 100
     };
 }
+
+const EMERALD_MODE_WHITELIST = 0;
+const EMERALD_MODE_BLACKLIST = 1;
+const EMERALD_MODE_ORDER = 2;
 
 
 TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
     defaultValues: {
         containerIndex: 0,
-        inverseMode: false
+        mode: EMERALD_MODE_WHITELIST
+    },
+    
+    click: function(id, count, data){
+        
     },
     
     /* callbacks */
@@ -64,7 +81,6 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
     tick: function(){
         if (this.container.isOpened()){
             this.reloadFilter();
-            this.container.setText("modeSwitch", this.data.inverseMode ? "Ignore" : "Filter");
         }
     },
     
@@ -89,32 +105,35 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
     },
     
     reloadFilter: function(){
-        this.filter = {
-            all: true
-        };
-        this.container.validateAll();
-
+        this.filter = {};
         for (var i = 0; i < 9; i++){
             var slot = this.container.getSlot("slot" + i);
             if (slot.id > 0){
                 this.filter[slot.id + "." + slot.data] = true;
-                this.filter.all = false;
             }
         }
     },
 
     checkItem: function(id, data){
         if (this.filter){
-            if (this.data.inverseMode){
-                return this.filter.all || !this.filter[id + "." + data];
+            if (this.data.mode == EMERALD_MODE_WHITELIST){
+                return this.filter[id + "." + data];
             }
-            else{
-                return this.filter.all || this.filter[id + "." + data];
+            else if(this.data.mode == EMERALD_MODE_BLACKLIST){
+                return !this.filter[id + "." + data];
             }
         }
         else{
             return true;
         }
+    },
+    
+    setMode: function(mode){
+        this.data.mode = mode;
+        this.container.getElement("modeWhitelist").bitmap = 
+            mode == EMERALD_MODE_WHITELIST? "emerald_button_active": "emerald_button_inactive";
+        this.container.getElement("modeBlacklist").bitmap = 
+            mode == EMERALD_MODE_BLACKLIST? "emerald_button_active": "emerald_button_inactive";
     },
 
     findContainer: function(){
@@ -138,7 +157,7 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
             let slot;
             for(var i = 0; i < size; i++){
                 var slot = container.getSlot(i);
-                if(slot.id > 0){
+                if(slot.id > 0 && this.checkItem(slot.id, slot.data)){
                     var count = Math.min(maxCount, slot.count);
                     item = {id: slot.id, count: count, data: slot.data};
                     container.setSlot(i, slot.id, slot.count - count, slot.data);
@@ -171,7 +190,7 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
             var item = null;
             for (var i in slots){
                 var slot = container.getSlot(slots[i]);
-                if (slot.id > 0){
+                if (slot.id > 0 && this.checkItem(slot.id, slot.data)){
                     var count = Math.min(maxCount, slot.count);
                     item = {id: slot.id, count: count, data: slot.data};
                     slot.count -= count;
