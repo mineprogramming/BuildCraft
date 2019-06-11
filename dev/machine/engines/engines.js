@@ -174,7 +174,7 @@ var BUILDCRAFT_ENGINE_PROTOTYPE = {
         heatStage: ENGINE_HEAT_BLUE,
         
         rotationIndex: 0,
-        redstone: false,
+        redstone: redstoneInverse,
         
         position: 24, // low piston position
         energy: 0,

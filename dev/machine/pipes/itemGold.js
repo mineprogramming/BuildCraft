@@ -12,7 +12,7 @@ var modelsItemGolden = registerItemPipe(BlockID.pipeItemGolden, [
 
 var PIPE_ITEM_GOLDEN_PROTOTYPE = {
     defaultValues: {
-        redstone: false,
+        redstone: redstoneInverse,
     },
     
     init: function(){
