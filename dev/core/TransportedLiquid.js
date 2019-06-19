@@ -259,13 +259,7 @@ var TransportedLiquid = new GameObject("bc-transported-liquid", {
             });
         }
         this.animation.describe({
-            skin: LiquidModels.getModelSkin(),
-            render: LiquidModels.getLiquidRender(6, this.liquid.amount <= 0.12 ? (this.liquid.amount / 20) * 100 : 6, 6, arr).getId(),
-            firmRotation: true,
-            hitbox: {
-                width: .0,
-                height: .0
-            }
+            render: LiquidModels.getLiquidRender(this.liquid.id, 6, this.liquid.amount <= 0.12 ? (this.liquid.amount / 20) * 100 : 6, 6, arr).getId()
         });
         this.animation.refresh();
     },

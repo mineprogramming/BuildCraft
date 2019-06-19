@@ -333,73 +333,109 @@ pillarRender.addBoxF(0.25, 0.0, 0.25, 0.75, 1.0, 0.75, {id: 5, data: 2});
 */
 
 var LiquidModels = {
- registerSkin: function(liquid){
-  LiquidRegistry.getLiquidData(liquid).modelTextures.push("images/model/buildcraft_" + liquid + "_atlas.png");
- },
+    registerSkin: function(liquid) {
+        LiquidRegistry.getLiquidData(liquid).modelTextures.push("images/model/buildcraft_" + liquid + "_atlas.png");
+    },
 
- getRender: function(w, d, h){
-  var render = new Render({name: "liquidModel" + [w, d, h]});
-  if (render.isEmpty){
-   render.setPart("body", [{
-    type: "box",
-    
-    uv: {x: 0, y: 0},
+    getRender: function(w, d, h) {
+        var render = new Render({
+            name: "liquidModel" + [w, d, h]
+        });
+        if (render.isEmpty) {
+            render.setPart("body", [{
+                type: "box",
 
-    coords: {x: w/2, y: 24 - d/2, z: h/2},
+                uv: {
+                    x: 0,
+                    y: 0
+                },
 
-    size: {x: w, y: d, z: h}
-   }], {width: 128, height: 64});
-   render.saveState("liquidModel" + [w, d, h]);
-  }
-  return render;
- },
+                coords: {
+                    x: w / 2 - 1,
+                    y: 24 - d / 2 + 1,
+                    z: h / 2 - 1
+                },
 
- getModelSkin: function(liquid){
-  var liquid = LiquidRegistry.getLiquidData(liquid);
-  return liquid ? liquid.modelTextures[0] : "images/model/buildcraft_water_atlas.png";
- },
+                size: {
+                    x: w,
+                    y: d,
+                    z: h
+                }
+            }], {
+                width: 128,
+                height: 64
+            });
+        }
+        return render;
+    },
 
- getModelData: function(liquid, w, d, h){
-  var skin = this.getModelSkin(liquid);
-  var render = this.getRender(w, d, h);
-  return {
-   skin: skin,
-   renderAPI: render,
-   firmRotation: true,
-   hitbox: {width: .0, height: .0}
-  };
- },
+    getModelSkin: function(liquid) {
+        var liquid = LiquidRegistry.getLiquidData(liquid);
+        if(liquid){
+            return liquid.modelTextures[0].substring(7);
+        }
+        return "model/buildcraft_water_atlas.png";
+    },
 
- getLiquidRender: function(w, d, h, directions){
-  var key = "transportedLiquid" + [w, d, h] + " " + JSON.stringify(directions, ["x", "y", "z"]);
-  var render = new Render({name: key});
-  if (render.isEmpty){
-   var modelData = [{
-     type: "box",
-    
-     uv: {x: 0, y: 0},
+    getModelData: function(liquid, w, d, h) {
+        var render = this.getRender(w, d, h);
+        return {
+            render: render.getId()
+        };
+    },
 
-     coords: {x: w/2, y: 24 - d/2, z: h/2},
+    getLiquidRender: function(liquid, w, d, h, directions) {
+        var render = new Render({skin: this.getModelSkin(liquid)});
+        var modelData = [{
+            type: "box",
 
-     size: {x: w, y: d, z: h}
-   }];
-   for (var dir in directions){
-    var direct = directions[dir];
-    modelData.push({
-     type: "box",
+            uv: {
+                x: 0,
+                y: 0
+            },
 
-     uv: {x: 0, y: 0},
+            coords: {
+                x: w / 2 - 1,
+                y: 24 - d / 2 + 1,
+                z: h / 2 - 1
+            },
 
-     coords: {x: w/2 + w*direct.x, y: 24 - d/2 + d*direct.y, z: h/2 + h*direct.z},
+            size: {
+                x: w,
+                y: d,
+                z: h
+            }
+        }];
+        for (var dir in directions) {
+            var direct = directions[dir];
+            modelData.push({
+                type: "box",
 
-     size: {x: w, y: d, z: h}
-    });
-   }
-   render.setPart("body", modelData, {width: 128, height: 64});
-   render.saveState(key);
-  }
-  return render;
- }
+                uv: {
+                    x: 0,
+                    y: 0
+                },
+
+                coords: {
+                    x: w / 2 + w * direct.x - 1,
+                    y: 24 - d / 2 + d * direct.y + 1,
+                    z: h / 2 + h * direct.z - 1
+                },
+
+                size: {
+                    x: w,
+                    y: d,
+                    z: h
+                }
+            });
+        }
+        render.setPart("body", modelData, {
+            width: 128,
+            height: 64
+        });
+
+        return render;
+    }
 };
 
 LiquidModels.registerSkin("water");
