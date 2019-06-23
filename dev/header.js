@@ -18,3 +18,5 @@
 
 var redstoneInverse = __config__.getBool('inverse_redstone');
 
+Recipes.removeFurnaceRecipe(81);
+Recipes.addFurnace(81, 351, 2);
