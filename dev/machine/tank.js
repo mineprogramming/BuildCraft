@@ -1,18 +1,18 @@
-IDRegistry.genBlockID("tank");
-Block.createBlock("tank", [
+IDRegistry.genBlockID("bcTank");
+Block.createBlock("bcTank", [
  {name: "Tank", texture: [["tank", 1], ["tank", 1], ["tank", 0]], inCreative: true}], BLOCK_TYPE_LIQUID_PIPE);
-Block.setBlockShape(BlockID.tank, {x: 2/16 + 0.001, y: 0.001, z: 2/16 + 0.001}, {x: 14/16 - 0.001, y: 0.999, z: 14/16 - 0.001});
+Block.setBlockShape(BlockID.bcTank, {x: 2/16 + 0.001, y: 0.001, z: 2/16 + 0.001}, {x: 14/16 - 0.001, y: 0.999, z: 14/16 - 0.001});
 
-Recipes.addShaped({id: BlockID.tank, count: 1, data: 0}, [
+Recipes.addShaped({id: BlockID.bcTank, count: 1, data: 0}, [
     "ggg",
     "g g",
     "ggg"
 ], ["g", 20, 0]);
 
-ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_ANY, BlockID.tank);
+//ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_ANY, BlockID.tank);
 
-ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_STONE, BlockID.tank);
-ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_COBBLE, BlockID.tank);
+//ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_STONE, BlockID.tank);
+//ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_COBBLE, BlockID.tank);
 
 var tankUI = new UI.StandartWindow({
     standart: {
@@ -34,7 +34,7 @@ var tankUI = new UI.StandartWindow({
 });
 
 
-TileEntity.registerPrototype(BlockID.tank, {
+TileEntity.registerPrototype(BlockID.bcTank, {
     init: function() {
         this.animation = new Animation.Base(this.x + 3 / 16, this.y, this.z + 13 / 16);
         this.animation.load();
@@ -53,6 +53,9 @@ TileEntity.registerPrototype(BlockID.tank, {
 
     getGuiScreen: function() {
         return tank_interface ? tankUI : null;
+    },
+    getTransportLiquid:function(){
+        return {input: ["water","lava"],output:["water","lava"]};
     },
 
     tick: function() {
@@ -96,7 +99,7 @@ TileEntity.registerPrototype(BlockID.tank, {
         }
 
         var targetId = World.getBlockID(this.x, this.y - 1, this.z);
-        if (targetId == BlockID.tank) {
+        if (targetId == BlockID.bcTank) {
             var other_storage = World.getTileEntity(this.x, this.y - 1, this.z).liquidStorage;
             var amount = this.liquidStorage.getLiquid(liquidStored, 1);
             if (amount > 0) {

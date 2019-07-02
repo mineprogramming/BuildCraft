@@ -25,6 +25,10 @@ TileEntity.registerPrototype(BlockID.bcPump, {
     MJEnergyDeploy: function(amount, generator, params) {
         if (this.data.energy < 20) this.data.energy += Math.min(amount, amount - this.data.energy);
     },
+    
+    getTransportLiquid:function(){
+        return {output: ["water"]};
+    },
 
     tick: function() {
         this.liquidStorage.setLimit(null, 16);

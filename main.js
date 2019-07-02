@@ -2,8 +2,36 @@
 NIDE BUILD INFO:
   dir: dev
   target: main.js
-  files: 18
+  files: 25
 */
+
+
+
+// file: header.js
+
+/*
+ *
+ *       :::::::::      :::    :::       :::::::::::       :::        :::::::::            ::::::::       :::::::::           :::        ::::::::::   ::::::::::: 
+ *      :+:    :+:     :+:    :+:           :+:           :+:        :+:    :+:          :+:    :+:      :+:    :+:        :+: :+:      :+:              :+:      
+ *     +:+    +:+     +:+    +:+           +:+           +:+        +:+    +:+          +:+             +:+    +:+       +:+   +:+     +:+              +:+       
+ *    +#++:++#+      +#+    +:+           +#+           +#+        +#+    +:+          +#+             +#++:++#:       +#++:++#++:    :#::+::#         +#+        
+ *   +#+    +#+     +#+    +#+           +#+           +#+        +#+    +#+          +#+             +#+    +#+      +#+     +#+    +#+              +#+         
+ *  #+#    #+#     #+#    #+#           #+#           #+#        #+#    #+#          #+#    #+#      #+#    #+#      #+#     #+#    #+#              #+#          
+ * #########       ########        ###########       ########## #########            ########       ###    ###      ###     ###    ###              ###           
+ *
+ *
+ *  This mod is licenced under GPL-3.0 licence
+ *  All rights belong to IchZerowan & #mineprogramming
+ *  Original CoreEngine source: Zheka Smirnov
+ *  Textures and mod design: Nikich21
+ * 
+ */
+
+var redstoneInverse = __config__.getBool('inverse_redstone');
+
+Recipes.removeFurnaceRecipe(81);
+Recipes.addFurnace(81, 351, 2);
+
 
 
 
@@ -343,102 +371,110 @@ pillarRender.addBoxF(0.25, 0.0, 0.25, 0.75, 1.0, 0.75, {id: 5, data: 2});
 
 */
 
-
-
-var ModelHelper = {
-    Texture: function(name, offset, size) {
-        this.name = name;
-        this.offset = offset;
-        this.size = size;
-        
-        this.getUV = function(){
-            return this.offset;
-        }
-        
-        this.getSize = function(){
-            return this.size;
-        }
-        
-        this.getTexture = function(){
-            return this.name;
-        }
-        
-        this.textureMatches = function(texture){
-            return this.name == texture.name;
-        }
-    },
-    
-}
-
-
 var LiquidModels = {
- registerSkin: function(liquid){
-  LiquidRegistry.getLiquidData(liquid).modelTextures.push("images/model/buildcraft_" + liquid + "_atlas.png");
- },
+    registerSkin: function(liquid) {
+        LiquidRegistry.getLiquidData(liquid).modelTextures.push("images/model/buildcraft_" + liquid + "_atlas.png");
+    },
 
- getRender: function(w, d, h){
-  var render = new Render({name: "liquidModel" + [w, d, h]});
-  if (render.isEmpty){
-   render.setPart("body", [{
-    type: "box",
-    
-    uv: {x: 0, y: 0},
+    getRender: function(w, d, h) {
+        var render = new Render({
+            name: "liquidModel" + [w, d, h]
+        });
+        if (render.isEmpty) {
+            render.setPart("body", [{
+                type: "box",
 
-    coords: {x: w/2, y: 24 - d/2, z: h/2},
+                uv: {
+                    x: 0,
+                    y: 0
+                },
 
-    size: {x: w, y: d, z: h}
-   }], {width: 128, height: 64});
-   render.saveState("liquidModel" + [w, d, h]);
-  }
-  return render;
- },
+                coords: {
+                    x: w / 2 - 1,
+                    y: 24 - d / 2 + 1,
+                    z: h / 2 - 1
+                },
 
- getModelSkin: function(liquid){
-  var liquid = LiquidRegistry.getLiquidData(liquid);
-  return liquid ? liquid.modelTextures[0] : "images/model/buildcraft_water_atlas.png";
- },
+                size: {
+                    x: w,
+                    y: d,
+                    z: h
+                }
+            }], {
+                width: 128,
+                height: 64
+            });
+        }
+        return render;
+    },
 
- getModelData: function(liquid, w, d, h){
-  var skin = this.getModelSkin(liquid);
-  var render = this.getRender(w, d, h);
-  return {
-   skin: skin,
-   renderAPI: render,
-   firmRotation: true,
-   hitbox: {width: .0, height: .0}
-  };
- },
+    getModelSkin: function(liquid) {
+        var liquid = LiquidRegistry.getLiquidData(liquid);
+        if(liquid){
+            return liquid.modelTextures[0].substring(7);
+        }
+        return "model/buildcraft_water_atlas.png";
+    },
 
- getLiquidRender: function(w, d, h, directions){
-  var key = "transportedLiquid" + [w, d, h] + " " + JSON.stringify(directions, ["x", "y", "z"]);
-  var render = new Render({name: key});
-  if (render.isEmpty){
-   var modelData = [{
-     type: "box",
-    
-     uv: {x: 0, y: 0},
+    getModelData: function(liquid, w, d, h) {
+        var render = this.getRender(w, d, h);
+        return {
+            render: render.getId()
+        };
+    },
 
-     coords: {x: w/2, y: 24 - d/2, z: h/2},
+    getLiquidRender: function(liquid, w, d, h, directions) {
+        var render = new Render({skin: this.getModelSkin(liquid)});
+        var modelData = [{
+            type: "box",
 
-     size: {x: w, y: d, z: h}
-   }];
-   for (var dir in directions){
-    var direct = directions[dir];
-    modelData.push({
-     type: "box",
+            uv: {
+                x: 0,
+                y: 0
+            },
 
-     uv: {x: 0, y: 0},
+            coords: {
+                x: w / 2 - 1,
+                y: 24 - d / 2 + 1,
+                z: h / 2 - 1
+            },
 
-     coords: {x: w/2 + w*direct.x, y: 24 - d/2 + d*direct.y, z: h/2 + h*direct.z},
+            size: {
+                x: w,
+                y: d,
+                z: h
+            }
+        }];
+        for (var dir in directions) {
+            var direct = directions[dir];
+            modelData.push({
+                type: "box",
 
-     size: {x: w, y: d, z: h}
-    });
-   }
-   render.setPart("body", modelData, {width: 128, height: 64});
-   render.saveState(key);
-  }
-  return render;
- }
+                uv: {
+                    x: 0,
+                    y: 0
+                },
+
+                coords: {
+                    x: w / 2 + w * direct.x - 1,
+                    y: 24 - d / 2 + d * direct.y + 1,
+                    z: h / 2 + h * direct.z - 1
+                },
+
+                size: {
+                    x: w,
+                    y: d,
+                    z: h
+                }
+            });
+        }
+        render.setPart("body", modelData, {
+            width: 128,
+            height: 64
+        });
+
+        return render;
+    }
 };
 
 LiquidModels.registerSkin("water");
@@ -607,6 +643,461 @@ function denyTransporting(id, item, fluid){
     }
 };
 
+
+
+
+Callback.addCallback("PostLoaded", function(){
+ denyTransporting(BlockID.pipeFluidWooden, false, true);
+ denyTransporting(BlockID.pipeFluidEmerald, false, true);
+});
+
+
+
+
+ModAPI.registerAPI("BuildcraftAPI", {
+ Transport: {
+  Helper: ItemTransportingHelper,
+  Item: TransportingItem,
+  Liquid: TransportedLiquid,
+  Cache: TransportingCache,
+  LiquidHelper: LiquidTransportHelper,
+  LiquidCache: LiquidTransportingCache,
+  LiquidMap: LiquidMap
+ },
+
+ ModelHelper: ModelHelper,
+
+ LiquidModelHelper: LiquidModels,
+
+ Engine: {
+  Part: EngineModelPartRegistry,
+  ModelHelper: EngineModelHelper,
+  Prototype: BUILDCRAFT_ENGINE_PROTOTYPE,
+  Types: ENGINE_TYPE_DATA
+ },
+
+ requireGlobal: function(str){
+  return eval(str);
+ },
+
+ registerPipe: registerItemPipe,
+
+ registerFluidPipe: setupFluidPipeRender
+});
+
+Logger.Log("Buildcraft API shared as BuildcraftAPI", "API");
+
+
+
+
+
+
+// file: translation.js
+
+Translation.addTranslation("Redstone Engine", {ru: "Двигатель на красном камне"});
+Translation.addTranslation("Steam Engine", {ru: "Паровой Двигатель"});
+Translation.addTranslation("Combustion Engine", {ru: "Двигатель внутреннего сгорания"});
+Translation.addTranslation("Creative Engine", {ru: "Творческий Двигатель"});
+Translation.addTranslation("Tank", {ru: "Цистерна"});
+Translation.addTranslation("Pump", {ru: "Помпа"});
+
+Translation.addTranslation("Wooden Transport Pipe", {ru: "Деревянная транспортная труба"});
+Translation.addTranslation("Cobblestone Transport Pipe", {ru: "Булыжниковая транспортная труба"});
+Translation.addTranslation("Stone Transport Pipe", {ru: "Каменная транспортная труба"});
+Translation.addTranslation("Sandstone Transport Pipe", {ru: "Песчаниковая транспортная труба"});
+Translation.addTranslation("Iron Transport Pipe", {ru: "Железная транспортная труба"});
+Translation.addTranslation("Golden Transport Pipe", {ru: "Золотая транспортная труба"});
+Translation.addTranslation("Obsidian Transport Pipe", {ru: "Обсидиановая транспортная труба"});
+Translation.addTranslation("Emerald Transport Pipe", {ru: "Изумрудная транспортная труба"});
+Translation.addTranslation("Diamond Transport Pipe", {ru: "Алмазная транспортная труба"});
+
+Translation.addTranslation("Wooden Fluid Pipe", {ru: "Деревянная жидкостная труба"});
+Translation.addTranslation("Cobblestone Fluid Pipe", {ru: "Булыжниковая жидкостная труба"});
+Translation.addTranslation("Stone Fluid Pipe", {ru: "Каменная жидкостная труба"});
+Translation.addTranslation("Iron Fluid Pipe", {ru: "Железная жидкостная труба"});
+Translation.addTranslation("Golden Fluid Pipe", {ru: "Золотая жидкостная труба"});
+Translation.addTranslation("Emerald Fluid Pipe", {ru: "Изумрудная жидкостная труба"});
+
+Translation.addTranslation("Wrench", {ru: "Гаечный ключ"});
+Translation.addTranslation("Wood Gear", {ru: "Деревянная шестерёнка"});
+Translation.addTranslation("Stone Gear", {ru: "Каменная шестерёнка"});
+Translation.addTranslation("Tin Gear", {ru: "Оловянная шестерёнка"});
+Translation.addTranslation("Iron Gear", {ru: "Железная шестерёнка"});
+Translation.addTranslation("Gold Gear", {ru: "Золотая шестерёнка"});
+Translation.addTranslation("Diamond Gear", {ru: "Алмазная шестерёнка"});
+Translation.addTranslation("Pipe Waterproof", {ru: "Водяная изоляция для труб"});
+
+
+
+
+// file: core/TransportedLiquid.js
+
+var LiquidTransportHelper = {
+    DownloadingDenied: {
+
+    },
+
+    PipeTiles: {
+
+    },
+
+    registerFluidPipe: function(id, connectType) {
+        this.PipeTiles[id] = connectType;
+    },
+
+    isPipe: function(blockID) {
+        return this.PipeTiles[blockID];
+    },
+
+    canPipesConnect: function(pipe1, pipe2) {
+        var type1 = this.PipeTiles[pipe1] || FLUID_PIPE_CONNECTION_ANY;
+        var type2 = this.PipeTiles[pipe2] || FLUID_PIPE_CONNECTION_ANY;
+        return type1 == type2 || type1 == FLUID_PIPE_CONNECTION_ANY || type2 == FLUID_PIPE_CONNECTION_ANY;
+    },
+
+    findNearbyLiquidStorages: function(position) {
+        var directions = [{
+                x: -1,
+                y: 0,
+                z: 0
+            },
+            {
+                x: 1,
+                y: 0,
+                z: 0
+            },
+            {
+                x: 0,
+                y: -1,
+                z: 0
+            },
+            {
+                x: 0,
+                y: 1,
+                z: 0
+            },
+            {
+                x: 0,
+                y: 0,
+                z: -1
+            },
+            {
+                x: 0,
+                y: 0,
+                z: 1
+            },
+        ];
+        var possibleDirs = [];
+        for (var i in directions) {
+            var dir = directions[i];
+            var tileentity = World.getTileEntity(position.x + dir.x, position.y + dir.y, position.z + dir.z);
+            if (tileentity && tileentity.liquidStorage) {
+                var block = World.getBlock(position.x + dir.x, position.y + dir.y, position.z + dir.z).id;
+                if (!this.DownloadingDenied[block]) {
+                    possibleDirs.push(dir);
+                }
+            }
+        }
+        return possibleDirs;
+    },
+
+    canDownloadTo: function(pipe, x, y, z) {
+        var block = World.getBlock(x, y, z).id;
+        if (block >= 8192 && !this.DownloadingDenied[block]) {
+            return TileEntity.isTileEntityBlock(block) || this.canPipesConnect(block, pipe);
+        }
+        return false;
+    },
+
+    locateLiquidPipes: function(x, y, z) {
+        var directions = [{
+                x: -1,
+                y: 0,
+                z: 0
+            },
+            {
+                x: 1,
+                y: 0,
+                z: 0
+            },
+            {
+                x: 0,
+                y: -1,
+                z: 0
+            },
+            {
+                x: 0,
+                y: 1,
+                z: 0
+            },
+            {
+                x: 0,
+                y: 0,
+                z: -1
+            },
+            {
+                x: 0,
+                y: 0,
+                z: 1
+            },
+        ];
+        var pipes = [];
+        var pipe = World.getBlock(x, y, z).id;
+        for (var d in directions) {
+            var dir = directions[d];
+            var block = World.getBlock(x + dir.x, y + dir.y, z + dir.z).id;
+            if (!this.DownloadingDenied[block] && this.isPipe(block) && this.canPipesConnect(pipe, block)) {
+                pipes.push(dir);
+            }
+        }
+        return pipes;
+    },
+
+    findBasicDirections: function(pipe, position) {
+        var directions = [{
+                x: -1,
+                y: 0,
+                z: 0
+            },
+            {
+                x: 1,
+                y: 0,
+                z: 0
+            },
+            {
+                x: 0,
+                y: -1,
+                z: 0
+            },
+            {
+                x: 0,
+                y: 1,
+                z: 0
+            },
+            {
+                x: 0,
+                y: 0,
+                z: -1
+            },
+            {
+                x: 0,
+                y: 0,
+                z: 1
+            },
+        ];
+        var possibleDirs = [];
+        for (var i in directions) {
+            var dir = directions[i];
+            if (this.canDownloadTo(pipe, position.x + dir.x, position.y + dir.y, position.z + dir.z)) {
+                possibleDirs.push(dir);
+            }
+        }
+        return possibleDirs;
+    },
+
+    getEnviromentData: function(position) {
+        var directions = LiquidTransportingCache.getInfo(position.x, position.y, position.z);
+
+        if (!directions) {
+            var id = World.getBlock(position.x, position.y, position.z).id;
+            var inPipe = this.isPipe(id) ? true : false;
+            directions = this.findBasicDirections(id, position);
+
+            for (var d in directions) {
+                var direction = directions[d];
+                var tileentity = World.getTileEntity(direction.x + position.x, direction.y + position.y, direction.z + position.z);
+                if (tileentity) {
+                    directions[d] = tileentity;
+                } else {
+                    for (var pos in position) {
+                        directions[d][pos] += position[pos];
+                    }
+                }
+            }
+
+            var directions = {
+                inPipe: inPipe,
+                directions: directions
+            };
+            LiquidTransportingCache.registerInfo(position.x, position.y, position.z, directions);
+        }
+
+        return directions;
+    },
+
+    flushLiquid: function(position, liquid, amount) {
+        var data = LiquidMap.getLiquid(position.x, position.y, position.z);
+        if (!data) {
+            data = TransportedLiquid.deploy(position.x, position.y, position.z, liquid, amount);
+            return 0;
+        }
+        data.addAmount(liquid, amount);
+        return 0;
+    },
+
+
+
+    downloadToStorage: function(storage, liquid, amount) {
+        storage.addLiquid(liquid, amount);
+    },
+
+    extractFromStorage: function(storage, amount) {
+        var liquidStored = storage.getLiquidStored();
+        return liquidStored ? storage.getLiquid(liquidStored, amount) : 0;
+    }
+};
+
+
+var TransportedLiquid = new GameObject("bc-transported-liquid", {
+    init: function(x, y, z, liquid, amount) {
+        this.pos = {
+            x: x,
+            y: y,
+            z: z
+        };
+
+        this.liquid = {
+            id: liquid,
+            amount: amount
+        };
+
+        this.frame = 0;
+
+        LiquidMap.registerLiquid(this.pos.x, this.pos.y, this.pos.z, this);
+
+    },
+
+    setLiquid: function(liquid, amount) {
+        this.liquid.id = liquid;
+        this.liquid.amount = amount;
+    },
+
+    addAmount: function(liquid, amount) {
+        if (this.liquid.id == liquid || !liquid) this.liquid.amount += amount;
+    },
+
+    validate: function() {
+        if (!this.liquid || this.liquid.amount <= 0.001 || !this.liquid.id || !this.liquid.amount) {
+            this.selfDestroy();
+        }
+        if (this.liquid.amount >= 0.12) this.liquid.amount = 0.12;
+    },
+
+    render: function(pos, dirs) {
+        var arr = [];
+        for (var a in dirs) {
+            arr.push({
+                x: dirs[a].x - pos.x,
+                y: dirs[a].y - pos.y,
+                z: dirs[a].z - pos.z
+            });
+        }
+        this.animation.describe({
+            render: LiquidModels.getLiquidRender(this.liquid.id, 6, this.liquid.amount <= 0.12 ? (this.liquid.amount / 20) * 100 : 6, 6, arr).getId()
+        });
+        this.animation.refresh();
+    },
+
+
+    //pouring
+
+    mean: function(amounts) {
+        var mean = 0;
+        for (var i in amounts) {
+            mean += amounts[i];
+        }
+        return +((mean / amounts.length).toFixed(3));
+    },
+
+    pouringAction: function() {
+        var amounts = [this.liquid.amount];
+        var deny = [true, true, true, true, true, true];
+        var te_counts = 0;
+        var env = LiquidTransportHelper.getEnviromentData(this.pos);
+        if (!env.inPipe) {
+            this.selfDestroy();
+            return;
+        }
+
+        this.render(this.pos, env.directions);
+
+        for (var d in env.directions) {
+            var dir = env.directions[d];
+            var liquid = LiquidMap.getLiquid(dir.x, dir.y, dir.z);
+            if (dir.liquidStorage) {
+                te_counts++;
+                continue;
+            }
+            if (liquid) {
+                if (liquid.liquid.id != this.liquid.id || liquid.liquid.amount > this.liquid.amount) {
+                    deny[d] = false;
+                } else amounts.push(liquid.liquid.amount);
+            }
+        }
+
+        var mean = this.mean(amounts);
+        for (var d in env.directions) {
+            var dir = env.directions[d];
+            if (!dir.liquidStorage && deny[d]) LiquidTransportHelper.flushLiquid(dir, this.liquid.id, mean);
+        }
+
+        if (te_counts > 0) {
+            var amountForTE = this.liquid.amount / te_counts;
+            this.liquid.amount = 0;
+            for (var d in env.directions) {
+                var dir = env.directions[d];
+                if (dir.addLiquidFromPipe) {
+                    this.liquid.amount += dir.addLiquidFromPipe(this.liquid.id, amountForTE);
+                } else if (dir.liquidStorage) {
+                    var liquidStored = dir.liquidStorage.getLiquidStored();
+                    var transportableLiquids;
+                    var transportDenied = false;
+                    if (dir.getTransportLiquids) {
+                        transportableLiquids = dir.getTransportLiquids();
+                    }
+                    if (transportableLiquids) {
+                        for (var id in transportableLiquids.input) {
+                            if (this.liquid.id == transportableLiquids.input[id]) transportDenied = true;
+                        }
+                    } else if (this.liquid.id == liquidStored) transportDenied = true;
+                    if (transportDenied) this.liquid.amount += dir.liquidStorage.addLiquid(this.liquid.id, amountForTE);
+                }
+            }
+            return;
+        }
+
+        this.liquid.amount = mean;
+    },
+
+    //standart callbacks
+    loaded: function() {
+        this.animation = new Animation.Base(this.pos.x + 7 / 16, this.pos.y + 6 / 16, this.pos.z + 10 / 16);
+        this.animation.load();
+        LiquidMap.registerLiquid(this.pos.x, this.pos.y, this.pos.z, this);
+    },
+
+    update: function() {
+        this.frame++;
+        if (this.frame % 5 == 0) {
+            this.pouringAction();
+            this.validate();
+        }
+    },
+
+    selfDestroy: function() {
+        if (this.animation) {
+            this.animation.destroy();
+        }
+        LiquidMap.deleteLiquid(this.pos.x, this.pos.y, this.pos.z);
+        this.destroy();
+    },
+});
+
+
+
+
+// file: core/TransportingItem.js
+
 var ItemTransportingHelper = {
     PipeTiles: {
         // connection types are registred with render connections
@@ -644,7 +1135,12 @@ var ItemTransportingHelper = {
     canPipesConnect: function(pipe1, pipe2){
         var type1 = this.PipeTiles[pipe1] || ITEM_PIPE_CONNECTION_ANY;
         var type2 = this.PipeTiles[pipe2] || ITEM_PIPE_CONNECTION_ANY;
-        return type1 == type2 || type1 == ITEM_PIPE_CONNECTION_ANY || type2 == ITEM_PIPE_CONNECTION_ANY;
+        return (type1 == type2 && type1 != ITEM_PIPE_CONNECTION_WOOD) 
+            || (type1 == ITEM_PIPE_CONNECTION_ANY || type2 == ITEM_PIPE_CONNECTION_ANY)
+            || (type1 == ITEM_PIPE_CONNECTION_STONE && type2 != ITEM_PIPE_CONNECTION_COBBLE)
+            || (type2 == ITEM_PIPE_CONNECTION_STONE && type1 != ITEM_PIPE_CONNECTION_COBBLE)
+            || (type1 == ITEM_PIPE_CONNECTION_COBBLE && type2 != ITEM_PIPE_CONNECTION_STONE)
+            || (type2 == ITEM_PIPE_CONNECTION_COBBLE && type1 != ITEM_PIPE_CONNECTION_STONE);
     },
     
     canTransportTo: function(pipe, x, y, z){
@@ -652,7 +1148,7 @@ var ItemTransportingHelper = {
         if (this.BasicItemContainers[block])
             return true; 
         if (block > 4096 && !this.TransportingDenied[block]){
-            return TileEntity.isTileEntityBlock(block) || this.canPipesConnect(block, pipe);
+            return (!this.isPipe(block) && TileEntity.isTileEntityBlock(block)) || this.canPipesConnect(block, pipe);
         }
         return false;
     },
@@ -768,395 +1264,6 @@ var ItemTransportingHelper = {
     }
 }
 
-
-var LiquidTransportHelper = {
- DownloadingDenied: {
-
- },
-
- PipeTiles: {
-
- },
-
- registerFluidPipe: function(id, connectType){
-  this.PipeTiles[id] = connectType;
- },
-
- isPipe: function(blockID){
-  return this.PipeTiles[blockID];
- },
-
- canPipesConnect: function(pipe1, pipe2){
-        var type1 = this.PipeTiles[pipe1] || FLUID_PIPE_CONNECTION_ANY;
-        var type2 = this.PipeTiles[pipe2] || FLUID_PIPE_CONNECTION_ANY;
-        return type1 == type2 || type1 == FLUID_PIPE_CONNECTION_ANY || type2 == FLUID_PIPE_CONNECTION_ANY;
-    },
-
-  findNearbyLiquidStorages: function(position){
-        var directions = [
-            {x: -1, y: 0, z: 0},
-            {x: 1, y: 0, z: 0},
-            {x: 0, y: -1, z: 0},
-            {x: 0, y: 1, z: 0},
-            {x: 0, y: 0, z: -1},
-            {x: 0, y: 0, z: 1},
-        ];
-        var possibleDirs = [];
-        for (var i in directions){
-            var dir = directions[i];
-            var tileentity = World.getTileEntity(position.x + dir.x, position.y + dir.y, position.z + dir.z);
-            if (tileentity && tileentity.liquidStorage){
-                var block = World.getBlock(position.x + dir.x, position.y + dir.y, position.z + dir.z).id;
-                if (!this.DownloadingDenied[block]){
-                    possibleDirs.push(dir);
-                }
-            }
-        }
-        return possibleDirs;
-    },
-
-  canDownloadTo: function(pipe, x, y, z){
-        var block = World.getBlock(x, y, z).id;
-        if (block >= 8192 && !this.DownloadingDenied[block]){
-            return TileEntity.isTileEntityBlock(block) || this.canPipesConnect(block, pipe);
-        }
-        return false;
-    },
-
-  locateLiquidPipes: function(x, y, z){
-   var directions = [
-            {x: -1, y: 0, z: 0},
-            {x: 1, y: 0, z: 0},
-            {x: 0, y: -1, z: 0},
-            {x: 0, y: 1, z: 0},
-            {x: 0, y: 0, z: -1},
-            {x: 0, y: 0, z: 1},
-        ];
-    var pipes = [];
-    var pipe = World.getBlock(x, y, z).id;
-   for (var d in directions){
-    var dir = directions[d];
-    var block = World.getBlock(x + dir.x, y + dir.y, z + dir.z).id;
-    if (!this.DownloadingDenied[block] && this.isPipe(block) && this.canPipesConnect(pipe, block)){
-     pipes.push(dir);
-    }
-   }
-   return pipes;
-  },
-
-  findBasicDirections: function(pipe, position){
-        var directions = [
-            {x: -1, y: 0, z: 0},
-            {x: 1, y: 0, z: 0},
-            {x: 0, y: -1, z: 0},
-            {x: 0, y: 1, z: 0},
-            {x: 0, y: 0, z: -1},
-            {x: 0, y: 0, z: 1},
-        ];
-        var possibleDirs = [];
-        for (var i in directions){
-            var dir = directions[i];
-            if (this.canDownloadTo(pipe, position.x + dir.x, position.y + dir.y, position.z + dir.z)){
-                possibleDirs.push(dir);
-            }
-        }
-        return possibleDirs;
-    },
-
- getEnviromentData: function(position){
-  var directions = LiquidTransportingCache.getInfo(position.x, position.y, position.z);
-
-  if (!directions){
-   var id = World.getBlock(position.x, position.y, position.z).id;
-   var inPipe = this.isPipe(id) ? true : false;
-   directions = this.findBasicDirections(id, position);
-
-   for (var d in directions){
-    var direction = directions[d];
-    var tileentity = World.getTileEntity(direction.x + position.x, direction.y + position.y, direction.z + position.z);
-    if (tileentity){
-     directions[d] = tileentity;
-    }
-    else{
-     for (var pos in position){
-      directions[d][pos] += position[pos];
-     }
-    }
-   }
-  
-   var directions = {
-    inPipe: inPipe,
-    directions: directions
-   };
- LiquidTransportingCache.registerInfo(position.x, position.y, position.z, directions);
-  }
-
-  return directions;
- },
-
- flushLiquid: function(position, liquid, amount){
-  var data = LiquidMap.getLiquid(position.x, position.y, position.z);
-  if (!data){
-    data = TransportedLiquid.deploy(position.x, position.y, position.z, liquid, amount);
-    return 0;
-  }
-  data.addAmount(liquid, amount);
-  return 0;
- },
-
- 
-
- downloadToStorage: function(storage, liquid, amount){
-  storage.addLiquid(liquid, amount);
- },
-
- extractFromStorage: function(storage, amount){
-  var liquidStored = storage.getLiquidStored();
-  return liquidStored ? storage.getLiquid(liquidStored, amount) : 0;
- }
-};
-
-Callback.addCallback("PostLoaded", function(){
- denyTransporting(BlockID.pipeFluidWooden, false, true);
- denyTransporting(BlockID.pipeFluidEmerald, false, true);
-});
-
-
-
-
-ModAPI.registerAPI("BuildcraftAPI", {
- Transport: {
-  Helper: ItemTransportingHelper,
-  Item: TransportingItem,
-  Liquid: TransportedLiquid,
-  Cache: TransportingCache,
-  LiquidHelper: LiquidTransportHelper,
-  LiquidCache: LiquidTransportingCache,
-  LiquidMap: LiquidMap
- },
-
- ModelHelper: ModelHelper,
-
- LiquidModelHelper: LiquidModels,
-
- Engine: {
-  Part: EngineModelPartRegistry,
-  ModelHelper: EngineModelHelper,
-  Prototype: BUILDCRAFT_ENGINE_PROTOTYPE,
-  Types: ENGINE_TYPE_DATA
- },
-
- requireGlobal: function(str){
-  return eval(str);
- },
-
- registerPipe: registerItemPipe,
-
- registerFluidPipe: setupFluidPipeRender
-});
-
-Logger.Log("Buildcraft API shared as BuildcraftAPI", "API");
-
-
-
-
-
-
-// file: translation.js
-
-Translation.addTranslation("Redstone Engine", {ru: "Двигатель на красном камне"});
-Translation.addTranslation("Stirling Engine", {ru: "Двигатель Стирлинга"});
-Translation.addTranslation("ICE", {ru: "ДВС"});
-Translation.addTranslation("Electric Engine", {ru: "Электрический двигатель"});
-Translation.addTranslation("Tank", {ru: "Цистерна"});
-Translation.addTranslation("Pump", {ru: "Помпа"});
-
-Translation.addTranslation("Wooden Transport Pipe", {ru: "Деревянная транспортная труба"});
-Translation.addTranslation("Cobblestone Transport Pipe", {ru: "Булыжниковая транспортная труба"});
-Translation.addTranslation("Stone Transport Pipe", {ru: "Каменная транспортная труба"});
-Translation.addTranslation("Sandstone Transport Pipe", {ru: "Песчаниковая транспортная труба"});
-Translation.addTranslation("Iron Transport Pipe", {ru: "Железная транспортная труба"});
-Translation.addTranslation("Golden Transport Pipe", {ru: "Золотая транспортная труба"});
-Translation.addTranslation("Obsidian Transport Pipe", {ru: "Обсидиановая транспортная труба"});
-Translation.addTranslation("Emerald Transport Pipe", {ru: "Изумрудная транспортная труба"});
-Translation.addTranslation("Diamond Transport Pipe", {ru: "Алмазная транспортная труба"});
-
-Translation.addTranslation("Wooden Fluid Pipe", {ru: "Деревянная жидкостная труба"});
-Translation.addTranslation("Cobblestone Fluid Pipe", {ru: "Булыжниковая жидкостная труба"});
-Translation.addTranslation("Stone Fluid Pipe", {ru: "Каменная жидкостная труба"});
-Translation.addTranslation("Iron Fluid Pipe", {ru: "Железная жидкостная труба"});
-Translation.addTranslation("Golden Fluid Pipe", {ru: "Золотая жидкостная труба"});
-Translation.addTranslation("Emerald Fluid Pipe", {ru: "Изумрудная жидкостная труба"});
-
-Translation.addTranslation("Wrench", {ru: "Гаечный ключ"});
-Translation.addTranslation("Wood Gear", {ru: "Деревянная шестерёнка"});
-Translation.addTranslation("Stone Gear", {ru: "Каменная шестерёнка"});
-Translation.addTranslation("Tin Gear", {ru: "Оловянная шестерёнка"});
-Translation.addTranslation("Iron Gear", {ru: "Железная шестерёнка"});
-Translation.addTranslation("Gold Gear", {ru: "Золотая шестерёнка"});
-Translation.addTranslation("Diamond Gear", {ru: "Алмазная шестерёнка"});
-Translation.addTranslation("Pipe Sealant", {ru: "Уплотнитель для труб"});
-
-
-
-// file: core/TransportedLiquid.js
-
-var TransportedLiquid = new GameObject("bc-transported-liquid", {
-    init: function(x, y, z, liquid, amount) {
-        this.pos = {
-            x: x,
-            y: y,
-            z: z
-        };
-
-        this.liquid = {
-            id: liquid,
-            amount: amount
-        };
-
-        this.frame = 0;
-
-        LiquidMap.registerLiquid(this.pos.x, this.pos.y, this.pos.z, this);
-
-    },
-
-    setLiquid: function(liquid, amount) {
-        this.liquid.id = liquid;
-        this.liquid.amount = amount;
-    },
-
-    addAmount: function(liquid, amount) {
-        if (this.liquid.id == liquid || !liquid) this.liquid.amount += amount;
-    },
-
-    validate: function() {
-        if (!this.liquid || this.liquid.amount <= 0.001 || !this.liquid.id || !this.liquid.amount) {
-            this.selfDestroy();
-        }
-        if (this.liquid.amount >= 0.12) this.liquid.amount = 0.12;
-    },
-
-    render: function(pos, dirs) {
-        var arr = [];
-        for (var a in dirs) {
-            arr.push({
-                x: dirs[a].x - pos.x,
-                y: dirs[a].y - pos.y,
-                z: dirs[a].z - pos.z
-            });
-        }
-        this.animation.describe({
-            skin: LiquidModels.getModelSkin(),
-            renderAPI: LiquidModels.getLiquidRender(6, this.liquid.amount <= 0.12 ? (this.liquid.amount / 20) * 100 : 6, 6, arr),
-            firmRotation: true,
-            hitbox: {
-                width: .0,
-                height: .0
-            }
-        });
-        this.animation.refresh();
-    },
-
-
-    //pouring
-
-    mean: function(amounts) {
-        var mean = 0;
-        for (var i in amounts) {
-            mean += amounts[i];
-        }
-        return +((mean / amounts.length).toFixed(3));
-    },
-
-    pouringAction: function() {
-        var amounts = [this.liquid.amount];
-        var deny = [true, true, true, true, true, true];
-        var te_counts = 0;
-        var env = LiquidTransportHelper.getEnviromentData(this.pos);
-        if (!env.inPipe) {
-            this.selfDestroy();
-            return;
-        }
-
-        this.render(this.pos, env.directions);
-
-        for (var d in env.directions) {
-            var dir = env.directions[d];
-            var liquid = LiquidMap.getLiquid(dir.x, dir.y, dir.z);
-            if (dir.liquidStorage) {
-                te_counts++;
-                continue;
-            }
-            if (liquid) {
-                if (liquid.liquid.id != this.liquid.id || liquid.liquid.amount > this.liquid.amount) {
-                    deny[d] = false;
-                } else amounts.push(liquid.liquid.amount);
-            }
-        }
-
-        var mean = this.mean(amounts);
-        for (var d in env.directions) {
-            var dir = env.directions[d];
-            if (!dir.liquidStorage && deny[d]) LiquidTransportHelper.flushLiquid(dir, this.liquid.id, mean);
-        }
-
-        if (te_counts > 0) {
-            var amountForTE = this.liquid.amount / te_counts;
-            this.liquid.amount = 0;
-            for (var d in env.directions) {
-                var dir = env.directions[d];
-                if (dir.addLiquidFromPipe) {
-                    this.liquid.amount += dir.addLiquidFromPipe(this.liquid.id, amountForTE);
-                } else if (dir.liquidStorage) {
-                    var liquidStored = dir.liquidStorage.getLiquidStored();
-                    var transportableLiquids;
-                    var transportDenied = false;
-                    if (dir.getTransportLiquids) {
-                        transportableLiquids = dir.getTransportLiquids();
-                    }
-                    if (transportableLiquids) {
-                        for (var id in transportableLiquids.input) {
-                            if (this.liquid.id == transportableLiquids.input[id]) transportDenied = true;
-                        }
-                    } else if (this.liquid.id == liquidStored) transportDenied = true;
-                    if (transportDenied) this.liquid.amount += dir.liquidStorage.addLiquid(this.liquid.id, amountForTE);
-                }
-            }
-            return;
-        }
-
-        this.liquid.amount = mean;
-    },
-
-    //standart callbacks
-    loaded: function() {
-        this.animation = new Animation.Base(this.pos.x + 7 / 16, this.pos.y + 6 / 16, this.pos.z + 10 / 16);
-        this.animation.load();
-        LiquidMap.registerLiquid(this.pos.x, this.pos.y, this.pos.z, this);
-    },
-
-    update: function() {
-        this.frame++;
-        if (this.frame % 5 == 0) {
-            this.pouringAction();
-            this.validate();
-        }
-    },
-
-    selfDestroy: function() {
-        if (this.animation) {
-            this.animation.destroy();
-        }
-        LiquidMap.deleteLiquid(this.pos.x, this.pos.y, this.pos.z);
-        this.destroy();
-    },
-});
-
-
-
-
-// file: core/TransportingItem.js
-
 var TransportingItem = new GameObject("bcTransportingItem", {
     init: function(){
         /* setup basics */
@@ -1270,12 +1377,11 @@ var TransportingItem = new GameObject("bcTransportingItem", {
     /* animation */
     
     reloadAnimation: function(){
-        var OFFSET = .3;
         
         if (this.animation){
             this.animation.destroy();
         }
-        this.animation = new Animation.Item(this.pos.x + OFFSET, this.pos.y + OFFSET, this.pos.z + OFFSET);
+        this.animation = new Animation.Item(this.pos.x, this.pos.y, this.pos.z);
         
         var modelCount = 1;
         if (this.item.count > 1){
@@ -1292,19 +1398,14 @@ var TransportingItem = new GameObject("bcTransportingItem", {
             id: this.item.id,
             count: modelCount,
             data: this.item.data,
-            size: .5,
+            size: 0.3,
             rotation: "x"
-        }, {
-            x: -OFFSET,
-            y: -OFFSET,
-            z: -OFFSET,
         });
         this.animation.load();
     },
     
     moveAnimation: function(){
-        var OFFSET = .3;
-        this.animation.setPos(this.pos.x + OFFSET, this.pos.y + OFFSET, this.pos.z + OFFSET);
+        this.animation.setPos(this.pos.x, this.pos.y, this.pos.z);
     },
     
     
@@ -1343,41 +1444,58 @@ var TransportingItem = new GameObject("bcTransportingItem", {
     
     
     addItemToContainer: function(container){
-        container.refreshSlots();
-        var tileEntity = container.tileEntity;
-        var slots = [];
-        var slotsInitialized = false;
-        if (tileEntity){
-            if (tileEntity.addTransportedItem){
-                tileEntity.addTransportedItem(this, this.item, this.direction);
-                return;
-            }
-            if (tileEntity.getTransportSlots){
-                slots = tileEntity.getTransportSlots().input || [];
-                slotsInitialized = true;
+        if (this.item.count <= 0){
+            return;
+        }
+        
+        // Native TileEntity
+        if(container.getType && container.getSize){
+            let size = container.getSize();
+            for (var i = 0; i < size; i++){
+                var slot = container.getSlot(i);
+                if (slot.id == 0 || slot.id == this.item.id && slot.data == this.item.data){
+                    var maxstack = slot.id > 0 ? Item.getMaxStack(slot.id) : 64;
+                    var add = Math.min(maxstack - slot.count, this.item.count);
+                    this.item.count -= add;
+                    container.setSlot(i, this.item.id, slot.count + add, this.item.data);
+                }
             }
         }
-        if (!slotsInitialized){
-            for (var name in container.slots){
-                slots.push(name);
+        
+        // TileEntity
+        else {
+            var tileEntity = container.tileEntity;
+            var slots = [];
+            var slotsInitialized = false;
+            if (tileEntity){
+                if (tileEntity.addTransportedItem){
+                    tileEntity.addTransportedItem(this, this.item, this.direction);
+                    return;
+                }
+                if (tileEntity.getTransportSlots){
+                    slots = tileEntity.getTransportSlots().input || [];
+                    slotsInitialized = true;
+                }
             }
+            if (!slotsInitialized){
+                for (var name in container.slots){
+                    slots.push(name);
+                }
+            }
+            for (var i in slots){
+                var slot = container.getSlot(slots[i]);
+                if (slot.id == 0 || slot.id == this.item.id && slot.data == this.item.data){
+                    var maxstack = slot.id > 0 ? Item.getMaxStack(slot.id) : 64;
+                    var add = Math.min(maxstack - slot.count, this.item.count);
+                    this.item.count -= add;
+                    slot.count += add;
+                    slot.id = this.item.id;
+                    slot.data = this.item.data;
+                }
+            }
+            
+            container.validateAll();
         }
-        for (var i in slots){
-            var slot = container.getSlot(slots[i]);
-            if (this.item.count <= 0){
-                break;
-            }
-            if (slot.id == 0 || slot.id == this.item.id && slot.data == this.item.data){
-                var maxstack = slot.id > 0 ? Item.getMaxStack(slot.id) : 64;
-                var add = Math.min(maxstack - slot.count, this.item.count);
-                this.item.count -= add;
-                slot.count += add;
-                slot.id = this.item.id;
-                slot.data = this.item.data;
-            }
-        }
-        container.applyChanges();
-        container.validateAll();
     },
     
     pathfind: function(){
@@ -1427,6 +1545,34 @@ var TransportingItem = new GameObject("bcTransportingItem", {
 });
 
 
+
+
+
+// file: core/ModelHelper.js
+
+var ModelHelper = {
+    Texture: function(name, offset, size) {
+        this.name = name;
+        this.offset = offset;
+        this.size = size;
+        
+        this.getUV = function(){
+            return this.offset;
+        }
+        
+        this.getSize = function(){
+            return this.size;
+        }
+        
+        this.getTexture = function(){
+            return this.name;
+        }
+        
+        this.textureMatches = function(texture){
+            return this.name == texture.name;
+        }
+    } 
+}
 
 
 
@@ -1512,75 +1658,9 @@ Recipes.addShaped({id: ItemID.bcWrench, count: 1, data: 0}, [
 
 
 
-// file: machine/engines.js
+// file: machine/engines/engines.js
 
-
-
-IDRegistry.genItemID("engineStone");
-Item.createItem("engineStone", "Stirling Engine", {name: "engine_stone"});
-
-IDRegistry.genItemID("engineIron");
-Item.createItem("engineIron", "ICE", {name: "engine_iron"});
-
-IDRegistry.genItemID("engineElectric");
-Item.createItem("engineElectric", "Electric Engine", {name: "engine_electric"});
-
-Recipes.addShaped({id: ItemID.engineWooden, count: 1, data: 0}, [
-    "aaa",
-    " b ",
-    "oxo"
-], ['x', 33, -1, 'a', 5, -1, 'b', 20, -1, 'o', ItemID.gearWood, 0]);
-
-Recipes.addShaped({id: ItemID.engineStone, count: 1, data: 0}, [
-    "aaa",
-    " b ",
-    "oxo"
-], ['x', 33, -1, 'a', 4, -1, 'b', 20, -1, 'o', ItemID.gearStone, 0]);
-
-Recipes.addShaped({id: ItemID.engineIron, count: 1, data: 0}, [
-    "aaa",
-    " b ",
-    "oxo"
-], ['x', 33, -1, 'a', 265, 0, 'b', 20, -1, 'o', ItemID.gearIron, 0]);
-
-
-Callback.addCallback("BC-ICore", function(ICore){
-    Recipes.addShaped({id: ItemID.engineElectric, count: 1, data: 0}, [
-        "aaa",
-        " b ",
-        "oxo"
-    ], ['x', 33, -1, 'a', ItemID.ingotTin, 0, 'b', 20, -1, 'o', ItemID.gearTin, 0]);
-});
-
-
-
-Item.registerUseFunction("engineStone", function(coords, item, block){
-    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
-    if (block.id == 0){
-        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
-        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_STONE);
-        Player.setCarriedItem(item.id, item.count - 1, item.data);
-    }
-});
-
-Item.registerUseFunction("engineIron", function(coords, item, block){
-    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
-    if (block.id == 0){
-        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
-        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_IRON);
-        Player.setCarriedItem(item.id, item.count - 1, item.data);
-    }
-});
-
-Item.registerUseFunction("engineElectric", function(coords, item, block){
-    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
-    if (block.id == 0){
-        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
-        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_ELECTRIC);
-        Player.setCarriedItem(item.id, item.count - 1, item.data);
-    }
-});
-
+// BuildCraft Engine
 IDRegistry.genBlockID("bcEngine");
 Block.createBlock("bcEngine", [
     {name: "bcEngine", texture: [["empty", 0]], inCreative: false}
@@ -1607,6 +1687,7 @@ var EngineModelPartRegistry = {
     }
 };
 
+
 EngineModelPartRegistry.Add("trunkBlue0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 0, y: 0}, {width: 512, height: 512}));
 EngineModelPartRegistry.Add("trunkBlue1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 64, y: 0}, {width: 512, height: 512}));
 EngineModelPartRegistry.Add("trunkBlue2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 128, y: 0}, {width: 512, height: 512}));
@@ -1623,34 +1704,16 @@ EngineModelPartRegistry.Add("trunkRed0", new ModelHelper.Texture("buildcraft_eng
 EngineModelPartRegistry.Add("trunkRed1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 64, y: 96}, {width: 512, height: 512}));
 EngineModelPartRegistry.Add("trunkRed2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 128, y: 96}, {width: 512, height: 512}));
 
+EngineModelPartRegistry.Add("trunkBlack0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 0, y: 128}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("trunkBlack1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 64, y: 128}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("trunkBlack2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 128, y: 128}, {width: 512, height: 512}));
 
-EngineModelPartRegistry.Add("engineWood0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 256, y: 0}, {width: 512, height: 512}));
-EngineModelPartRegistry.Add("engineWood1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 320, y: 0}, {width: 512, height: 512}));
-EngineModelPartRegistry.Add("engineWood2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 384, y: 0}, {width: 512, height: 512}));
-
-EngineModelPartRegistry.Add("engineStone0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 256, y: 32}, {width: 512, height: 512}));
-EngineModelPartRegistry.Add("engineStone1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 320, y: 32}, {width: 512, height: 512}));
-EngineModelPartRegistry.Add("engineStone2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 384, y: 32}, {width: 512, height: 512}));
-
-EngineModelPartRegistry.Add("engineIron0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 256, y: 64}, {width: 512, height: 512}));
-EngineModelPartRegistry.Add("engineIron1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 320, y: 64}, {width: 512, height: 512}));
-EngineModelPartRegistry.Add("engineIron2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 384, y: 64}, {width: 512, height: 512}));
-
-EngineModelPartRegistry.Add("engineElectric0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 256, y: 96}, {width: 512, height: 512}));
-EngineModelPartRegistry.Add("engineElectric1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 320, y: 96}, {width: 512, height: 512}));
-EngineModelPartRegistry.Add("engineElectric2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 384, y: 96}, {width: 512, height: 512}));
-
-
-var ENGINE_TYPE_WOOD = "Wood";
-var ENGINE_TYPE_STONE = "Stone";
-var ENGINE_TYPE_IRON = "Iron";
-var ENGINE_TYPE_ELECTRIC = "Electric";
-var ENGINE_TYPE_ELECTRIC_ADVANCED = "AdvElectric";
 
 var ENGINE_HEAT_BLUE = "Blue";
 var ENGINE_HEAT_GREEN = "Green";
 var ENGINE_HEAT_ORANGE = "Orange";
 var ENGINE_HEAT_RED = "Red";
+var ENGINE_HEAT_BLACK = "Black";
 
 var ENGINE_HEAT_ORDER = [
     ENGINE_HEAT_BLUE,
@@ -1703,73 +1766,66 @@ var EngineModelHelper = {
             break;
         };
         
-        var render = new Render();
-        if (render.isEmpty){
-            var yOffset = 31;
-            
-            var modelData = [{
-                type: "box",
-                uv: pistonMaterial.getUV(),
-                coords: {
-                    x: 0 + coords.x * 6,
-                    y: yOffset + coords.y * 6,
-                    z: 0 + coords.z * 6,
-                },
-                size: {
-                    x: 4 + 12 * (1 - Math.abs(coords.x)),
-                    y: 4 + 12 * (1 - Math.abs(coords.y)),
-                    z: 4 + 12 * (1 - Math.abs(coords.z))
-                }
+        var render = new Render({skin: "model/" + pistonMaterial.getTexture()});
+        var yOffset = 31;
+        
+        var modelData = [{
+            type: "box",
+            uv: pistonMaterial.getUV(),
+            coords: {
+                x: 0 + coords.x * 6,
+                y: yOffset + coords.y * 6,
+                z: 0 + coords.z * 6,
             },
-            {
+            size: {
+                x: 4 + 12 * (1 - Math.abs(coords.x)),
+                y: 4 + 12 * (1 - Math.abs(coords.y)),
+                z: 4 + 12 * (1 - Math.abs(coords.z))
+            }
+        },
+        {
+            type: "box",
+            uv: pistonMaterial.getUV(),
+            coords: {
+                x: 0 + coords.x * (2 - position / 3),
+                y: yOffset + coords.y * (2 - position / 3),
+                z: 0 + coords.z * (2 - position / 3),
+            },
+            size: {
+                x: 4 + 12 * (1 - Math.abs(coords.x)),
+                y: 4 + 12 * (1 - Math.abs(coords.y)),
+                z: 4 + 12 * (1 - Math.abs(coords.z))
+            }
+        }];
+        
+        if (pistonMaterial.textureMatches(trunkMaterial)){
+            modelData.push({
                 type: "box",
-                uv: pistonMaterial.getUV(),
+                uv: trunkMaterial.getUV(),
                 coords: {
-                    x: 0 + coords.x * (2 - position / 3),
-                    y: yOffset + coords.y * (2 - position / 3),
-                    z: 0 + coords.z * (2 - position / 3),
+                    x: 0 - coords.x * .1,
+                    y: yOffset - coords.y * .1,
+                    z: 0 - coords.z * .1
                 },
                 size: {
-                    x: 4 + 12 * (1 - Math.abs(coords.x)),
-                    y: 4 + 12 * (1 - Math.abs(coords.y)),
-                    z: 4 + 12 * (1 - Math.abs(coords.z))
+                    x: 8 + 8 * (Math.abs(coords.x)),
+                    y: 8 + 8 * (Math.abs(coords.y)),
+                    z: 8 + 8 * (Math.abs(coords.z))
                 }
-            }];
-            
-            if (pistonMaterial.textureMatches(trunkMaterial)){
-                modelData.push({
-                    type: "box",
-                    uv: trunkMaterial.getUV(),
-                    coords: {
-                        x: 0 - coords.x * .1,
-                        y: yOffset - coords.y * .1,
-                        z: 0 - coords.z * .1
-                    },
-                    size: {
-                        x: 8 + 8 * (Math.abs(coords.x)),
-                        y: 8 + 8 * (Math.abs(coords.y)),
-                        z: 8 + 8 * (Math.abs(coords.z))
-                    }
-                });
-            }
-            render.setPart("body", modelData, pistonMaterial.getSize());
+            });
         }
-        else{
-            //alert("render already cached: " + renderName);
-        }
+        render.setPart("body", modelData, pistonMaterial.getSize());
         
         return {
-            skin: pistonMaterial.getTexture(),
-            renderAPI: render,
-            firmRotation: true,
-            hitbox: {
-                width: .0,
-                height: .0
-            }
+            render: render.getId(),
+            //firmRotation: true,
+            //hitbox: {
+            //    width: .0,
+            //    height: .0
+            //}
         };
     }
 }
-
 
 
 var BUILDCRAFT_ENGINE_PROTOTYPE = {
@@ -1780,7 +1836,7 @@ var BUILDCRAFT_ENGINE_PROTOTYPE = {
         heatStage: ENGINE_HEAT_BLUE,
         
         rotationIndex: 0,
-        redstone: false,
+        redstone: redstoneInverse,
         
         position: 24, // low piston position
         energy: 0,
@@ -1938,11 +1994,6 @@ var BUILDCRAFT_ENGINE_PROTOTYPE = {
         return this.data.position > 24;
     },
     
-    
-    
-    
-    
-    
     setEngineType: function(type){
         this.data.type = type;
         var typeData = getEngineType(this.data.type);
@@ -1975,9 +2026,13 @@ var BUILDCRAFT_ENGINE_PROTOTYPE = {
         if (this.engineTick){
             this.engineTick();
         }
+        
         if (this.getHeatStage){
             this.data.heatStage = ENGINE_HEAT_ORDER[Math.min(3, Math.max(0, this.getHeatStage() || 0))];
+        }  else {
+            this.data.heatStage = ENGINE_HEAT_BLACK;
         }
+        
         if (this.data.position > 48){
             this.data.position -= 48;
             this.deployEnergyToTarget();
@@ -1990,10 +2045,6 @@ var BUILDCRAFT_ENGINE_PROTOTYPE = {
             this.findRotations();
             return true;
         }
-    },
-    
-    redstone: function(signal){
-        this.data.redstone = signal.power > 8;
     },
     
     getGuiScreen: function(){
@@ -2013,14 +2064,53 @@ var BUILDCRAFT_ENGINE_PROTOTYPE = {
     }
 };
 
+if(__config__.getBool('use_redstone')){
+    BUILDCRAFT_ENGINE_PROTOTYPE.redstone = function(signal){
+        this.data.redstone = redstoneInverse? signal.power <= 8: signal.power > 8;
+    };
+} else {
+    BUILDCRAFT_ENGINE_PROTOTYPE.defaultValues.redstone = true;
+}
+
+
 Callback.addCallback("BC-DefineEngines", function(ICore){
-    if (ICore){
-        ICore.Machine.registerPrototype(BlockID.bcEngine, BUILDCRAFT_ENGINE_PROTOTYPE);
-    }
-    else{
-        TileEntity.registerPrototype(BlockID.bcEngine, BUILDCRAFT_ENGINE_PROTOTYPE);
+    // TODO: IC2 integration
+    TileEntity.registerPrototype(BlockID.bcEngine, BUILDCRAFT_ENGINE_PROTOTYPE);
+});
+
+
+
+
+
+
+// file: machine/engines/engineRedstone.js
+
+var ENGINE_TYPE_WOOD = "Wood";
+
+// Redstone Engine
+IDRegistry.genItemID("engineWooden");
+Item.createItem("engineWooden", "Redstone Engine", {name: "engine_wooden"});
+
+Recipes.addShaped({id: ItemID.engineWooden, count: 1, data: 0}, [
+    "aaa",
+    " b ",
+    "oxo"
+], ['x', 33, -1, 'a', 5, -1, 'b', 20, -1, 'o', ItemID.gearWood, 0]);
+
+
+Item.registerUseFunction("engineWooden", function(coords, item, block){
+    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
+    if (block.id == 0){
+        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
+        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_WOOD);
+        Player.setCarriedItem(item.id, item.count - 1, item.data);
     }
 });
+
+
+EngineModelPartRegistry.Add("engineWood0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 256, y: 0}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("engineWood1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 320, y: 0}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("engineWood2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 384, y: 0}, {width: 512, height: 512}));
 
 
 ENGINE_TYPE_DATA[ENGINE_TYPE_WOOD] = {
@@ -2065,6 +2155,32 @@ ENGINE_TYPE_DATA[ENGINE_TYPE_WOOD] = {
 };
 
 
+
+// file: machine/engines/engineStirling.js
+
+var ENGINE_TYPE_STONE = "Stone";
+
+// Stirling Engine
+IDRegistry.genItemID("engineStone");
+Item.createItem("engineStone", "Stirling Engine", {name: "engine_stone"});
+
+Recipes.addShaped({id: ItemID.engineStone, count: 1, data: 0}, [
+    "aaa",
+    " b ",
+    "oxo"
+], ['x', 33, -1, 'a', 4, -1, 'b', 20, -1, 'o', ItemID.gearStone, 0]);
+
+
+Item.registerUseFunction("engineStone", function(coords, item, block){
+    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
+    if (block.id == 0){
+        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
+        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_STONE);
+        Player.setCarriedItem(item.id, item.count - 1, item.data);
+    }
+});
+
+
 var guiStoneEngine = new UI.StandartWindow({
     standart: {
         header: {text: {text: "Stirling Engine"}},
@@ -2083,6 +2199,12 @@ var guiStoneEngine = new UI.StandartWindow({
         "textInfo2": {type: "text", x: 655, y: 180, width: 300, height: 50, font: RED_FONT_MEDIUM, text: ""}
     }
 });
+
+
+EngineModelPartRegistry.Add("engineStone0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 256, y: 32}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("engineStone1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 320, y: 32}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("engineStone2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 384, y: 32}, {width: 512, height: 512}));
+
 
 ENGINE_TYPE_DATA[ENGINE_TYPE_STONE] = {
     defaultValues: {
@@ -2171,6 +2293,39 @@ function getFuelForStoneEngine(container, slotName){
     }
     return 0;
 }
+
+
+
+
+
+// file: machine/engines/engineICE.js
+
+var ENGINE_TYPE_IRON = "Iron";
+
+// ICE Engine
+IDRegistry.genItemID("engineIron");
+Item.createItem("engineIron", "ICE", {name: "engine_iron"});
+
+Recipes.addShaped({id: ItemID.engineIron, count: 1, data: 0}, [
+    "aaa",
+    " b ",
+    "oxo"
+], ['x', 33, -1, 'a', 265, 0, 'b', 20, -1, 'o', ItemID.gearIron, 0]);
+
+
+Item.registerUseFunction("engineIron", function(coords, item, block){
+    var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
+    if (block.id == 0){
+        World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
+        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_IRON);
+        Player.setCarriedItem(item.id, item.count - 1, item.data);
+    }
+});
+
+
+EngineModelPartRegistry.Add("engineIron0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 256, y: 64}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("engineIron1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 320, y: 64}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("engineIron2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 384, y: 64}, {width: 512, height: 512}));
 
 
 var guiIronEngine = new UI.StandartWindow({
@@ -2282,136 +2437,113 @@ ENGINE_TYPE_DATA[ENGINE_TYPE_IRON] = {
 
 
 
-var guiElectricEngine = new UI.StandartWindow({
-    standart: {
-        header: {text: {text: "Electric Engine"}},
-        inventory: {standart: true},
-        background: {standart: true}
-    },
-    
-    drawing: [
-        {type: "bitmap", x: 400, y: 30, bitmap: "electric_scale_background", scale: 10.0 / 3.0}
-    ],
-    
-    elements: {
-        "energyScale": {type: "scale", x: 400, y: 30, direction: 1, value: 0.5, bitmap: "electric_scale", scale: 10.0 / 3.0},
-        "textInfo1": {type: "text", x: 535, y: 150, width: 300, height: 50, font: STD_FONT_MEDIUM, text: ""},
-        "textInfo2": {type: "text", x: 535, y: 200, width: 300, height: 50, font: RED_FONT_MEDIUM, text: ""}
-    }
-});
+// file: machine/engines/engineCreative.js
+
+var ENGINE_TYPE_CREATIVE = "Creative";
+
+// Creative Engine
+IDRegistry.genItemID("engineCreative");
+Item.createItem("engineCreative", "Creative Engine", {name: "engine_creative"});
 
 
-ENGINE_TYPE_DATA[ENGINE_TYPE_ELECTRIC] = {
-    defaultValues: {
-        energyStored: 0,
-        pistonDelay: 0,
-    },
-    
-    getGuiScreen: function(){
-        return guiElectricEngine;
-    },
-    
-    getItemDrop: function(){
-        return [[ItemID.engineElectric, 1, 0]];
-    },
-    
-    getHeatStage: function(){
-        var MAX_HEAT = 200;
-        var index = parseInt(this.data.heat / MAX_HEAT * 3.5);
-        return index;
-    },
-    
-    engineTick: function(){
-        var MAX_HEAT = 200;
-        if (this.data.redstone && this.data.energyStored > 0){
-            this.setPower(this.getHeatStage() + .4);
-            if (this.isPushingForward()){
-                this.data.heat += .2;
-            }
-            else{
-                this.data.heat -= .1;
-            }
-            this.data.pistonDelay ++;
-        }
-        else{
-            this.setPower(0);
-            this.data.heat -= .1;
-            this.data.pistonDelay = 0;
-        }
-        
-        this.container.setScale("energyScale", this.data.energyStored / 50);
-        this.container.setText("textInfo1", parseInt(this.data.heat) + "°C   " + (this.data.redstone ? parseInt(this.data.energyInfo * 100 || 0) / 100 + " MJ/t": ""));
-        this.container.setText("textInfo2", (this.data.redstone && this.data.energyStored > 0 ? "ON" : "OFF") + (this.data.energyStored > 0 ? "" : ": NO ENERGY"));
-        this.container.setTextColor("textInfo2", this.data.redstone && this.data.energyStored > 0 ? android.graphics.Color.GREEN : android.graphics.Color.RED);
-        
-        this.data.heat = Math.min(Math.max(this.data.heat, 0), MAX_HEAT);
-    },
-    
-    energyDeploy: function(params){
-        var energy = this.data.energyStored;
-        this.data.energyStored = 0;
-        this.data.energyInfo = energy / this.data.pistonDelay;
-        this.data.pistonDelay = 0;
-        return energy;
-    },
-    
-    energyTick: function(type, src){
-        
-        var energy = Math.floor(src.get(20)) / 2.5;
-        this.data.energyStored += energy;
-    }
-};
-
-
-
-
-// file: machine/engines/engineRedstone.js
-
-// Redstone Enhine
-IDRegistry.genItemID("engineWooden");
-Item.createItem("engineWooden", "Redstone Engine", {name: "engine_wooden"});
-
-Item.registerUseFunction("engineWooden", function(coords, item, block){
+Item.registerUseFunction("engineCreative", function(coords, item, block){
     var block = World.getBlock(coords.relative.x, coords.relative.y, coords.relative.z);
     if (block.id == 0){
         World.setBlock(coords.relative.x, coords.relative.y, coords.relative.z, BlockID.bcEngine);
-        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_WOOD);
+        World.addTileEntity(coords.relative.x, coords.relative.y, coords.relative.z).setEngineType(ENGINE_TYPE_CREATIVE);
         Player.setCarriedItem(item.id, item.count - 1, item.data);
     }
 });
+
+
+EngineModelPartRegistry.Add("engineCreative0", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 256, y: 96}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("engineCreative1", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 320, y: 96}, {width: 512, height: 512}));
+EngineModelPartRegistry.Add("engineCreative2", new ModelHelper.Texture("buildcraft_engine_atlas.png", {x: 384, y: 96}, {width: 512, height: 512}));
+
+
+ENGINE_TYPE_DATA[ENGINE_TYPE_CREATIVE] = {
+    defaultValues: {
+        generation: 20
+    },
+    
+    getGuiScreen: function(){
+        return null;
+    },
+    
+    getItemDrop: function(){
+        return [[ItemID.engineCreative, 1, 0]];
+    },
+    
+    engineTick: function(){
+        if (this.data.redstone){
+            this.setPower(0.4);
+        }
+        else{
+            this.setPower(0);
+            this.data.pistonDelay = 0;
+        }
+    },
+    
+    energyDeploy: function(params){
+        return this.data.generation;
+    },
+    
+    energyTick: function(type, src){
+    },
+    
+    click: function(id, count, data){
+        if (id == ItemID.bcWrench){
+            this.data.generation *= 2;
+            if(this.data.generation > 1280){
+                this.data.generation = 20;
+            }
+            Game.message("Switched to " + this.data.generation + " RF/t limit");
+        }
+    },
+};
+
 
 
 
 // file: machine/pipes/PipeRegistry.js
 
 var BLOCK_TYPE_ITEM_PIPE = Block.createSpecialType({
-    base: 20,
+    base: 1,
     opaque: false
 }, "bc-item-pipe");
 
 var BLOCK_TYPE_LIQUID_PIPE = Block.createSpecialType({
-    base: 20,
+    base: 1,
     opaque: false
 }, "bc-liquid-pipe");
 
 var PIPE_BLOCK_WIDTH = 0.25;
 
 
-// item pipe render setup
 
 var ITEM_PIPE_CONNECTION_MACHINE = "bc-container";
 
 var ITEM_PIPE_CONNECTION_ANY = "bc-item-pipe-any";
+var ITEM_PIPE_CONNECTION_WOOD = "bc-item-pipe-wood";
 var ITEM_PIPE_CONNECTION_STONE = "bc-item-pipe-stone";
 var ITEM_PIPE_CONNECTION_COBBLE = "bc-item-pipe-cobble";
-var ITEM_PIPE_CONNECTION_SANDSTONE = "bc-item-pipe-sandstone";
+
+
+
+var FLUID_PIPE_CONNECTION_MACHINE = "bc-fluid";
+
+var FLUID_PIPE_CONNECTION_ANY = "bc-fluid-pipe-any";
+var FLUID_PIPE_CONNECTION_WOOD = "bc-fluid-pipe-wood";
+var FLUID_PIPE_CONNECTION_STONE = "bc-fluid-pipe-stone";
+var FLUID_PIPE_CONNECTION_COBBLE = "bc-fluid-pipe-cobble";
+
 
 var PipeRegistry = {
     itemPipes: []
 }
 
 
-function getPipeRender(width, group, texture){
+function getPipeRender(width, group, connectionType, texture){
     var render = new ICRender.Model();
     
     var boxes = [
@@ -2434,8 +2566,26 @@ function getPipeRender(width, group, texture){
         }
         
         model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, data);
-       
-        render.addEntry(model).asCondition(box.side[0], box.side[1], box.side[2], group, 0);
+        
+        var condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], group, false);
+        if(connectionType == ITEM_PIPE_CONNECTION_WOOD){
+            condition = ICRender.AND(condition, ICRender.BLOCK(box.side[0], box.side[1], box.side[2], ICRender.getGroup(ITEM_PIPE_CONNECTION_WOOD), true));
+        } 
+        else if(connectionType == ITEM_PIPE_CONNECTION_STONE){
+            condition = ICRender.AND(condition, ICRender.BLOCK(box.side[0], box.side[1], box.side[2], ICRender.getGroup(ITEM_PIPE_CONNECTION_COBBLE), true));
+        }
+        else if(connectionType == ITEM_PIPE_CONNECTION_COBBLE){
+            condition = ICRender.AND(condition, ICRender.BLOCK(box.side[0], box.side[1], box.side[2], ICRender.getGroup(ITEM_PIPE_CONNECTION_STONE), true));
+        }
+        
+        render.addEntry(model).setCondition(condition);
+        
+        // Connecting to TileEntities
+        data = connectionType == ITEM_PIPE_CONNECTION_WOOD? texture.data + 2: data;
+        model = BlockRenderer.createModel();
+        model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, data);
+        var condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], ICRender.getGroup(ITEM_PIPE_CONNECTION_MACHINE), false);
+        render.addEntry(model).setCondition(condition);
     }
 
     var model = BlockRenderer.createModel();
@@ -2452,6 +2602,7 @@ function registerItemPipe(id, texture, connectionType, params){
     });
     
     var width = 0.5;
+    ICRender.getGroup(connectionType).add(id, -1);
     var group = ICRender.getGroup("bc-pipes");
     group.add(id, -1);
     
@@ -2460,19 +2611,19 @@ function registerItemPipe(id, texture, connectionType, params){
 
     if(Array.isArray(texture)){
         for(var i in texture){
-            var current = getPipeRender(width, group, texture[i], false);
+            var current = getPipeRender(width, group, connectionType, texture[i]);
             renders.push(current);
         }
         render = renders[0];
     } else if(texture.rotation){
         for(var i = 0; i < 6; i++){
             texture.index = i;
-            var current = getPipeRender(width, group, texture, false);
+            var current = getPipeRender(width, group, connectionType, texture);
             renders.push(current);
         }
         render = renders[0];
     } else {
-        render = getPipeRender(width, group, texture, false);
+        render = getPipeRender(width, group, connectionType, texture);
     }
     
     BlockRenderer.setStaticICRender(id, 0, render);
@@ -2486,12 +2637,76 @@ function registerItemPipe(id, texture, connectionType, params){
     return renders;
 }
 
-ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 54);
-ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 61);
-ICRenderLib.addConnectionBlock(ITEM_PIPE_CONNECTION_MACHINE, 62);
+var blockGroupMachine = ICRender.getGroup(ITEM_PIPE_CONNECTION_MACHINE);
+blockGroupMachine.add(54, -1);
+blockGroupMachine.add(61, -1);
+blockGroupMachine.add(62, -1);
+blockGroupMachine.add(154, -1);
+
+var blockGroupFluid = ICRender.getGroup("bc-liquid-pipes");
+//blockGroupMachine.add(54, -1);
+
+Callback.addCallback("PostLoaded", function(){
+    var prototypes = TileEntity.tileEntityPrototypes;
+    for(var id in prototypes){
+        if(prototypes[id].getTransportSlots){
+            let slots = prototypes[id].getTransportSlots();
+            if(slots.output && slots.output.length > 0 || slots.input && slots.input.length > 0){
+                blockGroupMachine.add(id, -1);
+            }
+        }
+    }
+});
+
+Callback.addCallback("PostLoaded", function(){
+    var prototypes = TileEntity.tileEntityPrototypes;
+    for(var id in prototypes){
+        if(prototypes[id].getTransportLiquid){
+            blockGroupFluid.add(id, -1);
+        }
+    }
+});
 
 
-// item pipes 
+function setupFluidPipeRender(id, texture, connectionType){
+    /* drop func */
+    Block.registerDropFunctionForID(id, function(){
+        return [[id, 1, 0]];
+    });
+    
+    var width = 0.5;
+    var group = ICRender.getGroup("bc-liquid-pipes");
+    group.add(id, -1);
+
+    /* render */
+    var render = new ICRender.Model();
+    
+    var boxes = [
+        {side: [1, 0, 0], box: [0.5 + width / 2, 0.5 - width / 2, 0.5 - width / 2, 1, 0.5 + width / 2, 0.5 + width / 2]},
+        {side: [-1, 0, 0], box: [0, 0.5 - width / 2, 0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2]},
+        {side: [0, 1, 0], box: [0.5 - width / 2, 0.5 + width / 2, 0.5 - width / 2, 0.5 + width / 2, 1, 0.5 + width / 2]},
+        {side: [0, -1, 0], box: [0.5 - width / 2, 0, 0.5 - width / 2, 0.5 + width / 2, 0.5 - width / 2, 0.5 + width / 2]},
+        {side: [0, 0, 1], box: [0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2, 0.5 + width / 2, 1]},
+        {side: [0, 0, -1], box: [0.5 - width / 2, 0.5 - width / 2, 0, 0.5 + width / 2, 0.5 + width / 2, 0.5 - width / 2]},
+    ]
+
+    for (var i in boxes) {
+        var box = boxes[i];
+       
+        var model = BlockRenderer.createModel();
+        
+        model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data + 1);
+       
+        render.addEntry(model).asCondition(box.side[0], box.side[1], box.side[2], group, 0);
+    }
+
+    var model = BlockRenderer.createModel();
+    model.addBox(0.5 - width / 2, 0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2, 0.5 + width / 2, texture.name, texture.data);
+    render.addEntry(model);
+    BlockRenderer.setStaticICRender(id, 0, render);
+    
+    LiquidTransportHelper.registerFluidPipe(id, connectionType);
+}
 
 
 
@@ -2520,7 +2735,7 @@ Block.createBlock("pipeItemWooden", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemWooden, count: 1, data: 0}, ["xax"], ['x', 5, -1, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemWooden, {name: "pipe_item_wood", data: 0}, ITEM_PIPE_CONNECTION_ANY);
+registerItemPipe(BlockID.pipeItemWooden, {name: "pipe_item_wood", data: 0}, ITEM_PIPE_CONNECTION_WOOD);
  
 
 TileEntity.registerPrototype(BlockID.pipeItemWooden, {
@@ -2563,37 +2778,56 @@ TileEntity.registerPrototype(BlockID.pipeItemWooden, {
     },
     
     getItemFrom: function(container, maxCount){
-        container.refreshSlots();
-        var tileEntity = container.tileEntity;
-        var slots = [];
-        var slotsInitialized = false;
-        if (tileEntity){
-            if (tileEntity.getTransportedItem){
-                tileEntity.getTransportedItem();
+        // Native TileEntity
+        if(container.getType && container.getSize){
+            let size = container.getSize();
+            let slot;
+            for(var i = 0; i < size; i++){
+                var slot = container.getSlot(i);
+                if(slot.id > 0){
+                    var count = Math.min(maxCount, slot.count);
+                    item = {id: slot.id, count: count, data: slot.data};
+                    container.setSlot(i, slot.id, slot.count - count, slot.data);
+                    break;
+                }
             }
-            if (tileEntity.getTransportSlots){
-                slots = tileEntity.getTransportSlots().output || [];
-                slotsInitialized = true;
+        } 
+        
+        // TileEntity
+        else {
+            var tileEntity = container.tileEntity;
+            var slots = [];
+            var slotsInitialized = false;
+            if (tileEntity){
+                if (tileEntity.getTransportedItem){
+                    tileEntity.getTransportedItem();
+                }
+                if (tileEntity.getTransportSlots){
+                    slots = tileEntity.getTransportSlots().output || [];
+                    slotsInitialized = true;
+                }
             }
-        }
-        if (!slotsInitialized){
-            for (var name in container.slots){
-                slots.push(name);
+            
+            if (!slotsInitialized){
+                for (var name in container.slots){
+                    slots.push(name);
+                }
+            }  
+            
+            var item = null;
+            for (var i in slots){
+                var slot = container.getSlot(slots[i]);
+                if (slot.id > 0){
+                    var count = Math.min(maxCount, slot.count);
+                    item = {id: slot.id, count: count, data: slot.data};
+                    slot.count -= count;
+                    break;
+                }
             }
+            
+            container.validateAll();
         }
         
-        var item = null;
-        for (var i in slots){
-            var slot = container.getSlot(slots[i]);
-            if (slot.id > 0){
-                var count = Math.min(maxCount, slot.count);
-                item = {id: slot.id, count: count, data: slot.data};
-                slot.count -= count;
-                break;
-            }
-        }
-        container.validateAll();
-        container.applyChanges();
         return item;
     }
 });
@@ -2621,10 +2855,10 @@ var IRON_PIPE_DIRECTIONS = [
     {x: 0, y: 0, z: -1},
 ];
 
-TileEntity.registerPrototype(BlockID.pipeItemIron, {
+
+var PIPE_ITEM_IRON_PROTOTYPE = {
     defaultValues: {
-        direction: 0,
-        redstone: false
+        direction: 0
     },
     
     init: function(){
@@ -2638,16 +2872,6 @@ TileEntity.registerPrototype(BlockID.pipeItemIron, {
 
     created: function(){
         this.setDirection(1);
-    },
-    
-    redstone: function(signal){
-        Game.message(signal.power + "; " + this.data.redstone);
-        if(signal.power > 8 && !this.data.redstone){
-            this.data.redstone = true;
-            this.changeDirection();
-        } else {
-            this.data.redstone = false;
-        }
     },
 
     click: function(id, count, data){
@@ -2674,8 +2898,31 @@ TileEntity.registerPrototype(BlockID.pipeItemIron, {
         return [
             IRON_PIPE_DIRECTIONS[this.data.direction]
         ];
+    },
+    
+    destroyBlock: function(){
+        BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
     }
-});
+}
+
+
+if(__config__.getBool('use_redstone')){ 
+    PIPE_ITEM_IRON_PROTOTYPE.redstone = function(signal){
+        if(signal.power > 8 && !this.data.redstone){
+            this.data.redstone = true;
+            this.changeDirection();
+        } else {
+            this.data.redstone = false;
+        }
+    }
+    PIPE_ITEM_IRON_PROTOTYPE.defaultValues.redstone = false;
+}
+
+
+TileEntity.registerPrototype(BlockID.pipeItemIron, PIPE_ITEM_IRON_PROTOTYPE);
+
+
+
 
 
 
@@ -2694,19 +2941,13 @@ var modelsItemGolden = registerItemPipe(BlockID.pipeItemGolden, [
     {name: "pipe_item_gold", data: 0},
     {name: "pipe_item_gold", data: 2}
  ], ITEM_PIPE_CONNECTION_ANY);
- 
 
-TileEntity.registerPrototype(BlockID.pipeItemGolden, {
+var PIPE_ITEM_GOLDEN_PROTOTYPE = {
     defaultValues: {
-        redstone: false,
+        redstone: redstoneInverse,
     },
     
     init: function(){
-        this.updateModel();
-    },
-
-    redstone: function(signal){
-        this.data.redstone = signal.power > 8;  
         this.updateModel();
     },
     
@@ -2717,8 +2958,27 @@ TileEntity.registerPrototype(BlockID.pipeItemGolden, {
     
     getItemAcceleration: function(){
         return this.data.redstone ? 0.0025 : 0.02;
+    },
+    
+    destroyBlock: function(){
+        BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
     }
-});
+};
+
+
+if(__config__.getBool('pipes_use_redstone')){
+    PIPE_ITEM_GOLDEN_PROTOTYPE.redstone = function(signal){
+        this.data.redstone = redstoneInverse? signal.power <= 8: signal.power > 8;  
+        this.updateModel();
+    };
+} else {
+    PIPE_ITEM_GOLDEN_PROTOTYPE.defaultValues.redstone = true;
+}
+
+
+TileEntity.registerPrototype(BlockID.pipeItemGolden, PIPE_ITEM_GOLDEN_PROTOTYPE);
+
+
 
 
 
@@ -2732,7 +2992,7 @@ Block.createBlock("pipeItemEmerald", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemEmerald, count: 1, data: 0}, ["xax"], ['x', 388, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemEmerald, {name: "pipe_item_emerald", data: 0}, ITEM_PIPE_CONNECTION_ANY);
+registerItemPipe(BlockID.pipeItemEmerald, {name: "pipe_item_emerald", data: 0}, ITEM_PIPE_CONNECTION_WOOD);
 
 
 var emeraldPipeUI = new UI.StandartWindow({
@@ -2749,22 +3009,31 @@ var emeraldPipeUI = new UI.StandartWindow({
     },
 
     elements: {
-        "modeSwitch": {
-            type: "button", isTextButton: true, x: 380, y: 200, bitmap: "button_36x12_up", bitmap2: "button_36x12_down", text: "Filter", scale: 6, 
-            font: {
-                color: android.graphics.Color.WHITE,
-                size: 24,
-                shadow: 0.75
-            },
-            textOffset: {
-                x: 48,
-                y: 45
-            },
+        "modeWhitelist": {
+            type: "button", x: 380, y: 200, bitmap: "emerald_button_inactive", bitmap2: "emerald_button_active", scale: 3.5, 
             clicker: {
                 onClick: function(container, tileEntity){
-                    tileEntity.data.inverseMode = !tileEntity.data.inverseMode;
+                    tileEntity.setMode(EMERALD_MODE_WHITELIST);
                 }
             }
+        },
+        
+        "iconWhitelist": {
+            type: "image", bitmap: "emerald_whitelist", x: 383, y: 203, z: 5, scale: 3.5
+        },
+        
+        "modeBlacklist": {
+            type: "button", x: 450, y: 200, bitmap: "emerald_button_inactive", bitmap2: "emerald_button_active", scale: 3.5, 
+            clicker: {
+                onClick: function(container, tileEntity){
+                    tileEntity.setMode(EMERALD_MODE_BLACKLIST);
+                }
+            }
+        },
+        
+        
+        "iconBlacklist": {
+            type: "image", bitmap: "emerald_blacklist", x: 453, y: 203, z: 5, scale: 3.5
         }
     }
 });
@@ -2772,15 +3041,23 @@ var emeraldPipeUI = new UI.StandartWindow({
 for (var i = 0; i < 9; i++){
     emeraldPipeUI.content.elements["slot" + i] = {
         type: "slot",
-        x: 370 + i * 65, y: 285
+        x: 370 + i * 65, y: 100
     };
 }
+
+const EMERALD_MODE_WHITELIST = 0;
+const EMERALD_MODE_BLACKLIST = 1;
+const EMERALD_MODE_ORDER = 2;
 
 
 TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
     defaultValues: {
         containerIndex: 0,
-        inverseMode: false
+        mode: EMERALD_MODE_WHITELIST
+    },
+    
+    click: function(id, count, data){
+        
     },
     
     /* callbacks */
@@ -2791,7 +3068,6 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
     tick: function(){
         if (this.container.isOpened()){
             this.reloadFilter();
-            this.container.setText("modeSwitch", this.data.inverseMode ? "Ignore" : "Filter");
         }
     },
     
@@ -2816,32 +3092,35 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
     },
     
     reloadFilter: function(){
-        this.filter = {
-            all: true
-        };
-        this.container.validateAll();
-
+        this.filter = {};
         for (var i = 0; i < 9; i++){
             var slot = this.container.getSlot("slot" + i);
             if (slot.id > 0){
                 this.filter[slot.id + "." + slot.data] = true;
-                this.filter.all = false;
             }
         }
     },
 
     checkItem: function(id, data){
         if (this.filter){
-            if (this.data.inverseMode){
-                return this.filter.all || !this.filter[id + "." + data];
+            if (this.data.mode == EMERALD_MODE_WHITELIST){
+                return this.filter[id + "." + data];
             }
-            else{
-                return this.filter.all || this.filter[id + "." + data];
+            else if(this.data.mode == EMERALD_MODE_BLACKLIST){
+                return !this.filter[id + "." + data];
             }
         }
         else{
             return true;
         }
+    },
+    
+    setMode: function(mode){
+        this.data.mode = mode;
+        this.container.getElement("modeWhitelist").bitmap = 
+            mode == EMERALD_MODE_WHITELIST? "emerald_button_active": "emerald_button_inactive";
+        this.container.getElement("modeBlacklist").bitmap = 
+            mode == EMERALD_MODE_BLACKLIST? "emerald_button_active": "emerald_button_inactive";
     },
 
     findContainer: function(){
@@ -2858,38 +3137,57 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
         }
     },
     
-    getItemFrom: function(container, maxCount, filter){
-        container.refreshSlots();
-        var tileEntity = container.tileEntity;
-        var slots = [];
-        var slotsInitialized = false;
-        if (tileEntity){
-            if (tileEntity.getTransportedItem){
-                tileEntity.getTransportedItem();
+    getItemFrom: function(container, maxCount){
+        // Native TileEntity
+        if(container.getType && container.getSize){
+            let size = container.getSize();
+            let slot;
+            for(var i = 0; i < size; i++){
+                var slot = container.getSlot(i);
+                if(slot.id > 0 && this.checkItem(slot.id, slot.data)){
+                    var count = Math.min(maxCount, slot.count);
+                    item = {id: slot.id, count: count, data: slot.data};
+                    container.setSlot(i, slot.id, slot.count - count, slot.data);
+                    break;
+                }
             }
-            if (tileEntity.getTransportSlots){
-                slots = tileEntity.getTransportSlots().output || [];
-                slotsInitialized = true;
+        } 
+        
+        // TileEntity
+        else {
+            var tileEntity = container.tileEntity;
+            var slots = [];
+            var slotsInitialized = false;
+            if (tileEntity){
+                if (tileEntity.getTransportedItem){
+                    tileEntity.getTransportedItem();
+                }
+                if (tileEntity.getTransportSlots){
+                    slots = tileEntity.getTransportSlots().output || [];
+                    slotsInitialized = true;
+                }
             }
-        }
-        if (!slotsInitialized){
-            for (var name in container.slots){
-                slots.push(name);
+            
+            if (!slotsInitialized){
+                for (var name in container.slots){
+                    slots.push(name);
+                }
+            }  
+            
+            var item = null;
+            for (var i in slots){
+                var slot = container.getSlot(slots[i]);
+                if (slot.id > 0 && this.checkItem(slot.id, slot.data)){
+                    var count = Math.min(maxCount, slot.count);
+                    item = {id: slot.id, count: count, data: slot.data};
+                    slot.count -= count;
+                    break;
+                }
             }
+            
+            container.validateAll();
         }
         
-        var item = null;
-        for (var i in slots){
-            var slot = container.getSlot(slots[i]);
-            if (slot.id > 0 && this.checkItem(slot.id, slot.data)){
-                var count = Math.min(maxCount, slot.count);
-                item = {id: slot.id, count: count, data: slot.data};
-                slot.count -= count;
-                break;
-            }
-        }
-        container.validateAll();
-        container.applyChanges();
         return item;
     }
 });
@@ -3089,7 +3387,7 @@ Block.createBlock("pipeItemSandstone", [
 ], BLOCK_TYPE_ITEM_PIPE);
 
 Recipes.addShaped({id: BlockID.pipeItemSandstone, count: 1, data: 0}, ["xax"], ['x', 24, 0, 'a', 20, -1]);
-registerItemPipe(BlockID.pipeItemSandstone, {name: "pipe_item_sandstone", data: 0}, ITEM_PIPE_CONNECTION_SANDSTONE, {
+registerItemPipe(BlockID.pipeItemSandstone, {name: "pipe_item_sandstone", data: 0}, ITEM_PIPE_CONNECTION_ANY, {
     friction: .0025
 }); 
 
@@ -3110,48 +3408,192 @@ registerItemPipe(BlockID.pipeItemObsidian, {name: "pipe_item_obsidian", data: 0}
 
 
 
-// file: machine/liquid_pipes.js
+// file: machine/pipes/liquidWooden.js
 
-// fluid pipe render setup
-
-var FLUID_PIPE_CONNECTION_MACHINE = "bc-fluid";
-
-var FLUID_PIPE_CONNECTION_ANY = "bc-fluid-pipe-any";
-var FLUID_PIPE_CONNECTION_STONE = "bc-fluid-pipe-stone";
-var FLUID_PIPE_CONNECTION_COBBLE = "bc-fluid-pipe-cobble";
-var FLUID_PIPE_CONNECTION_SANDSTONE = "bc-fluid-pipe-sandstone";
-
-function setupFluidPipeRender(id, connectionType){
-    /* drop func */
-    Block.registerDropFunctionForID(id, function(){
-        return [[id, 1, 0]];
-    });
-
-    /* render */
-    var model = new TileRenderModel(id, 0);
-    model.addConnectionGroup(connectionType);
-    model.addConnectionGroup(FLUID_PIPE_CONNECTION_MACHINE);
-    model.setConnectionWidth(PIPE_BLOCK_WIDTH * 2);
-    model.addBoxF(0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 - PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH, 0.5 + PIPE_BLOCK_WIDTH);
-    
-    ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_ANY, id);
-    ICRenderLib.addConnectionBlock(connectionType, id);
-    if (connectionType == FLUID_PIPE_CONNECTION_ANY){
-        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_STONE, id);
-        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_COBBLE, id);
-        ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_SANDSTONE, id);
-    }
-
-  LiquidTransportHelper.registerFluidPipe(id, connectionType);
-}
-
-
-// fluid pipes
-
+// Wooden Fluid Pipe
 IDRegistry.genBlockID("pipeFluidWooden");
 Block.createBlock("pipeFluidWooden", [
     {name: "Wooden Fluid Pipe", texture: [["pipe_fluid_wood", 0]], inCreative: true}
 ], BLOCK_TYPE_LIQUID_PIPE);
+
+Block.setBlockShape(BlockID.pipeFluidWooden, {x: 0.5 - PIPE_BLOCK_WIDTH, y: 0.5 - PIPE_BLOCK_WIDTH, z: 0.5 - PIPE_BLOCK_WIDTH}, {x: 0.5 + PIPE_BLOCK_WIDTH, y: 0.5 + PIPE_BLOCK_WIDTH, z: 0.5 + PIPE_BLOCK_WIDTH});
+Recipes.addShapeless({id: BlockID.pipeFluidWooden, count: 1, data: 0}, [{id: ItemID.pipeSealant, data: 0}, {id: BlockID.pipeItemWooden, data: 0}]);
+setupFluidPipeRender(BlockID.pipeFluidWooden, {name: "pipe_fluid_wood", data: 0}, FLUID_PIPE_CONNECTION_ANY);
+
+
+TileEntity.registerPrototype(BlockID.pipeFluidWooden, {
+    defaultValues: {
+        storageIndex: 0,
+    },
+
+    getTransportSlots: function() {
+        return {};
+    },
+
+    MJEnergyDeploy: function(amount, generator, params) {
+        var storageData = this.findLiquidStorage();
+        if (storageData && storageData.liquidStorage) {
+            var pipes = LiquidTransportHelper.locateLiquidPipes(this.x, this.y, this.z);
+            if (pipes.length > 0) {
+                for (var dir in pipes) {
+                    var liquid = this.getLiquidFrom(storageData.liquidStorage, amount * 0.01);
+                    if (liquid) {
+                        for (var pos in pipes[dir]) {
+                            pipes[dir][pos] += this[pos];
+                        }
+                        LiquidTransportHelper.flushLiquid(pipes[dir], liquid.id, liquid.amount);
+                    } else {
+                        this.data.storageIndex++;
+                    }
+                }
+            }
+        }
+    },
+
+    findLiquidStorage: function() {
+        var directions = LiquidTransportHelper.findNearbyLiquidStorages(this);
+        var dir = directions[this.data.storageIndex % directions.length];
+
+        if (dir) {
+            var liquidStorage = World.getTileEntity(this.x + dir.x, this.y + dir.y, this.z + dir.z).liquidStorage;
+            return {
+                liquidStorage: liquidStorage,
+                direction: dir,
+                position: {
+                    x: this.x + dir.x,
+                    y: this.y + dir.y,
+                    z: this.z + dir.z
+                }
+            };
+        }
+    },
+
+    getLiquidFrom: function(storage, amount) {
+        var liquidStored = storage.getLiquidStored();
+        if (liquidStored) {
+            return {
+                id: liquidStored,
+                amount: storage.getLiquid(liquidStored, amount)
+            };
+        }
+    } 
+});
+
+
+
+
+// file: machine/pipes/liquidEmerald.js
+
+// Emerald Fluid Pipe
+IDRegistry.genBlockID("pipeFluidEmerald");
+Block.createBlock("pipeFluidEmerald", [
+    {name: "Emerald Fluid Pipe", texture: [["pipe_fluid_emerald", 0]], inCreative: true}
+], BLOCK_TYPE_LIQUID_PIPE);
+
+Block.setBlockShape(BlockID.pipeFluidEmerald, {x: 0.5 - PIPE_BLOCK_WIDTH, y: 0.5 - PIPE_BLOCK_WIDTH, z: 0.5 - PIPE_BLOCK_WIDTH}, {x: 0.5 + PIPE_BLOCK_WIDTH, y: 0.5 + PIPE_BLOCK_WIDTH, z: 0.5 + PIPE_BLOCK_WIDTH});
+Recipes.addShapeless({id: BlockID.pipeFluidEmerald, count: 1, data: 0}, [{id: ItemID.pipeSealant, data: 0}, {id: BlockID.pipeItemEmerald, data: 0}]);
+setupFluidPipeRender(BlockID.pipeFluidEmerald, {name: "pipe_fluid_emerald", data: 0}, FLUID_PIPE_CONNECTION_ANY);
+
+
+TileEntity.registerPrototype(BlockID.pipeFluidEmerald, {
+    defaultValues: {
+        containerIndex: 0,
+        inverseMode: false
+    },
+
+    /* callbacks */
+    getGuiScreen: function() {
+        return emeraldPipeUI;
+    },
+
+    tick: function() {
+        if (this.container.isOpened()) {
+            this.reloadFilter();
+            this.container.setText("modeSwitch", this.data.inverseMode ? "Ignore" : "Filter");
+        }
+    },
+
+    getTransportSlots: function() {
+        return {};
+    },
+
+    MJEnergyDeploy: function(amount, generator, params) {
+        var storageData = this.findLiquidStorage();
+        if (storageData && storageData.liquidStorage) {
+            var pipes = LiquidTransportHelper.locateLiquidPipes(this.x, this.y, this.z);
+            if (pipes.length > 0) {
+                for (var dir in pipes) {
+                    var liquid = this.getLiquidFrom(storageData.liquidStorage, amount * 0.05);
+                    if (liquid) {
+                        LiquidTransportHelper.flushLiquid(pipes[dir], liquid.id, liquid.amount);
+                    } else {
+                        this.data.storageIndex++;
+                    }
+                }
+            }
+        }
+    },
+
+    findLiquidStorages: function() {
+        var directions = LiquidTransportHelper.findNearbyLiquidDtorages(this);
+        var dir = directions[this.data.storageIndex % directions.length];
+
+        if (dir) {
+            var liquidStorage = World.getTileEntity(this.x + dir.x, this.y + dir.y, this.z + dir.z).liquidStorage;
+            return {
+                liquidStorage: liquidStorage,
+                direction: dir,
+                position: {
+                    x: this.x + dir.x,
+                    y: this.y + dir.y,
+                    z: this.z + dir.z
+                }
+            };
+        }
+    },
+
+    /* logic */
+    reloadFilter: function() {
+        this.filter = {
+            all: true
+        };
+        this.container.validateAll();
+        for (var i = 0; i < 9; i++) {
+            var slot = this.container.getSlot("slot" + i);
+            var liquid = LiquidRegistry.getItemLiquid(slot.id, slot.data)
+            if (liquid) {
+                this.filter[liquid] = true;
+                this.filter.all = false;
+            }
+        }
+    },
+
+    checkLiquid: function(id) {
+        if (this.filter) {
+            if (this.data.inverseMode) {
+                return this.filter.all || !this.filter[id];
+            } else {
+                return this.filter.all || this.filter[id];
+            }
+        } else {
+            return true;
+        }
+    },
+
+    getLiquidFrom: function(storage, amount) {
+        var liquidStored = storage.getLiquidStored();
+        if (liquidStored && checkLiquid(liquid)) {
+            return {
+                id: liquidStored,
+                amount: storage.getLiquid(liquidStored, amount)
+            };
+        }
+    }
+});
+
+
+
+// file: machine/pipes/liquidOther.js
 
 IDRegistry.genBlockID("pipeFluidCobble");
 Block.createBlock("pipeFluidCobble", [
@@ -3173,204 +3615,45 @@ Block.createBlock("pipeFluidGolden", [
     {name: "Golden Fluid Pipe", texture: [["pipe_fluid_gold", 0]], inCreative: true}
 ], BLOCK_TYPE_LIQUID_PIPE);
 
-IDRegistry.genBlockID("pipeFluidEmerald");
-Block.createBlock("pipeFluidEmerald", [
-    {name: "Emerald Fluid Pipe", texture: [["pipe_fluid_emerald", 0]], inCreative: true}
-], BLOCK_TYPE_LIQUID_PIPE);
 
-Block.setBlockShape(BlockID.pipeFluidWooden, {x: 0.5 - PIPE_BLOCK_WIDTH, y: 0.5 - PIPE_BLOCK_WIDTH, z: 0.5 - PIPE_BLOCK_WIDTH}, {x: 0.5 + PIPE_BLOCK_WIDTH, y: 0.5 + PIPE_BLOCK_WIDTH, z: 0.5 + PIPE_BLOCK_WIDTH});
+
 Block.setBlockShape(BlockID.pipeFluidCobble, {x: 0.5 - PIPE_BLOCK_WIDTH, y: 0.5 - PIPE_BLOCK_WIDTH, z: 0.5 - PIPE_BLOCK_WIDTH}, {x: 0.5 + PIPE_BLOCK_WIDTH, y: 0.5 + PIPE_BLOCK_WIDTH, z: 0.5 + PIPE_BLOCK_WIDTH});
 Block.setBlockShape(BlockID.pipeFluidStone, {x: 0.5 - PIPE_BLOCK_WIDTH, y: 0.5 - PIPE_BLOCK_WIDTH, z: 0.5 - PIPE_BLOCK_WIDTH}, {x: 0.5 + PIPE_BLOCK_WIDTH, y: 0.5 + PIPE_BLOCK_WIDTH, z: 0.5 + PIPE_BLOCK_WIDTH});
 Block.setBlockShape(BlockID.pipeFluidIron, {x: 0.5 - PIPE_BLOCK_WIDTH, y: 0.5 - PIPE_BLOCK_WIDTH, z: 0.5 - PIPE_BLOCK_WIDTH}, {x: 0.5 + PIPE_BLOCK_WIDTH, y: 0.5 + PIPE_BLOCK_WIDTH, z: 0.5 + PIPE_BLOCK_WIDTH});
 Block.setBlockShape(BlockID.pipeFluidGolden, {x: 0.5 - PIPE_BLOCK_WIDTH, y: 0.5 - PIPE_BLOCK_WIDTH, z: 0.5 - PIPE_BLOCK_WIDTH}, {x: 0.5 + PIPE_BLOCK_WIDTH, y: 0.5 + PIPE_BLOCK_WIDTH, z: 0.5 + PIPE_BLOCK_WIDTH});
-Block.setBlockShape(BlockID.pipeFluidEmerald, {x: 0.5 - PIPE_BLOCK_WIDTH, y: 0.5 - PIPE_BLOCK_WIDTH, z: 0.5 - PIPE_BLOCK_WIDTH}, {x: 0.5 + PIPE_BLOCK_WIDTH, y: 0.5 + PIPE_BLOCK_WIDTH, z: 0.5 + PIPE_BLOCK_WIDTH});
 
-Recipes.addShapeless({id: BlockID.pipeFluidWooden, count: 1, data: 0}, [{id: ItemID.pipeSealant, data: 0}, {id: BlockID.pipeItemWooden, data: 0}]);
+
 Recipes.addShapeless({id: BlockID.pipeFluidCobble, count: 1, data: 0}, [{id: ItemID.pipeSealant, data: 0}, {id: BlockID.pipeItemCobble, data: 0}]);
 Recipes.addShapeless({id: BlockID.pipeFluidStone, count: 1, data: 0}, [{id: ItemID.pipeSealant, data: 0}, {id: BlockID.pipeItemStone, data: 0}]);
 Recipes.addShapeless({id: BlockID.pipeFluidIron, count: 1, data: 0}, [{id: ItemID.pipeSealant, data: 0}, {id: BlockID.pipeItemIron, data: -1}]);
 Recipes.addShapeless({id: BlockID.pipeFluidGolden, count: 1, data: 0}, [{id: ItemID.pipeSealant, data: 0}, {id: BlockID.pipeItemGolden, data: -1}]);
-Recipes.addShapeless({id: BlockID.pipeFluidEmerald, count: 1, data: 0}, [{id: ItemID.pipeSealant, data: 0}, {id: BlockID.pipeItemEmerald, data: 0}]);
-
-setupFluidPipeRender(BlockID.pipeFluidWooden, FLUID_PIPE_CONNECTION_ANY);
-setupFluidPipeRender(BlockID.pipeFluidCobble, FLUID_PIPE_CONNECTION_COBBLE);
-setupFluidPipeRender(BlockID.pipeFluidStone, FLUID_PIPE_CONNECTION_STONE);
-setupFluidPipeRender(BlockID.pipeFluidIron, FLUID_PIPE_CONNECTION_ANY);
-setupFluidPipeRender(BlockID.pipeFluidGolden, FLUID_PIPE_CONNECTION_ANY);
-setupFluidPipeRender(BlockID.pipeFluidEmerald, FLUID_PIPE_CONNECTION_ANY);
 
 
-TileEntity.registerPrototype(BlockID.pipeFluidWooden, {
-    defaultValues: {
-        storageIndex: 0,
-    },
-    
-    getTransportSlots: function(){
-        return {};
-    },
-    
-    MJEnergyDeploy: function(amount, generator, params){
-        var storageData = this.findLiquidStorage();
-        if (storageData && storageData.liquidStorage){
-     var pipes = LiquidTransportHelper.locateLiquidPipes(this.x, this.y, this.z);
-            if (pipes.length > 0){
-       for (var dir in pipes){
-        var liquid = this.getLiquidFrom(storageData.liquidStorage, amount*0.01);
-              if (liquid){
-         for (var pos in pipes[dir]){
-          pipes[dir][pos] += this[pos];
-         }
-                LiquidTransportHelper.flushLiquid(pipes[dir], liquid.id, liquid.amount);
-            }
-            else{
-                this.data.storageIndex++;
-            }
-    }
-   }
-   }
-    },
-    
-    findLiquidStorage: function(){
-        var directions = LiquidTransportHelper.findNearbyLiquidStorages(this);
-        var dir = directions[this.data.storageIndex % directions.length];
-        
-        if (dir){
-            var liquidStorage = World.getTileEntity(this.x + dir.x, this.y + dir.y, this.z + dir.z).liquidStorage;
-            return {
-                liquidStorage: liquidStorage,
-                direction: dir,
-                position: {x: this.x + dir.x, y: this.y + dir.y, z: this.z + dir.z}
-            };
-        }
-    },
-
-    getLiquidFrom: function(storage, amount){
-   var liquidStored = storage.getLiquidStored();
-   if (liquidStored){
-    return {id: liquidStored, amount: storage.getLiquid(liquidStored, amount)};
-   }
-  }
-});
-
-
-
-TileEntity.registerPrototype(BlockID.pipeFluidEmerald, {
-    defaultValues: {
-        containerIndex: 0,
-        inverseMode: false
-    },
-    
-    /* callbacks */
-    getGuiScreen: function(){
-        return emeraldPipeUI;
-    },
-
-    tick: function(){
-        if (this.container.isOpened()){
-            this.reloadFilter();
-            this.container.setText("modeSwitch", this.data.inverseMode ? "Ignore" : "Filter");
-        }
-    },
-    
-    getTransportSlots: function(){
-        return {};
-    },
-
-    MJEnergyDeploy: function(amount, generator, params){
-        var storageData = this.findLiquidStorage();
-        if (storageData && storageData.liquidStorage){
-     var pipes = LiquidTransportHelper.locateLiquidPipes(this.x, this.y, this.z);
-            if (pipes.length > 0){
-       for (var dir in pipes){
-        var liquid = this.getLiquidFrom(storageData.liquidStorage, amount*0.05);
-              if (liquid){
-                LiquidTransportHelper.flushLiquid(pipes[dir], liquid.id, liquid.amount);
-            }
-            else{
-                this.data.storageIndex++;
-            }
-    }
-   }
-   }
-    },
-    
-    findLiquidStorages: function(){
-        var directions = LiquidTransportHelper.findNearbyLiquidDtorages(this);
-        var dir = directions[this.data.storageIndex % directions.length];
-        
-        if (dir){
-            var liquidStorage = World.getTileEntity(this.x + dir.x, this.y + dir.y, this.z + dir.z).liquidStorage;
-            return {
-                liquidStorage: liquidStorage,
-                direction: dir,
-                position: {x: this.x + dir.x, y: this.y + dir.y, z: this.z + dir.z}
-            };
-        }
-    },
-    
-    /* logic */
-    reloadFilter: function(){
-        this.filter = {
-            all: true
-        };
-        this.container.validateAll();
-        for (var i = 0; i < 9; i++){
-                var slot = this.container.getSlot("slot" + i);
-     var liquid = LiquidRegistry.getItemLiquid(slot.id, slot.data)
-            if (liquid){
-                this.filter[liquid] = true;
-                this.filter.all = false;
-            }
-        }
-    },
-
-    checkLiquid: function(id){
-        if (this.filter){
-            if (this.data.inverseMode){
-                return this.filter.all || !this.filter[id];
-            }
-            else{
-                return this.filter.all || this.filter[id];
-            }
-        }
-        else{
-            return true;
-        }
-    },
-
-    getLiquidFrom: function(storage, amount){
-   var liquidStored = storage.getLiquidStored();
-   if (liquidStored && checkLiquid(liquid)){
-    return {id: liquidStored, amount: storage.getLiquid(liquidStored, amount)};
-   }
-  }
-});
-
-
-
-
-
+setupFluidPipeRender(BlockID.pipeFluidCobble, {name: "pipe_fluid_cobble", data: 0}, FLUID_PIPE_CONNECTION_COBBLE);
+setupFluidPipeRender(BlockID.pipeFluidStone, {name: "pipe_fluid_stone", data: 0}, FLUID_PIPE_CONNECTION_STONE);
+setupFluidPipeRender(BlockID.pipeFluidIron, {name: "pipe_fluid_iron", data: 0}, FLUID_PIPE_CONNECTION_ANY);
+setupFluidPipeRender(BlockID.pipeFluidGolden, {name: "pipe_fluid_gold", data: 0}, FLUID_PIPE_CONNECTION_ANY);
 
 
 
 
 // file: machine/tank.js
 
-IDRegistry.genBlockID("tank");
-Block.createBlock("tank", [
+IDRegistry.genBlockID("bcTank");
+Block.createBlock("bcTank", [
  {name: "Tank", texture: [["tank", 1], ["tank", 1], ["tank", 0]], inCreative: true}], BLOCK_TYPE_LIQUID_PIPE);
-Block.setBlockShape(BlockID.tank, {x: 2/16 + 0.001, y: 0.001, z: 2/16 + 0.001}, {x: 14/16 - 0.001, y: 0.999, z: 14/16 - 0.001});
+Block.setBlockShape(BlockID.bcTank, {x: 2/16 + 0.001, y: 0.001, z: 2/16 + 0.001}, {x: 14/16 - 0.001, y: 0.999, z: 14/16 - 0.001});
 
-Recipes.addShaped({id: BlockID.tank, count: 1, data: 0}, [
+Recipes.addShaped({id: BlockID.bcTank, count: 1, data: 0}, [
     "ggg",
     "g g",
     "ggg"
 ], ["g", 20, 0]);
 
-ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_ANY, BlockID.tank);
+//ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_ANY, BlockID.tank);
 
-ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_STONE, BlockID.tank);
-ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_COBBLE, BlockID.tank);
+//ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_STONE, BlockID.tank);
+//ICRenderLib.addConnectionBlock(FLUID_PIPE_CONNECTION_COBBLE, BlockID.tank);
 
 var tankUI = new UI.StandartWindow({
     standart: {
@@ -3392,7 +3675,7 @@ var tankUI = new UI.StandartWindow({
 });
 
 
-TileEntity.registerPrototype(BlockID.tank, {
+TileEntity.registerPrototype(BlockID.bcTank, {
     init: function() {
         this.animation = new Animation.Base(this.x + 3 / 16, this.y, this.z + 13 / 16);
         this.animation.load();
@@ -3411,6 +3694,9 @@ TileEntity.registerPrototype(BlockID.tank, {
 
     getGuiScreen: function() {
         return tank_interface ? tankUI : null;
+    },
+    getTransportLiquid:function(){
+        return {input: ["water","lava"],output:["water","lava"]};
     },
 
     tick: function() {
@@ -3454,7 +3740,7 @@ TileEntity.registerPrototype(BlockID.tank, {
         }
 
         var targetId = World.getBlockID(this.x, this.y - 1, this.z);
-        if (targetId == BlockID.tank) {
+        if (targetId == BlockID.bcTank) {
             var other_storage = World.getTileEntity(this.x, this.y - 1, this.z).liquidStorage;
             var amount = this.liquidStorage.getLiquid(liquidStored, 1);
             if (amount > 0) {
@@ -3522,6 +3808,10 @@ TileEntity.registerPrototype(BlockID.bcPump, {
 
     MJEnergyDeploy: function(amount, generator, params) {
         if (this.data.energy < 20) this.data.energy += Math.min(amount, amount - this.data.energy);
+    },
+    
+    getTransportLiquid:function(){
+        return {output: ["water"]};
     },
 
     tick: function() {

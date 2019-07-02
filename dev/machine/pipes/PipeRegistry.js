@@ -134,6 +134,9 @@ blockGroupMachine.add(61, -1);
 blockGroupMachine.add(62, -1);
 blockGroupMachine.add(154, -1);
 
+var blockGroupFluid = ICRender.getGroup("bc-liquid-pipes");
+//blockGroupMachine.add(54, -1);
+
 Callback.addCallback("PostLoaded", function(){
     var prototypes = TileEntity.tileEntityPrototypes;
     for(var id in prototypes){
@@ -142,6 +145,15 @@ Callback.addCallback("PostLoaded", function(){
             if(slots.output && slots.output.length > 0 || slots.input && slots.input.length > 0){
                 blockGroupMachine.add(id, -1);
             }
+        }
+    }
+});
+
+Callback.addCallback("PostLoaded", function(){
+    var prototypes = TileEntity.tileEntityPrototypes;
+    for(var id in prototypes){
+        if(prototypes[id].getTransportLiquid){
+            blockGroupFluid.add(id, -1);
         }
     }
 });
