@@ -46,9 +46,13 @@ TileEntity.registerPrototype(BlockID.bcTank, {
         var liquid = storage.getLiquidStored();
         if (liquid) {
             var amount = storage.getAmount(liquid);
+            //LiquidModels.getModelData(liquid, 10, amount, 10)
             this.animation.describe(LiquidModels.getModelData(liquid, 10, amount, 10));
-            this.animation.refresh();
+        }else{
+            this.animation.describe(LiquidModels.getModelData("water", 10, 0, 10));
         }
+        //alert(LiquidModels.getModelData(liquid, 10, 0, 10).render);
+        this.animation.refresh();
     },
 
     getGuiScreen: function() {
@@ -59,7 +63,7 @@ TileEntity.registerPrototype(BlockID.bcTank, {
     },
 
     tick: function() {
-        //this.updateModel(); FIX IT!!!! It creates errors
+        this.updateModel(); ///FIX IT!!!! It creates errors
 
         this.data.frame++;
 

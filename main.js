@@ -377,9 +377,7 @@ var LiquidModels = {
     },
 
     getRender: function(w, d, h) {
-        var render = new Render({
-            name: "liquidModel" + [w, d, h]
-        });
+        var render = new Render();//{\name: "liquidModel" + [w, d, h]}
         if (render.isEmpty) {
             render.setPart("body", [{
                 type: "box",
@@ -1042,18 +1040,21 @@ var TransportedLiquid = new GameObject("bc-transported-liquid", {
         }
 
         if (te_counts > 0) {
+            //alert("te counts "+te_counts);
             var amountForTE = this.liquid.amount / te_counts;
+            //alert(amountForTE);
             this.liquid.amount = 0;
             for (var d in env.directions) {
                 var dir = env.directions[d];
                 if (dir.addLiquidFromPipe) {
                     this.liquid.amount += dir.addLiquidFromPipe(this.liquid.id, amountForTE);
                 } else if (dir.liquidStorage) {
+                    //alert("storage");
                     var liquidStored = dir.liquidStorage.getLiquidStored();
                     var transportableLiquids;
                     var transportDenied = false;
-                    if (dir.getTransportLiquids) {
-                        transportableLiquids = dir.getTransportLiquids();
+                    if (dir.getTransportLiquid) {
+                        transportableLiquids = dir.getTransportLiquid();
                     }
                     if (transportableLiquids) {
                         for (var id in transportableLiquids.input) {
@@ -3687,9 +3688,13 @@ TileEntity.registerPrototype(BlockID.bcTank, {
         var liquid = storage.getLiquidStored();
         if (liquid) {
             var amount = storage.getAmount(liquid);
+            //LiquidModels.getModelData(liquid, 10, amount, 10)
             this.animation.describe(LiquidModels.getModelData(liquid, 10, amount, 10));
-            this.animation.refresh();
+        }else{
+            this.animation.describe(LiquidModels.getModelData(liquid, 10, 0, 10));
         }
+        //alert(LiquidModels.getModelData(liquid, 10, 0, 10).render);
+        this.animation.refresh();
     },
 
     getGuiScreen: function() {
@@ -3700,7 +3705,7 @@ TileEntity.registerPrototype(BlockID.bcTank, {
     },
 
     tick: function() {
-        this.updateModel();
+        this.updateModel(); ///FIX IT!!!! It creates errors
 
         this.data.frame++;
 

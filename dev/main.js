@@ -338,9 +338,7 @@ var LiquidModels = {
     },
 
     getRender: function(w, d, h) {
-        var render = new Render({
-            name: "liquidModel" + [w, d, h]
-        });
+        var render = new Render();//{\name: "liquidModel" + [w, d, h]}
         if (render.isEmpty) {
             render.setPart("body", [{
                 type: "box",
@@ -380,7 +378,8 @@ var LiquidModels = {
     getModelData: function(liquid, w, d, h) {
         var render = this.getRender(w, d, h);
         return {
-            render: render.getId()
+            render: render.getId(),
+            skin:this.getModelSkin(liquid)
         };
     },
 
