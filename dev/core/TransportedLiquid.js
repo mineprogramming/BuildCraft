@@ -308,18 +308,21 @@ var TransportedLiquid = new GameObject("bc-transported-liquid", {
         }
 
         if (te_counts > 0) {
+            //alert("te counts "+te_counts);
             var amountForTE = this.liquid.amount / te_counts;
+            //alert(amountForTE);
             this.liquid.amount = 0;
             for (var d in env.directions) {
                 var dir = env.directions[d];
                 if (dir.addLiquidFromPipe) {
                     this.liquid.amount += dir.addLiquidFromPipe(this.liquid.id, amountForTE);
                 } else if (dir.liquidStorage) {
+                    //alert("storage");
                     var liquidStored = dir.liquidStorage.getLiquidStored();
                     var transportableLiquids;
                     var transportDenied = false;
-                    if (dir.getTransportLiquids) {
-                        transportableLiquids = dir.getTransportLiquids();
+                    if (dir.getTransportLiquid) {
+                        transportableLiquids = dir.getTransportLiquid();
                     }
                     if (transportableLiquids) {
                         for (var id in transportableLiquids.input) {

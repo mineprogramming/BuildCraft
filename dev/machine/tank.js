@@ -59,7 +59,7 @@ TileEntity.registerPrototype(BlockID.bcTank, {
     },
 
     tick: function() {
-        this.updateModel();
+        //this.updateModel(); FIX IT!!!! It creates errors
 
         this.data.frame++;
 
