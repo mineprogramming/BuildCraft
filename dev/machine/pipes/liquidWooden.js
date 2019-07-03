@@ -25,11 +25,12 @@ TileEntity.registerPrototype(BlockID.pipeFluidWooden, {
             if (pipes.length > 0) {
                 for (var dir in pipes) {
                     var liquid = this.getLiquidFrom(storageData.liquidStorage, amount * 0.01);
-                    if (liquid) {
+                    if (liquid) {      
                         for (var pos in pipes[dir]) {
                             pipes[dir][pos] += this[pos];
                         }
                         LiquidTransportHelper.flushLiquid(pipes[dir], liquid.id, liquid.amount);
+                        
                     } else {
                         this.data.storageIndex++;
                     }

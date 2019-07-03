@@ -38,20 +38,18 @@ TileEntity.registerPrototype(BlockID.bcTank, {
     init: function() {
         this.animation = new Animation.Base(this.x + 3 / 16, this.y, this.z + 13 / 16);
         this.animation.load();
-        this.data.frame = 0;
+        this.liquidStorage.setLimit(null, 16);
+        this.updateModel();
     },
 
     updateModel: function() {
         var storage = this.liquidStorage;
-        var liquid = storage.getLiquidStored();
-        if (liquid) {
-            var amount = storage.getAmount(liquid);
-            //LiquidModels.getModelData(liquid, 10, amount, 10)
-            this.animation.describe(LiquidModels.getModelData(liquid, 10, amount, 10));
-        }else{
-            this.animation.describe(LiquidModels.getModelData("water", 10, 0, 10));
-        }
-        //alert(LiquidModels.getModelData(liquid, 10, 0, 10).render);
+        //alert("model");
+        var liquid = storage.getLiquidStored() ? storage.getLiquidStored() : "water";
+        var amount = storage.getAmount(liquid) ? storage.getAmount(liquid) : 0;
+        var width = amount?10:0;
+        
+        this.animation.describe(LiquidModels.getModelData(liquid, width, amount, width));
         this.animation.refresh();
     },
 
@@ -59,44 +57,41 @@ TileEntity.registerPrototype(BlockID.bcTank, {
         return tank_interface ? tankUI : null;
     },
     getTransportLiquid:function(){
-        return {input: ["water","lava"],output:["water","lava"]};
+        return {input: ["water","lava","milk"],output:["water","lava","milk"]};
     },
 
-    tick: function() {
-        this.updateModel(); ///FIX IT!!!! It creates errors
-
-        this.data.frame++;
-
-        var liquidStored = this.liquidStorage.getLiquidStored();
+    tick: function() { 
+        if(World.getThreadTime()%40==0) this.updateModel();
+        
+        var storage = this.liquidStorage;
+        var liquid = this.liquidStorage.getLiquidStored();
         var slot1 = this.container.getSlot("liquidSlot1");
         var slot2 = this.container.getSlot("liquidSlot2");
-        var emptyItem = LiquidRegistry.getEmptyItem(slot1.id, slot1.data);
-        var fullItem = LiquidRegistry.getFullItem(slot1.id, slot1.data, liquidStored);
-        this.liquidStorage.setLimit(null, 16);
-
-        if (emptyItem && (emptyItem.liquid == liquidStored || !liquidStored)) {
-            if (this.liquidStorage.addLiquid(emptyItem.liquid, 1) <= 1) {
-                if (slot2.id == emptyItem.id && slot2.data == emptyItem.data && slot2.count < Item.getMaxStack(emptyItem.id) || slot2.id == 0) {
-                    slot1.count--;
-                    slot2.id = emptyItem.id;
-                    slot2.data = emptyItem.data;
-                    slot2.count++;
-                    this.container.validateAll();
-                }
+        var empty = LiquidRegistry.getEmptyItem(slot1.id, slot1.data);
+        var fullItem = LiquidRegistry.getFullItem(slot1.id, slot1.data, liquid);
+        
+        if(empty && (!liquid || empty.liquid == liquid)){
+            if(storage.getAmount(empty.liquid) <= 15 && (slot2.id == empty.id && slot2.data == empty.data && slot2.count < Item.getMaxStack(empty.id) || slot2.id == 0)){
+                storage.addLiquid(empty.liquid, 1);
+                slot1.count--;
+                slot2.id = empty.id;
+                slot2.data = empty.data;
+                slot2.count++;
+                this.container.validateAll();
             }
         }
-        if (fullItem) {
-            if (this.liquidStorage.getAmount(liquidStored, 1) >= 1) {
-                if (slot2.id == fullItem.id && slot2.data == fullItem.data && slot2.count < Item.getMaxStack(fullItem.id) || slot2.id == 0) {
-                    this.liquidStorage.getLiquid(liquidStored, 1, true);
-                    slot1.count--;
-                    slot2.id = fullItem.id;
-                    slot2.data = fullItem.data;
-                    slot2.count++;
-                    this.container.validateAll();
-                }
+        if(liquid){
+            var full = LiquidRegistry.getFullItem(slot1.id, slot1.data, liquid);
+            if(full && storage.getAmount(liquid) >= 1 && (slot2.id == full.id && slot2.data == full.data && slot2.count < Item.getMaxStack(full.id) || slot2.id == 0)){
+                storage.getLiquid(liquid, 1);
+                slot1.count--;
+                slot2.id = full.id;
+                slot2.data = full.data;
+                slot2.count++;
+                this.container.validateAll();
             }
         }
+        
         if (this.container.isOpened()) {
             this.liquidStorage.updateUiScale("liquidScale", this.liquidStorage.getLiquidStored());
             this.container.setText("textInfo1", "Liquid: " + (+this.liquidStorage.getAmount(this.liquidStorage.getLiquidStored()).toFixed(3)) * 1000 + "/16000");
@@ -105,10 +100,11 @@ TileEntity.registerPrototype(BlockID.bcTank, {
         var targetId = World.getBlockID(this.x, this.y - 1, this.z);
         if (targetId == BlockID.bcTank) {
             var other_storage = World.getTileEntity(this.x, this.y - 1, this.z).liquidStorage;
-            var amount = this.liquidStorage.getLiquid(liquidStored, 1);
+            var amount = this.liquidStorage.getLiquid(liquid, 1);
             if (amount > 0) {
-                var returned_amount = other_storage.addLiquid(liquidStored, amount);
-                this.liquidStorage.addLiquid(liquidStored, returned_amount);
+                var returned_amount = other_storage.addLiquid(liquid, amount);
+                this.liquidStorage.addLiquid(liquid, returned_amount);
+                this.updateModel();
             }
         }
     },
@@ -122,20 +118,13 @@ TileEntity.registerPrototype(BlockID.bcTank, {
                 if (this.liquidStorage.addLiquid(emptyItem.liquid, 1, true) < 1) {
                     Player.decreaseCarriedItem(1);
                     Player.addItemToInventory(emptyItem.id, 1, emptyItem.data);
+                    this.updateModel();
                 }
             }
         } else {
             return false;
         }
     },
-
-    addLiquidFromPipe: function(liquid, amount) {
-        var liquidStored = this.liquidStorage.getLiquidStored();
-        if (liquidStored == liquid || !liquidStored) {
-            return this.liquidStorage.addLiquid(liquid, amount);
-        }
-    },
-
     destroyBlock: function() {
         if (this.animation) this.animation.destroy();
     }
