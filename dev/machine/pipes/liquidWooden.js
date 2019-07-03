@@ -6,7 +6,9 @@ Block.createBlock("pipeFluidWooden", [
 
 Block.setBlockShape(BlockID.pipeFluidWooden, {x: 0.5 - PIPE_BLOCK_WIDTH, y: 0.5 - PIPE_BLOCK_WIDTH, z: 0.5 - PIPE_BLOCK_WIDTH}, {x: 0.5 + PIPE_BLOCK_WIDTH, y: 0.5 + PIPE_BLOCK_WIDTH, z: 0.5 + PIPE_BLOCK_WIDTH});
 Recipes.addShapeless({id: BlockID.pipeFluidWooden, count: 1, data: 0}, [{id: ItemID.pipeSealant, data: 0}, {id: BlockID.pipeItemWooden, data: 0}]);
-setupFluidPipeRender(BlockID.pipeFluidWooden, {name: "pipe_fluid_wood", data: 0}, FLUID_PIPE_CONNECTION_ANY);
+setupWoodenFluidPipeRender(BlockID.pipeFluidWooden, {name: "pipe_fluid_wood", data: 0}, FLUID_PIPE_CONNECTION_ANY);
+//OVERRIDE
+
 
 
 TileEntity.registerPrototype(BlockID.pipeFluidWooden, {

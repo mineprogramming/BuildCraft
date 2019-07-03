@@ -417,7 +417,8 @@ var LiquidModels = {
     getModelData: function(liquid, w, d, h) {
         var render = this.getRender(w, d, h);
         return {
-            render: render.getId()
+            render: render.getId(),
+            skin:this.getModelSkin(liquid)
         };
     },
 
@@ -2644,8 +2645,7 @@ blockGroupMachine.add(61, -1);
 blockGroupMachine.add(62, -1);
 blockGroupMachine.add(154, -1);
 
-var blockGroupFluid = ICRender.getGroup("bc-liquid-pipes");
-//blockGroupMachine.add(54, -1);
+var blockGroupFluid = ICRender.getGroup("bc-liquid-pipes-machine");
 
 Callback.addCallback("PostLoaded", function(){
     var prototypes = TileEntity.tileEntityPrototypes;
@@ -2677,6 +2677,7 @@ function setupFluidPipeRender(id, texture, connectionType){
     
     var width = 0.5;
     var group = ICRender.getGroup("bc-liquid-pipes");
+    var group2 = ICRender.getGroup("bc-liquid-pipes-machine");
     group.add(id, -1);
 
     /* render */
@@ -2699,6 +2700,7 @@ function setupFluidPipeRender(id, texture, connectionType){
         model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data + 1);
        
         render.addEntry(model).asCondition(box.side[0], box.side[1], box.side[2], group, 0);
+        render.addEntry(model).asCondition(box.side[0], box.side[1], box.side[2], group2, 0);
     }
 
     var model = BlockRenderer.createModel();
@@ -2709,20 +2711,50 @@ function setupFluidPipeRender(id, texture, connectionType){
     LiquidTransportHelper.registerFluidPipe(id, connectionType);
 }
 
+function setupWoodenFluidPipeRender(id, texture,texture1, connectionType){
+    /* drop func */
+    Block.registerDropFunctionForID(id, function(){
+        return [[id, 1, 0]];
+    });
 
+    var width = 0.5;
+    var group = ICRender.getGroup("bc-liquid-pipes");
+    group.add(id, -1);
 
+    var groupMachines = ICRender.getGroup("bc-liquid-pipes-machine");
 
+    /* render */
+    var render = new ICRender.Model();
 
+    var boxes = [
+        {side: [1, 0, 0], box: [0.5 + width / 2, 0.5 - width / 2, 0.5 - width / 2, 1, 0.5 + width / 2, 0.5 + width / 2]},
+        {side: [-1, 0, 0], box: [0, 0.5 - width / 2, 0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2]},
+        {side: [0, 1, 0], box: [0.5 - width / 2, 0.5 + width / 2, 0.5 - width / 2, 0.5 + width / 2, 1, 0.5 + width / 2]},
+        {side: [0, -1, 0], box: [0.5 - width / 2, 0, 0.5 - width / 2, 0.5 + width / 2, 0.5 - width / 2, 0.5 + width / 2]},
+        {side: [0, 0, 1], box: [0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2, 0.5 + width / 2, 1]},
+        {side: [0, 0, -1], box: [0.5 - width / 2, 0.5 - width / 2, 0, 0.5 + width / 2, 0.5 + width / 2, 0.5 - width / 2]},
+    ]
 
+    for (var i in boxes) {
+        var box = boxes[i];
+       
+        var model = BlockRenderer.createModel();
+        var modelForMachine = BlockRenderer.createModel();
+        
+        model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data + 1);
+        modelForMachine.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], "pipe_item_wood", 2);
+       
+        render.addEntry(model).asCondition(box.side[0], box.side[1], box.side[2], group, 0);
+        render.addEntry(modelForMachine).asCondition(box.side[0], box.side[1], box.side[2], groupMachines, 0);
+    }
 
+    var model = BlockRenderer.createModel();
+    model.addBox(0.5 - width / 2, 0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2, 0.5 + width / 2, texture.name, texture.data);
+    render.addEntry(model);
+    BlockRenderer.setStaticICRender(id, 0, render);
 
-
-
-
-
-
-
-
+    LiquidTransportHelper.registerFluidPipe(id, connectionType);
+}
 
 
 
@@ -3419,7 +3451,9 @@ Block.createBlock("pipeFluidWooden", [
 
 Block.setBlockShape(BlockID.pipeFluidWooden, {x: 0.5 - PIPE_BLOCK_WIDTH, y: 0.5 - PIPE_BLOCK_WIDTH, z: 0.5 - PIPE_BLOCK_WIDTH}, {x: 0.5 + PIPE_BLOCK_WIDTH, y: 0.5 + PIPE_BLOCK_WIDTH, z: 0.5 + PIPE_BLOCK_WIDTH});
 Recipes.addShapeless({id: BlockID.pipeFluidWooden, count: 1, data: 0}, [{id: ItemID.pipeSealant, data: 0}, {id: BlockID.pipeItemWooden, data: 0}]);
-setupFluidPipeRender(BlockID.pipeFluidWooden, {name: "pipe_fluid_wood", data: 0}, FLUID_PIPE_CONNECTION_ANY);
+setupWoodenFluidPipeRender(BlockID.pipeFluidWooden, {name: "pipe_fluid_wood", data: 0}, FLUID_PIPE_CONNECTION_ANY);
+//OVERRIDE
+
 
 
 TileEntity.registerPrototype(BlockID.pipeFluidWooden, {
@@ -3438,11 +3472,12 @@ TileEntity.registerPrototype(BlockID.pipeFluidWooden, {
             if (pipes.length > 0) {
                 for (var dir in pipes) {
                     var liquid = this.getLiquidFrom(storageData.liquidStorage, amount * 0.01);
-                    if (liquid) {
+                    if (liquid) {      
                         for (var pos in pipes[dir]) {
                             pipes[dir][pos] += this[pos];
                         }
                         LiquidTransportHelper.flushLiquid(pipes[dir], liquid.id, liquid.amount);
+                        
                     } else {
                         this.data.storageIndex++;
                     }
@@ -3680,20 +3715,18 @@ TileEntity.registerPrototype(BlockID.bcTank, {
     init: function() {
         this.animation = new Animation.Base(this.x + 3 / 16, this.y, this.z + 13 / 16);
         this.animation.load();
-        this.data.frame = 0;
+        this.liquidStorage.setLimit(null, 16);
+        this.updateModel();
     },
 
     updateModel: function() {
         var storage = this.liquidStorage;
-        var liquid = storage.getLiquidStored();
-        if (liquid) {
-            var amount = storage.getAmount(liquid);
-            //LiquidModels.getModelData(liquid, 10, amount, 10)
-            this.animation.describe(LiquidModels.getModelData(liquid, 10, amount, 10));
-        }else{
-            this.animation.describe(LiquidModels.getModelData(liquid, 10, 0, 10));
-        }
-        //alert(LiquidModels.getModelData(liquid, 10, 0, 10).render);
+        //alert("model");
+        var liquid = storage.getLiquidStored() ? storage.getLiquidStored() : "water";
+        var amount = storage.getAmount(liquid) ? storage.getAmount(liquid) : 0;
+        var width = amount?10:0;
+        
+        this.animation.describe(LiquidModels.getModelData(liquid, width, amount, width));
         this.animation.refresh();
     },
 
@@ -3701,44 +3734,41 @@ TileEntity.registerPrototype(BlockID.bcTank, {
         return tank_interface ? tankUI : null;
     },
     getTransportLiquid:function(){
-        return {input: ["water","lava"],output:["water","lava"]};
+        return {input: ["water","lava","milk"],output:["water","lava","milk"]};
     },
 
-    tick: function() {
-        this.updateModel(); ///FIX IT!!!! It creates errors
-
-        this.data.frame++;
-
-        var liquidStored = this.liquidStorage.getLiquidStored();
+    tick: function() { 
+        if(World.getThreadTime()%40==0) this.updateModel();
+        
+        var storage = this.liquidStorage;
+        var liquid = this.liquidStorage.getLiquidStored();
         var slot1 = this.container.getSlot("liquidSlot1");
         var slot2 = this.container.getSlot("liquidSlot2");
-        var emptyItem = LiquidRegistry.getEmptyItem(slot1.id, slot1.data);
-        var fullItem = LiquidRegistry.getFullItem(slot1.id, slot1.data, liquidStored);
-        this.liquidStorage.setLimit(null, 16);
-
-        if (emptyItem && (emptyItem.liquid == liquidStored || !liquidStored)) {
-            if (this.liquidStorage.addLiquid(emptyItem.liquid, 1) <= 1) {
-                if (slot2.id == emptyItem.id && slot2.data == emptyItem.data && slot2.count < Item.getMaxStack(emptyItem.id) || slot2.id == 0) {
-                    slot1.count--;
-                    slot2.id = emptyItem.id;
-                    slot2.data = emptyItem.data;
-                    slot2.count++;
-                    this.container.validateAll();
-                }
+        var empty = LiquidRegistry.getEmptyItem(slot1.id, slot1.data);
+        var fullItem = LiquidRegistry.getFullItem(slot1.id, slot1.data, liquid);
+        
+        if(empty && (!liquid || empty.liquid == liquid)){
+            if(storage.getAmount(empty.liquid) <= 15 && (slot2.id == empty.id && slot2.data == empty.data && slot2.count < Item.getMaxStack(empty.id) || slot2.id == 0)){
+                storage.addLiquid(empty.liquid, 1);
+                slot1.count--;
+                slot2.id = empty.id;
+                slot2.data = empty.data;
+                slot2.count++;
+                this.container.validateAll();
             }
         }
-        if (fullItem) {
-            if (this.liquidStorage.getAmount(liquidStored, 1) >= 1) {
-                if (slot2.id == fullItem.id && slot2.data == fullItem.data && slot2.count < Item.getMaxStack(fullItem.id) || slot2.id == 0) {
-                    this.liquidStorage.getLiquid(liquidStored, 1, true);
-                    slot1.count--;
-                    slot2.id = fullItem.id;
-                    slot2.data = fullItem.data;
-                    slot2.count++;
-                    this.container.validateAll();
-                }
+        if(liquid){
+            var full = LiquidRegistry.getFullItem(slot1.id, slot1.data, liquid);
+            if(full && storage.getAmount(liquid) >= 1 && (slot2.id == full.id && slot2.data == full.data && slot2.count < Item.getMaxStack(full.id) || slot2.id == 0)){
+                storage.getLiquid(liquid, 1);
+                slot1.count--;
+                slot2.id = full.id;
+                slot2.data = full.data;
+                slot2.count++;
+                this.container.validateAll();
             }
         }
+        
         if (this.container.isOpened()) {
             this.liquidStorage.updateUiScale("liquidScale", this.liquidStorage.getLiquidStored());
             this.container.setText("textInfo1", "Liquid: " + (+this.liquidStorage.getAmount(this.liquidStorage.getLiquidStored()).toFixed(3)) * 1000 + "/16000");
@@ -3747,10 +3777,11 @@ TileEntity.registerPrototype(BlockID.bcTank, {
         var targetId = World.getBlockID(this.x, this.y - 1, this.z);
         if (targetId == BlockID.bcTank) {
             var other_storage = World.getTileEntity(this.x, this.y - 1, this.z).liquidStorage;
-            var amount = this.liquidStorage.getLiquid(liquidStored, 1);
+            var amount = this.liquidStorage.getLiquid(liquid, 1);
             if (amount > 0) {
-                var returned_amount = other_storage.addLiquid(liquidStored, amount);
-                this.liquidStorage.addLiquid(liquidStored, returned_amount);
+                var returned_amount = other_storage.addLiquid(liquid, amount);
+                this.liquidStorage.addLiquid(liquid, returned_amount);
+                this.updateModel();
             }
         }
     },
@@ -3764,20 +3795,13 @@ TileEntity.registerPrototype(BlockID.bcTank, {
                 if (this.liquidStorage.addLiquid(emptyItem.liquid, 1, true) < 1) {
                     Player.decreaseCarriedItem(1);
                     Player.addItemToInventory(emptyItem.id, 1, emptyItem.data);
+                    this.updateModel();
                 }
             }
         } else {
             return false;
         }
     },
-
-    addLiquidFromPipe: function(liquid, amount) {
-        var liquidStored = this.liquidStorage.getLiquidStored();
-        if (liquidStored == liquid || !liquidStored) {
-            return this.liquidStorage.addLiquid(liquid, amount);
-        }
-    },
-
     destroyBlock: function() {
         if (this.animation) this.animation.destroy();
     }
