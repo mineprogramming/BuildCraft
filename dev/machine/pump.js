@@ -19,27 +19,27 @@ TileEntity.registerPrototype(BlockID.bcPump, {
     },
 
     created: function() {
-        this.data.pumpY = this.y - 1;
+        this.data.pumpY = this.y - 1;  
     },
+    
+    init:function(){this.liquidStorage.setLimit(null, 16)},
 
     MJEnergyDeploy: function(amount, generator, params) {
         if (this.data.energy < 20) this.data.energy += Math.min(amount, amount - this.data.energy);
     },
     
     getTransportLiquid:function(){
-        return {output: ["water"]};
+        return {output: ["water","lava"]};
     },
 
     tick: function() {
-        this.liquidStorage.setLimit(null, 16);
-
         if (World.getThreadTime() % 20 == 0 && this.data.energy > 1) {
             var te = World.getTileEntity(this.x, this.y - 1, this.z);
             if (te) {
                 this.pullFromTileEntity(te);
             } else {
                 var coords = this.getPumpingCoords();
-                if (coords) {
+                if (coords){
                     var tile = World.getBlock(coords.x, coords.y, coords.z);
                     if (tile.id == 9 || tile.id == 11) {
                         World.setBlock(coords.x, coords.y, coords.z, 0);
@@ -53,7 +53,7 @@ TileEntity.registerPrototype(BlockID.bcPump, {
     },
 
     pullFromTileEntity: function(tileEntity) {
-        var transportableLiquid = tileEntity.getTransportLiquids;
+        var transportableLiquid = tileEntity.getTransportLiquid;
         var outputLiquids;
         if (transportableLiquid) outputLiquids = transportableLiquid().output;
 
