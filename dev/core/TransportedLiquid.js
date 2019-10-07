@@ -259,7 +259,7 @@ var TransportedLiquid = new GameObject("bc-transported-liquid", {
             });
         }
         this.animation.describe({
-            render: LiquidModels.getLiquidRender(this.liquid.id, 6, this.liquid.amount <= 0.12 ? (this.liquid.amount / 20) * 100 : 6, 6, arr).getId()
+            render: LiquidModels.getLiquidRender(this.liquid.id, 6, this.liquid.amount <= 0.12 ? (this.liquid.amount / 20) * 100 : 6, 6, arr).getId() 
         });
         this.animation.refresh();
     },
@@ -276,6 +276,7 @@ var TransportedLiquid = new GameObject("bc-transported-liquid", {
     },
 
     pouringAction: function() {
+        
         var amounts = [this.liquid.amount];
         var deny = [true, true, true, true, true, true];
         var te_counts = 0;
@@ -286,8 +287,8 @@ var TransportedLiquid = new GameObject("bc-transported-liquid", {
         }
 
         this.render(this.pos, env.directions);
-
-        for (var d in env.directions) {
+        
+        for(var d in env.directions) {
             var dir = env.directions[d];
             var liquid = LiquidMap.getLiquid(dir.x, dir.y, dir.z);
             if (dir.liquidStorage) {
@@ -297,45 +298,51 @@ var TransportedLiquid = new GameObject("bc-transported-liquid", {
             if (liquid) {
                 if (liquid.liquid.id != this.liquid.id || liquid.liquid.amount > this.liquid.amount) {
                     deny[d] = false;
-                } else amounts.push(liquid.liquid.amount);
+                } else{
+                    amounts.push(liquid.liquid.amount);
+                    liquid.selfDestroy();    
+                } 
             }
+        }  
+        if (te_counts > 0) { 
+              var amountForTE = this.liquid.amount / te_counts;
+              this.liquid.amount = 0;
+              for (var d in env.directions) {
+                  var dir = env.directions[d];
+                  if (dir.addLiquidFromPipe) {
+                      this.liquid.amount += dir.addLiquidFromPipe(this.liquid.id, amountForTE);
+                  } else if (dir.liquidStorage) {
+                      var liquidStored = dir.liquidStorage.getLiquidStored();
+                      var transportableLiquids;
+                      var transportDenied = false;
+                      if (dir.getTransportLiquid) {
+                          transportableLiquids = dir.getTransportLiquid();
+                      }
+                      if (transportableLiquids) {
+                          for (var id in transportableLiquids.input) {
+                              if (this.liquid.id == transportableLiquids.input[id]) transportDenied = true;
+                          }
+                      } else if (this.liquid.id == liquidStored) transportDenied = true;
+                      
+                      if (transportDenied){
+                        var over = dir.liquidStorage.addLiquid(this.liquid.id, amountForTE);
+                        this.liquid.amount -= amountForTE
+                        this.liquid.amount += over;
+                        Debug.m("over "+over+"  added "+amountForTE);
+                    } 
+                  }
+              }
+              return;
         }
-
         var mean = this.mean(amounts);
         for (var d in env.directions) {
             var dir = env.directions[d];
-            if (!dir.liquidStorage && deny[d]) LiquidTransportHelper.flushLiquid(dir, this.liquid.id, mean);
-        }
-
-        if (te_counts > 0) {
-            //alert("te counts "+te_counts);
-            var amountForTE = this.liquid.amount / te_counts;
-            //alert(amountForTE);
-            this.liquid.amount = 0;
-            for (var d in env.directions) {
-                var dir = env.directions[d];
-                if (dir.addLiquidFromPipe) {
-                    this.liquid.amount += dir.addLiquidFromPipe(this.liquid.id, amountForTE);
-                } else if (dir.liquidStorage) {
-                    //alert("storage");
-                    var liquidStored = dir.liquidStorage.getLiquidStored();
-                    var transportableLiquids;
-                    var transportDenied = false;
-                    if (dir.getTransportLiquid) {
-                        transportableLiquids = dir.getTransportLiquid();
-                    }
-                    if (transportableLiquids) {
-                        for (var id in transportableLiquids.input) {
-                            if (this.liquid.id == transportableLiquids.input[id]) transportDenied = true;
-                        }
-                    } else if (this.liquid.id == liquidStored) transportDenied = true;
-                    if (transportDenied) this.liquid.amount += dir.liquidStorage.addLiquid(this.liquid.id, amountForTE);
-                }
-            }
-            return;
-        }
-
-        this.liquid.amount = mean;
+            if (!dir.liquidStorage && deny[d]){
+                LiquidTransportHelper.flushLiquid(dir, this.liquid.id, mean);
+                this.selfDestroy();
+                return;
+            } 
+        } 
     },
 
     //standart callbacks

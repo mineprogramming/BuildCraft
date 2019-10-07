@@ -582,11 +582,16 @@ var LiquidMap = {
         return this.cache[key];
     },
 
-  deleteLiquid: function(x, y, z){
-   var key = x + "." + y + "." + z;
-     delete this.cache[key];
+	deleteLiquid: function(x, y, z){
+		var key = x + "." + y + "." + z;
+		delete this.cache[key];
+	},
 
-  }
+	debug:function(){
+		for(var i in this.cache){
+			Debug.m(this.cache[i]);
+		}
+	}
 };
 
 Callback.addCallback("LevelLeft", function(){
