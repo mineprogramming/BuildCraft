@@ -37,7 +37,7 @@ var diamondPipeUI = new UI.StandartWindow({
     standart: {
         header: {
             text: {text: "Diamond Transporting Pipe"}
-        }, 
+        },
         background: {
             standart: true,
         },
@@ -47,7 +47,7 @@ var diamondPipeUI = new UI.StandartWindow({
     },
 
     elements: {
-        
+
     }
 });
 
@@ -68,7 +68,7 @@ TileEntity.registerPrototype(BlockID.pipeItemDiamond, {
         containerIndex: 0,
         inverseMode: false
     },
-    
+
     /* callbacks */
     getGuiScreen: function(){
         return diamondPipeUI;
@@ -77,13 +77,11 @@ TileEntity.registerPrototype(BlockID.pipeItemDiamond, {
     tick: function(){
         this.reloadFilter();
     },
-    
+
     getTransportSlots: function(){
         return {};
     },
 
-    
-    
     /* logic */
     reloadFilter: function(){
         this.filter = {};
@@ -95,7 +93,7 @@ TileEntity.registerPrototype(BlockID.pipeItemDiamond, {
             };
             for (var j = 0; j < 9; j++){
                 var slot = this.container.getSlot("slot_" + i + "_" + j);
-                if (slot.id > 0){
+                if (slot.id != 0){
                     this.filter[i][slot.id + "." + slot.data] = true;
                     this.filter[i].all = false;
                 }

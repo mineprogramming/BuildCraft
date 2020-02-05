@@ -24,15 +24,15 @@ ENGINE_TYPE_DATA[ENGINE_TYPE_CREATIVE] = {
     defaultValues: {
         generation: 20
     },
-    
+
     getGuiScreen: function(){
         return null;
     },
-    
+
     getItemDrop: function(){
         return [[ItemID.engineCreative, 1, 0]];
     },
-    
+
     engineTick: function(){
         if (this.data.redstone){
             this.setPower(0.4);
@@ -42,14 +42,14 @@ ENGINE_TYPE_DATA[ENGINE_TYPE_CREATIVE] = {
             this.data.pistonDelay = 0;
         }
     },
-    
+
     energyDeploy: function(params){
         return this.data.generation;
     },
-    
+
     energyTick: function(type, src){
     },
-    
+
     click: function(id, count, data){
         if (id == ItemID.bcWrench){
             this.data.generation *= 2;

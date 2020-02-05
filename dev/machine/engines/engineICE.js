@@ -32,11 +32,11 @@ var guiIronEngine = new UI.StandartWindow({
         inventory: {standart: true},
         background: {standart: true}
     },
-    
+
     drawing: [
         {type: "bitmap", x: 550, y: 30, bitmap: "liquid_scale_40x8_background", scale: 4}
     ],
-    
+
     elements: {
         "liquidScale": {type: "scale", x: 554, y: 34, direction: 1, value: 0.5, bitmap: "liquid_scale_40x8_empty", overlay: "liquid_scale_40x8_overlay", scale: 4},
         "liquidSlot1": {type: "slot", x: 421, y: 54, size: 80},
@@ -57,19 +57,19 @@ ENGINE_TYPE_DATA[ENGINE_TYPE_IRON] = {
     defaultValues: {
         overheat: 0
     },
-    
+
     getGuiScreen: function(){
         return guiIronEngine;
     },
-    
+
     getItemDrop: function(){
         return [[ItemID.engineIron, 1, 0]];
     },
-    
+
     energyDeploy: function(){
         return 128;
     },
-    
+
     getHeatStage: function(){
         var MAX_HEAT = 1200;
         var index = parseInt(this.data.heat / MAX_HEAT * 3);
@@ -78,14 +78,14 @@ ENGINE_TYPE_DATA[ENGINE_TYPE_IRON] = {
         }
         return index;
     },
-    
+
     engineTick: function(){
         var MAX_HEAT = 1200;
         var heatRatio = (MAX_HEAT - this.data.heat) / MAX_HEAT + .1;
-        
+
         var liquidStored = this.liquidStorage.getLiquidStored();
         var fuelTicks = ENGINE_IRON_FUEL_DATA[liquidStored];
-        
+
         if (this.data.overheat > 0){
             this.data.overheat--;
             this.data.heat -= .2;
@@ -104,12 +104,12 @@ ENGINE_TYPE_DATA[ENGINE_TYPE_IRON] = {
             this.setPower(0);
             this.data.heat -= .2;
         }
-        
+
         var slot1 = this.container.getSlot("liquidSlot1");
         var slot2 = this.container.getSlot("liquidSlot2");
         var emptyItem = LiquidRegistry.getEmptyItem(slot1.id, slot1.data);
         this.liquidStorage.setLimit(null, 8);
-        
+
         if (emptyItem && (emptyItem.liquid == liquidStored || !liquidStored)){
             if (this.liquidStorage.addLiquid(emptyItem.liquid, 1, true) < 1){
                 if (slot2.id == emptyItem.id && slot2.data == emptyItem.data && slot2.count < Item.getMaxStack(emptyItem.id) || slot2.id == 0){
@@ -121,11 +121,11 @@ ENGINE_TYPE_DATA[ENGINE_TYPE_IRON] = {
                 }
             }
         }
-        
+
         this.liquidStorage.updateUiScale("liquidScale", this.liquidStorage.getLiquidStored());
         this.container.setText("textInfo1", parseInt(this.data.heat) + "°C");
         this.container.setText("textInfo2", (this.data.redstone ? "ON" : "OFF") + (this.data.overheat > 0 ? ": OVERHEATED" : (!fuelTicks ? ": NO FUEL" : "")));
-        
+
         this.data.heat = Math.min(Math.max(this.data.heat, 0), MAX_HEAT);
         if (this.data.heat == MAX_HEAT){
             this.data.overheat = 3600; // 180 secs

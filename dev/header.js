@@ -13,7 +13,7 @@
  *  All rights belong to IchZerowan & #mineprogramming
  *  Original CoreEngine source: Zheka Smirnov
  *  Textures and mod design: Nikich21
- * 
+ *
  */
 
 var redstoneInverse = __config__.getBool('inverse_redstone');

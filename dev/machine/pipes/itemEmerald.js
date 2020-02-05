@@ -30,11 +30,11 @@ var emeraldPipeUI = new UI.StandartWindow({
                 }
             }
         },
-        
+
         "iconWhitelist": {
             type: "image", bitmap: "emerald_whitelist", x: 383, y: 203, z: 5, scale: 3.5
         },
-        
+
         "modeBlacklist": {
             type: "button", x: 450, y: 200, bitmap: "emerald_button_inactive", bitmap2: "emerald_button_active", scale: 3.5, 
             clicker: {
@@ -43,8 +43,7 @@ var emeraldPipeUI = new UI.StandartWindow({
                 }
             }
         },
-        
-        
+
         "iconBlacklist": {
             type: "image", bitmap: "emerald_blacklist", x: 453, y: 203, z: 5, scale: 3.5
         }
@@ -68,11 +67,11 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
         containerIndex: 0,
         mode: EMERALD_MODE_WHITELIST
     },
-    
+
     click: function(id, count, data){
-        
+
     },
-    
+
     /* callbacks */
     getGuiScreen: function(){
         return emeraldPipeUI;
@@ -83,7 +82,7 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
             this.reloadFilter();
         }
     },
-    
+
     getTransportSlots: function(){
         return {};
     },
@@ -103,12 +102,12 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
             }
         }
     },
-    
+
     reloadFilter: function(){
         this.filter = {};
         for (var i = 0; i < 9; i++){
             var slot = this.container.getSlot("slot" + i);
-            if (slot.id > 0){
+            if (slot.id != 0){
                 this.filter[slot.id + "." + slot.data] = true;
             }
         }
@@ -127,19 +126,19 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
             return true;
         }
     },
-    
+
     setMode: function(mode){
         this.data.mode = mode;
-        this.container.getElement("modeWhitelist").bitmap = 
+        this.container.getElement("modeWhitelist").bitmap =
             mode == EMERALD_MODE_WHITELIST? "emerald_button_active": "emerald_button_inactive";
-        this.container.getElement("modeBlacklist").bitmap = 
+        this.container.getElement("modeBlacklist").bitmap =
             mode == EMERALD_MODE_BLACKLIST? "emerald_button_active": "emerald_button_inactive";
     },
 
     findContainer: function(){
         var directions = ItemTransportingHelper.findNearbyContainers(this);
         var dir = directions[this.data.containerIndex % directions.length];
-        
+
         if (dir){
             var container = World.getContainer(this.x + dir.x, this.y + dir.y, this.z + dir.z);
             return {
@@ -149,7 +148,7 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
             };
         }
     },
-    
+
     getItemFrom: function(container, maxCount){
         // Native TileEntity
         if(container.getType && container.getSize){
@@ -157,15 +156,15 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
             let slot;
             for(var i = 0; i < size; i++){
                 var slot = container.getSlot(i);
-                if(slot.id > 0 && this.checkItem(slot.id, slot.data)){
+                if(slot.id != 0 && this.checkItem(slot.id, slot.data)){
                     var count = Math.min(maxCount, slot.count);
                     item = {id: slot.id, count: count, data: slot.data};
                     container.setSlot(i, slot.id, slot.count - count, slot.data);
                     break;
                 }
             }
-        } 
-        
+        }
+
         // TileEntity
         else {
             var tileEntity = container.tileEntity;
@@ -180,27 +179,27 @@ TileEntity.registerPrototype(BlockID.pipeItemEmerald, {
                     slotsInitialized = true;
                 }
             }
-            
+
             if (!slotsInitialized){
                 for (var name in container.slots){
                     slots.push(name);
                 }
-            }  
-            
+            }
+
             var item = null;
             for (var i in slots){
                 var slot = container.getSlot(slots[i]);
-                if (slot.id > 0 && this.checkItem(slot.id, slot.data)){
+                if (slot.id != 0 && this.checkItem(slot.id, slot.data)){
                     var count = Math.min(maxCount, slot.count);
                     item = {id: slot.id, count: count, data: slot.data};
                     slot.count -= count;
                     break;
                 }
             }
-            
+
             container.validateAll();
         }
-        
+
         return item;
     }
 });

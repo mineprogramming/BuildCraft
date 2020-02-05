@@ -10,7 +10,6 @@ setupWoodenFluidPipeRender(BlockID.pipeFluidWooden, {name: "pipe_fluid_wood", da
 //OVERRIDE
 
 
-
 TileEntity.registerPrototype(BlockID.pipeFluidWooden, {
     defaultValues: {
         storageIndex: 0,
@@ -27,12 +26,12 @@ TileEntity.registerPrototype(BlockID.pipeFluidWooden, {
             if (pipes.length > 0) {
                 for (var dir in pipes) {
                     var liquid = this.getLiquidFrom(storageData.liquidStorage, amount * 0.01);
-                    if (liquid) {      
+                    if (liquid) {
                         for (var pos in pipes[dir]) {
                             pipes[dir][pos] += this[pos];
                         }
                         LiquidTransportHelper.flushLiquid(pipes[dir], liquid.id, liquid.amount);
-                        
+
                     } else {
                         this.data.storageIndex++;
                     }
@@ -67,5 +66,5 @@ TileEntity.registerPrototype(BlockID.pipeFluidWooden, {
                 amount: storage.getLiquid(liquidStored, amount)
             };
         }
-    } 
+    }
 });

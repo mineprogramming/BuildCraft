@@ -2,21 +2,21 @@ var ItemTransportingHelper = {
     PipeTiles: {
         // connection types are registred with render connections
     },
-    
+
     PipeParams: {
         // params like friction are stored here
     },
-    
+
     TransportingDenied: {
         // TODO: add all blocks
     },
-    
+
     BasicItemContainers: {
         54: true,
         61: true,
         62: true
     },
-    
+
     registerItemPipe: function(pipe, type, params){
         this.PipeTiles[pipe] = type;
         if (!params){
@@ -27,32 +27,32 @@ var ItemTransportingHelper = {
         }
         this.PipeParams[pipe] = params;
     },
-    
+
     isPipe: function(block){
         return this.PipeTiles[block];
     },
-    
+
     canPipesConnect: function(pipe1, pipe2){
         var type1 = this.PipeTiles[pipe1] || ITEM_PIPE_CONNECTION_ANY;
         var type2 = this.PipeTiles[pipe2] || ITEM_PIPE_CONNECTION_ANY;
-        return (type1 == type2 && type1 != ITEM_PIPE_CONNECTION_WOOD) 
+        return (type1 == type2 && type1 != ITEM_PIPE_CONNECTION_WOOD)
             || (type1 == ITEM_PIPE_CONNECTION_ANY || type2 == ITEM_PIPE_CONNECTION_ANY)
             || (type1 == ITEM_PIPE_CONNECTION_STONE && type2 != ITEM_PIPE_CONNECTION_COBBLE)
             || (type2 == ITEM_PIPE_CONNECTION_STONE && type1 != ITEM_PIPE_CONNECTION_COBBLE)
             || (type1 == ITEM_PIPE_CONNECTION_COBBLE && type2 != ITEM_PIPE_CONNECTION_STONE)
             || (type2 == ITEM_PIPE_CONNECTION_COBBLE && type1 != ITEM_PIPE_CONNECTION_STONE);
     },
-    
+
     canTransportTo: function(pipe, x, y, z){
         var block = World.getBlock(x, y, z).id;
         if (this.BasicItemContainers[block])
-            return true; 
+            return true;
         if (block > 4096 && !this.TransportingDenied[block]){
             return (!this.isPipe(block) && TileEntity.isTileEntityBlock(block)) || this.canPipesConnect(block, pipe);
         }
         return false;
     },
-    
+
     findNearbyContainers: function(position){
         var directions = [
             {x: -1, y: 0, z: 0},
@@ -75,7 +75,7 @@ var ItemTransportingHelper = {
         }
         return possibleDirs;
     },
-    
+
     findBasicDirections: function(pipe, position, direction, checkBackwardDirection){
         var directions = [
             {x: -1, y: 0, z: 0},
@@ -97,7 +97,7 @@ var ItemTransportingHelper = {
         }
         return possibleDirs;
     },
-    
+
     filterDirections: function(listOfDirs, itemDirection){
         var resultDirs = [];
         for (var i in listOfDirs){
@@ -108,14 +108,14 @@ var ItemTransportingHelper = {
         }
         return resultDirs;
     },
-    
+
     getPathData: function(transportedItem, item, position, direction){
         position = {
             x: Math.floor(position.x),
             y: Math.floor(position.y),
             z: Math.floor(position.z),
         };
-        
+
         // cache block start
         var cachedData = TransportingCache.getInfo(position.x, position.y, position.z);
         if (!cachedData){
@@ -140,7 +140,7 @@ var ItemTransportingHelper = {
             TransportingCache.registerInfo(position.x, position.y, position.z, cachedData);
         }
         // cache block end
-        
+
         var resultDirs = this.filterDirections(cachedData.possibleDirs, direction);
         var acceleration = 0;
         if (cachedData.tileEntity){
@@ -151,7 +151,7 @@ var ItemTransportingHelper = {
                 acceleration = cachedData.tileEntity.getItemAcceleration(transportedItem, cachedData.possibleDirs, item, direction, resultDirs);
             }
         }
-        
+
         return {
             inPipe: cachedData.inPipe,
             directions: resultDirs,
@@ -177,28 +177,28 @@ var TransportingItem = new GameObject("bcTransportingItem", {
             count: 0,
             data: 0
         };
-        
+
         this.inPipeFlag = false;
-        
+
         this.animation = null;
-        
+
         /* setup pathfinding */
         this.target = null;
         this.velocity = .05;
         this.acceleration = .0;
         this.friction = .0;
         this.direction = {
-            x: 0, 
-            y: 0, 
+            x: 0,
+            y: 0,
             z: 0
         };
-        
+
     },
-    
+
     loaded: function(){
         this.reloadAnimation();
     },
-    
+
     update: function(){
         if (this.move()){
             this.pathfind();
@@ -208,19 +208,16 @@ var TransportingItem = new GameObject("bcTransportingItem", {
         }
         this.moveAnimation();
     },
-    
+
     destroySelf: function(){
         if (this.animation){
             this.animation.destroy();
         }
         this.destroy();
     },
-    
 
-    
-    
     /* basics */
-    
+
     setPosition: function(x, y, z){
         this.pos = {
             x: x,
@@ -228,32 +225,32 @@ var TransportingItem = new GameObject("bcTransportingItem", {
             z: z
         };
     },
-    
+
     setItem: function(id, count, data){
         this.item = {
             id: id,
-            count: count, 
+            count: count,
             data: data
         };
-        if (id > 0){
+        if (id != 0){
             this.reloadAnimation();
         }
     },
-    
+
     setItemSource: function(item){
         this.item = item || {id: 0, count: 0, data: 0};
         this.reloadAnimation();
     },
-    
+
     drop: function(){
         this.destroySelf();
-        if (this.item && this.item.id > 0 && this.item.count > 0){
+        if (this.item && this.item.id != 0 && this.item.count > 0){
             var item = World.drop(this.pos.x, this.pos.y, this.pos.z, this.item.id, this.item.count, this.item.data);
             Entity.setVelocity(item, this.direction.x * this.velocity * 1.5,  this.direction.y * this.velocity * 1.5,  this.direction.z * this.velocity * 1.5)
         }
         this.setItem(0, 0, 0);
     },
-    
+
     validate: function(){
         if (!this.item || this.item.count <= 0){
             this.destroySelf();
@@ -272,17 +269,16 @@ var TransportingItem = new GameObject("bcTransportingItem", {
             z: this.pos.z - delta.z,
         };
     },
-    
-    
+
     /* animation */
-    
+
     reloadAnimation: function(){
-        
+
         if (this.animation){
             this.animation.destroy();
         }
         this.animation = new Animation.Item(this.pos.x, this.pos.y, this.pos.z);
-        
+
         var modelCount = 1;
         if (this.item.count > 1){
             modelCount = 2;
@@ -293,7 +289,7 @@ var TransportingItem = new GameObject("bcTransportingItem", {
         if (this.item.count > 56){
             modelCount = 4;
         }
-        
+
         this.animation.describeItem({
             id: this.item.id,
             count: modelCount,
@@ -303,14 +299,13 @@ var TransportingItem = new GameObject("bcTransportingItem", {
         });
         this.animation.load();
     },
-    
+
     moveAnimation: function(){
         this.animation.setPos(this.pos.x, this.pos.y, this.pos.z);
     },
-    
-    
+
     /* pathfinding */
-    
+
     setTarget: function(x, y, z){
         this.target = {
             x: Math.floor(x) + .5 || 0,
@@ -318,7 +313,7 @@ var TransportingItem = new GameObject("bcTransportingItem", {
             z: Math.floor(z) + .5 || 0,
         };
     },
-    
+
     move: function(){
         this.velocity = Math.min(.5, Math.max(.02, this.velocity + this.acceleration - this.friction || 0));
         if (this.target && this.velocity){
@@ -341,27 +336,27 @@ var TransportingItem = new GameObject("bcTransportingItem", {
         }
         return true;
     },
-    
-    
+
+
     addItemToContainer: function(container){
         if (this.item.count <= 0){
             return;
         }
-        
+
         // Native TileEntity
         if(container.getType && container.getSize){
             let size = container.getSize();
             for (var i = 0; i < size; i++){
                 var slot = container.getSlot(i);
                 if (slot.id == 0 || slot.id == this.item.id && slot.data == this.item.data){
-                    var maxstack = slot.id > 0 ? Item.getMaxStack(slot.id) : 64;
+                    var maxstack = slot.id != 0? Item.getMaxStack(slot.id) : 64;
                     var add = Math.min(maxstack - slot.count, this.item.count);
                     this.item.count -= add;
                     container.setSlot(i, this.item.id, slot.count + add, this.item.data);
                 }
             }
         }
-        
+
         // TileEntity
         else {
             var tileEntity = container.tileEntity;
@@ -385,7 +380,7 @@ var TransportingItem = new GameObject("bcTransportingItem", {
             for (var i in slots){
                 var slot = container.getSlot(slots[i]);
                 if (slot.id == 0 || slot.id == this.item.id && slot.data == this.item.data){
-                    var maxstack = slot.id > 0 ? Item.getMaxStack(slot.id) : 64;
+                    var maxstack = slot.id != 0 ? Item.getMaxStack(slot.id) : 64;
                     var add = Math.min(maxstack - slot.count, this.item.count);
                     this.item.count -= add;
                     slot.count += add;
@@ -393,25 +388,25 @@ var TransportingItem = new GameObject("bcTransportingItem", {
                     slot.data = this.item.data;
                 }
             }
-            
+
             container.validateAll();
         }
     },
-    
+
     pathfind: function(){
         if (this.dropFlag){
             this.drop();
             return;
         }
-        
+
         var pathdata = ItemTransportingHelper.getPathData(this, this.item, this.pos, this.direction);
         var directions = pathdata.directions;
         var dir = directions[parseInt(directions.length * Math.random())];
-        
+
         this.acceleration = pathdata.acceleration;
         this.friction = pathdata.friction;
-        
-        if (pathdata.inPipe){           
+
+        if (pathdata.inPipe){
             if (!dir){
                 dir = this.direction;
                 this.dropFlag = true;
@@ -433,7 +428,7 @@ var TransportingItem = new GameObject("bcTransportingItem", {
                 this.drop();
             }
         }
-        
+
         if (dir){
             this.target = {
                 x: Math.floor(this.pos.x) + .5 + dir.x,

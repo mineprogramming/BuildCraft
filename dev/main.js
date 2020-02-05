@@ -1,4 +1,7 @@
-
+IMPORT("StorageInterface");
+function random(min, max){
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 // constants
 var FURNACE_FUEL_MAP = {
     5: 300,
@@ -41,7 +44,7 @@ function TileRenderModel(id, data){
         this.id = id;
         this.data = data || 0;
         this.convertedId = this.id * 16 + this.data;
-        
+
         if (this.convertedId){
             ICRenderLib.registerTileModel(this.convertedId, this);
         }
@@ -49,13 +52,13 @@ function TileRenderModel(id, data){
             Logger.Log("tile model cannot be registred: block id is undefined or 0", "ERROR");
         }
     }
-    
+
     this.cloneForId = function(id, data){
         this.registerAsId(id, data);
     }
-    
+
     this.registerAsId(id, data);
-    
+
     this.boxes = [];
     this.dynamic = [];
 
@@ -81,13 +84,13 @@ function TileRenderModel(id, data){
     this.addBoxF = function(x1, y1, z1, x2, y2, z2, block){
         this.boxes.push(this.formatBox(x1, y1, z1, x2, y2, z2, block));
     }
- 
+
     this.addBox = function(x, y, z, size, block){
         this.boxes.push(this.formatBox(
                 x, y, z,
                 (x + size.x),
                 (y + size.y),
-                (z + size.z), 
+                (z + size.z),
                 block
             )
         );
@@ -100,7 +103,7 @@ function TileRenderModel(id, data){
             mode: Math.max(0, mode || 0),
 
             boxes: [],
-            
+
             addBoxF: function(x1, y1, z1, x2, y2, z2, block){
                 this.boxes.push(model.formatBox(x1, y1, z1, x2, y2, z2, block));
             },
@@ -110,7 +113,7 @@ function TileRenderModel(id, data){
                         x, y, z,
                         (x + size.x),
                         (y + size.y),
-                        (z + size.z), 
+                        (z + size.z),
                         block
                     )
                 );
@@ -118,40 +121,40 @@ function TileRenderModel(id, data){
 
             tiles: {},
             tileGroups: [],
-            
+
             addBlock: function(id, data){
                 var convertedId = block.id * 16 + (block.datadata || 0);
                 this.tiles[convertedId] = true;
             },
-            
+
             addBlockGroup: function(name){
                 this.tileGroups.push(name);
             },
-            
+
             addBlockGroupFinal: function(name){
                 var group = ICRenderLib.getConnectionGroup(name);
                 for (var id in group){
                     this.tiles[id] = true;
                 }
             },
-            
+
             writeCondition: function(){
                 var output = parseInt(this.x) + " " + parseInt(this.y) + " " + parseInt(this.z) + " " + parseInt(this.mode) + "\n";
-                
+
                 for (var i in this.tileGroups){
                     this.addBlockGroupFinal(this.tileGroups[i]);
                 }
-                
+
                 var blocks = [];
                 for(var id in this.tiles){
                     blocks.push(id);
                 }
                 output += blocks.length + " " + blocks.join(" ") + "\n" + condition.boxes.length + "\n";
-                
+
                 for(var i in condition.boxes){
                     output += condition.boxes[i].join(" ") + "\n";
                 }
-                
+
                 return output;
             }
         };
@@ -159,44 +162,44 @@ function TileRenderModel(id, data){
         this.dynamic.push(condition);
         return condition;
     }
-    
+
     this.connections = {};
     this.connectionGroups = [];
     this.connectionWidth = 0.5;
     this.hasConnections = false;
-    
+
     this.setConnectionWidth = function(width){
         this.connectionWidth = width;
     }
-    
+
     this.addConnection = function(id, data){
         var convertedId = id * 16 + (data || 0);
         this.connections[convertedId] = true;
         this.hasConnections = true;
     }
-    
+
     this.addConnectionGroup = function(name){
         this.connectionGroups.push(name);
         this.hasConnections = true;
     }
-    
+
     this.addConnectionGroupFinal = function(name){
         var group = ICRenderLib.getConnectionGroup(name);
         for (var id in group){
             this.connections[id] = true;
         }
     }
-    
+
     this.addSelfConnection = function(){
         this.connections[this.convertedId] = true;
         this.hasConnections = true;
     }
-    
+
     this.writeAsId = function(id){
         var output = "";
         output += id + " " + (this.hasConnections ? 1 : 0) + "\n";
         output += this.boxes.length + "\n";
-        
+
         for (var i in this.boxes){
             output += this.boxes[i].join(" ") + "\n";
         }
@@ -206,16 +209,16 @@ function TileRenderModel(id, data){
             var condition = this.dynamic[i];
             output += condition.writeCondition();
         }
-        
+
         for (var i in this.connectionGroups){
             this.addConnectionGroupFinal(this.connectionGroups[i]);
         }
-        
+
         var connections = [];
         for (var id in this.connections){
             connections.push(id);
         }
-        
+
         output += connections.length + " " + this.connectionWidth + "\n" + connections.join(" ");
         return output;
     }
@@ -226,11 +229,11 @@ if (!ICRenderLib){
     var ICRenderLib = {
         /* model registry */
         tileModels: {},
-        
+
         registerTileModel: function(convertedId, model){
             this.tileModels[convertedId] = model;
         },
-        
+
         /* output */
         writeAllData: function(){
             var output = "";
@@ -239,45 +242,44 @@ if (!ICRenderLib){
                 output += this.tileModels[id].writeAsId(id) + "\n\n";
                 count++;
             }
-            
+
             output = count + "\n\n" + output;
             FileTools.WriteText("games/com.mojang/mods/icrender", output);
         },
-        
+
         /* connection groups functions */
         connectionGroups: {},
-        
+
         addConnectionBlockWithData: function(name, blockId, blockData){
             var group = this.connectionGroups[name];
             if (!group){
                 group = {};
                 this.connectionGroups[name] = group;
             }
-            
+
             group[blockId * 16 + blockData] = true;
         },
-        
+
         addConnectionBlock: function(name, blockId){
             for (var data = 0; data < 16; data++){
                 this.addConnectionBlockWithData(name, blockId, data);
             }
         },
-        
+
         addConnectionGroup: function(name, blockIds){
             for (var i in blockIds){
                 this.addConnectionBlock(name, blockIds[i]);
             }
         },
-        
+
         getConnectionGroup: function(name){
             return this.connectionGroups[name];
         },
-        
-        
+
         /* standart models */
         registerAsWire: function(id, connectionGroupName, width){
             width = width || 0.5;
-            
+
             var model = new TileRenderModel(id, 0);
             model.addConnectionGroup(connectionGroupName);
             model.addSelfConnection();
@@ -287,12 +289,12 @@ if (!ICRenderLib){
                 y: width,
                 z: width,
             });
-            
+
             this.addConnectionBlock(connectionGroupName, id);
         }
     };
-    
-    
+
+
     ModAPI.registerAPI("ICRenderLib", ICRenderLib);
     Callback.addCallback("PostLoaded", function(){
         ICRenderLib.writeAllData();
@@ -463,21 +465,21 @@ var TRANSPORTING_CACHE_DEBUG = false;
 
 var TransportingCache = {
     cache: [],
-    
+
     debug: {
         calls: 0,
         overrides: 0,
     },
-    
+
     clear: function(){
         this.cache = [];
     },
-    
+
     registerInfo: function(x, y, z, info){
         var key = x + "." + y + "." + z;
         this.cache[key] = info;
     },
-    
+
     getInfo: function(x, y, z, info){
         var key = x + "." + y + "." + z;
         return this.cache[key];
@@ -507,19 +509,19 @@ if (TRANSPORTING_CACHE_DEBUG){
         var key = x + "." + y + "." + z;
         this.cache[key] = info;
     };
-    
+
     TransportingCache.getInfo = function(x, y, z, info){
         this.debug.calls++;
         var key = x + "." + y + "." + z;
         return this.cache[key];
     };
-    
+
     TransportingCache.debugTick = function(){
         Game.tipMessage(JSON.stringify(this.debug, "\t"));
         this.debug.calls = 0;
         this.debug.overrides = 0;
     };
-    
+
     Callback.addCallback("tick", function(){
         TransportingCache.debugTick();
     });
@@ -530,21 +532,21 @@ var TRANSPORTING_CACHE_DEBUG = false;
 
 var LiquidTransportingCache = {
     cache: [],
-    
+
     debug: {
         calls: 0,
         overrides: 0,
     },
-    
+
     clear: function(){
         this.cache = [];
     },
-    
+
     registerInfo: function(x, y, z, info){
         var key = x + "." + y + "." + z;
         this.cache[key] = info;
     },
-    
+
     getInfo: function(x, y, z, info){
         var key = x + "." + y + "." + z;
         return this.cache[key];
@@ -567,16 +569,16 @@ Callback.addCallback("DestroyBlock", function(){
 
 var LiquidMap = {
     cache: {},
-    
+
     clear: function(){
         this.cache = {};
     },
-    
+
     registerLiquid: function(x, y, z, info){
         var key = x + "." + y + "." + z;
         this.cache[key] = info;
     },
-    
+
     getLiquid: function(x, y, z){
         var key = x + "." + y + "." + z;
         return this.cache[key];
