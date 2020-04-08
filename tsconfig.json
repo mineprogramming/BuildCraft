@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "lib": ["es2018"],
+	  "outFile": "BuildCraft/bundle.js",
+    "allowJs": true,
+    "experimentalDecorators": true
+  },
+  "exclude": [
+    "typedoc",
+    "**/node_modules/*",
+    "dom"
+  ],
+  "files": [
+    "../declarations/core-engine.d.ts",
+    "../declarations/android-declarations.d.ts",
+    "../declarations/android-platform-21.d.ts",
+    "../declarations/lib/StorageInterface.d.ts",
+    "dev/main.js"
+  ]
+}
+
