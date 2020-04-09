@@ -1,6 +1,7 @@
 *.bat
 *.zip
 *.rar
+*.icmod
 
 .vscode/*
 *.code-workspace
