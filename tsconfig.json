@@ -1,4 +1,5 @@
 {
+  "compileOnSave": true,
   "compilerOptions": {
     "target": "ES5",
     "lib": ["es2018"],
@@ -11,12 +12,14 @@
     "**/node_modules/*",
     "dom"
   ],
+  "include": [
+    "dev/**/*"
+  ],
   "files": [
     "../declarations/core-engine.d.ts",
     "../declarations/android-declarations.d.ts",
     "../declarations/android-platform-21.d.ts",
-    "../declarations/lib/StorageInterface.d.ts",
-    "dev/main.js"
+    "../declarations/lib/StorageInterface.d.ts"
   ]
 }
 
