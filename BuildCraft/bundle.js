@@ -80,18 +80,36 @@ var EngineType;
 var RenderManager = /** @class */ (function () {
     function RenderManager() {
     }
+    RenderManager.getRender = function (renderName) {
+    };
+    RenderManager.renders = {
+        engine: {}
+    };
     return RenderManager;
 }());
-/// <reference path="../EngineHeat.ts" />
-/// <reference path="../EngineType.ts" />
-/// <reference path="../model/RenderManager.ts" />
-var textureOffset = {
+var EngineRender = /** @class */ (function () {
+    function EngineRender(texture) {
+        this.texture = texture;
+        this.render = new Render({ skin: "model/" + this.texture.getTexture() });
+        this.render.setPart("body", this.getModelData(), this.texture.getSize());
+    }
+    EngineRender.prototype.getID = function () {
+        return this.render.getId();
+    };
+    EngineRender.prototype.getModelData = function () {
+        return [];
+    };
+    return EngineRender;
+}());
+var TexturesOffset = {
     engine: {
-        creative: { x: 320, y: 96 },
-        iron: "iron",
-        redstone: "redstone",
-        stirling: "stirling",
-        custom: "custom"
+        base: {
+            creative: { x: 320, y: 96 },
+            iron: "iron",
+            redstone: "redstone",
+            stirling: "stirling",
+            custom: "custom"
+        }
     },
     trunk: {
         BLUE: { x: 64, y: 0 },
@@ -101,36 +119,111 @@ var textureOffset = {
         BLACK: { x: 64, y: 128 }
     }
 };
+var ModelTexture = /** @class */ (function () {
+    function ModelTexture(offset) {
+        this.offset = offset;
+        this.name = "buildcraft_engine_atlas.png";
+    }
+    ModelTexture.prototype.getUV = function () {
+        return this.offset;
+    };
+    ModelTexture.prototype.getSize = function () {
+        return { width: 512, height: 512 };
+    };
+    ModelTexture.prototype.getTexture = function () {
+        return this.name;
+    };
+    ModelTexture.prototype.textureMatches = function (texture) {
+        return this.name == texture.name;
+    };
+    return ModelTexture;
+}());
+/// <reference path="EngineRender.ts" />
+/// <reference path="../ModelTexture.ts" />
+var BaseRender = /** @class */ (function (_super) {
+    __extends(BaseRender, _super);
+    function BaseRender(type) {
+        return _super.call(this, new ModelTexture(TexturesOffset.engine.base[type])) || this;
+    }
+    BaseRender.prototype.getModelData = function () {
+        return [
+            {
+                type: "box",
+                uv: this.texture.getUV(),
+                coords: {
+                    x: -6,
+                    y: 24,
+                    z: 0,
+                },
+                size: {
+                    x: 4,
+                    y: 16,
+                    z: 16
+                }
+            }
+        ];
+    };
+    return BaseRender;
+}(EngineRender));
+/// <reference path="EngineRender.ts" />
+/// <reference path="../ModelTexture.ts" />
+var TrunkRender = /** @class */ (function (_super) {
+    __extends(TrunkRender, _super);
+    function TrunkRender(type) {
+        return _super.call(this, new ModelTexture(TexturesOffset.trunk["BLUE"])) || this;
+    }
+    TrunkRender.prototype.getModelData = function () {
+        return [
+            {
+                type: "box",
+                uv: this.texture.getUV(),
+                coords: {
+                    x: .001,
+                    y: 24,
+                    z: 0,
+                },
+                size: {
+                    x: 16,
+                    y: 8,
+                    z: 8
+                }
+            }
+        ];
+    };
+    return TrunkRender;
+}(EngineRender));
+/// <reference path="../EngineHeat.ts" />
+/// <reference path="../EngineType.ts" />
+/// <reference path="../model/render/RenderManager.ts" />
+/// <reference path="../model/render/BaseRender.ts" />
+/// <reference path="../model/render/TrunkRender.ts" />
 var EngineAnimation = /** @class */ (function () {
     function EngineAnimation(coords, type) {
         this.coords = coords;
         this.type = type;
         Debug.m("constructor EngineAnimation");
         this.base = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
+        this.trunk = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
         Debug.m(this.type);
-        this.baseTexture = new ModelTexture(textureOffset.engine["creative"]);
-        this.trunkTexture = new ModelTexture(textureOffset.trunk["BLUE"]);
+        this.baseRender = new BaseRender("creative");
+        this.trunkRender = new TrunkRender("creative");
+        this.baseTexture = new ModelTexture(TexturesOffset.engine["creative"]);
+        this.trunkTexture = new ModelTexture(TexturesOffset.trunk["BLUE"]);
         this.initAnim();
     }
     EngineAnimation.prototype.initAnim = function () {
-        this.base.describe(this.getDescription());
+        this.base.describe({
+            render: this.baseRender.getID()
+        });
         this.base.load();
-        //this.base.render.transform.rotate(Math.PI / 3, Math.PI / 3 , Math.PI / 3);
-        //anim.render.transform.clear().rotate(0, -1.62, 0).rotate(....).translate(0, 1.62, 0)
+        this.trunk.describe({
+            render: this.trunkRender.getID()
+        });
+        this.trunk.load();
+        //this.base.render.transform.rotate(Math.PI, Math.PI , Math.PI);
+        //this.base.render.rebuild();
     };
     EngineAnimation.prototype.update = function () {
-    };
-    EngineAnimation.prototype.getDescription = function () {
-        return {
-            render: this.getRender().getId()
-        };
-    };
-    EngineAnimation.prototype.getRender = function () {
-        Debug.m("getRender");
-        Debug.m("model/" + this.baseTexture.getTexture() + "  " + this.baseTexture.getSize());
-        var render = new Render({ skin: "model/" + this.baseTexture.getTexture() });
-        render.setPart("body", this.getModelData(), this.baseTexture.getSize());
-        return render;
     };
     EngineAnimation.prototype.getModelData = function () {
         Debug.m("getModelData ");
@@ -221,22 +314,3 @@ var CreativeEngine = /** @class */ (function (_super) {
 }(BCEngine));
 /// <reference path="CreativeEngine.ts" />
 var creativeEngine = new CreativeEngine();
-var ModelTexture = /** @class */ (function () {
-    function ModelTexture(offset) {
-        this.offset = offset;
-        this.name = "buildcraft_engine_atlas.png";
-    }
-    ModelTexture.prototype.getUV = function () {
-        return this.offset;
-    };
-    ModelTexture.prototype.getSize = function () {
-        return { width: 512, height: 512 };
-    };
-    ModelTexture.prototype.getTexture = function () {
-        return this.name;
-    };
-    ModelTexture.prototype.textureMatches = function (texture) {
-        return this.name == texture.name;
-    };
-    return ModelTexture;
-}());
