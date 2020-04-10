@@ -1,5 +1,7 @@
 /// <reference path="components/EngineBlock.ts" />
 /// <reference path="components/EngineItem.ts" />
+/// <reference path="components/EngineAnimation.ts" />
+/// <reference path="EngineHeat.ts" />
 /// <reference path="EngineType.ts" />
 /// <reference path="TileEntityProvider.ts" />
 /// <reference path="../Coords.ts" />
@@ -10,12 +12,10 @@ abstract class BCEngine {
 
     private tileEntityProvider: TileEntityProvider;
 
-    private animationBase: object;
-    private animationPiston: object;
-
     constructor(public readonly type: EngineType){
         this.block = new EngineBlock(this.type);
         this.item = new EngineItem(this.type, this.block);
+
         this.tileEntityProvider = new TileEntityProvider(this.block.id, this.tileEntityObject);
         let self = this;
         Item.registerUseFunction(this.item.stringId, function(coords, item, block){
@@ -30,11 +30,14 @@ abstract class BCEngine {
     }
 
     protected tileEntityObject: object = {
-        init: this.init,
-        tick: this.tick
+        init: function(){
+            alert("init ");
+            Debug.m(this.type);
+            this.animation = new EngineAnimation(BlockPos.getCoords(this), this.type);
+        },
+        tick: function(){
+            this.animation.update();
+        },
+        animation: null
     };
-
-    //TileEntity
-    protected init(): void {}
-    protected tick(): void {}
 }
