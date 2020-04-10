@@ -1,4 +1,5 @@
 /// <reference path="BCEngine.ts" />
+/// <reference path="EngineType.ts" />
 class CreativeEngine extends BCEngine {
     constructor(){
         super(EngineType.creative)
