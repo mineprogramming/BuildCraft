@@ -1,4 +1,4 @@
-var TexturesOffset = {
+const TexturesOffset = {
     engine: {
         base: {
             creative: {x: 320, y: 96},
@@ -6,6 +6,9 @@ var TexturesOffset = {
             redstone : "redstone",
             stirling : "stirling",
             custom : "custom"
+        },
+        piston: {
+
         }
     },
     trunk: {

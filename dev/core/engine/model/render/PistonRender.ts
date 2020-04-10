@@ -1,8 +1,8 @@
 /// <reference path="EngineRender.ts" />
 /// <reference path="../ModelTexture.ts" />
-class TrunkRender extends EngineRender{
+class PistonRender extends EngineRender{
     constructor(type){
-        super(new ModelTexture(TexturesOffset.trunk["BLUE"]))
+        super(new ModelTexture(TexturesOffset.engine.base["creative"]))
     }
 
     protected getModelData(){
@@ -11,14 +11,14 @@ class TrunkRender extends EngineRender{
                 type: "box",
                 uv: this.texture.getUV(),
                 coords: {
-                    x: .01,
+                    x: -2,
                     y: 24,
                     z: 0,
                 },
                 size: {
-                    x: 16,
-                    y: 8,
-                    z: 8
+                    x: 4,
+                    y: 16,
+                    z: 16
                 }
             }
         ]

@@ -91,10 +91,13 @@ var EngineRender = /** @class */ (function () {
     function EngineRender(texture) {
         this.texture = texture;
         this.render = new Render({ skin: "model/" + this.texture.getTexture() });
-        this.render.setPart("body", this.getModelData(), this.texture.getSize());
+        this.render.setPart("head", this.getModelData(), this.texture.getSize());
     }
     EngineRender.prototype.getID = function () {
         return this.render.getId();
+    };
+    EngineRender.prototype.rebuild = function () {
+        this.render.rebuild();
     };
     EngineRender.prototype.getModelData = function () {
         return [];
@@ -109,7 +112,8 @@ var TexturesOffset = {
             redstone: "redstone",
             stirling: "stirling",
             custom: "custom"
-        }
+        },
+        piston: {}
     },
     trunk: {
         BLUE: { x: 64, y: 0 },
@@ -178,7 +182,7 @@ var TrunkRender = /** @class */ (function (_super) {
                 type: "box",
                 uv: this.texture.getUV(),
                 coords: {
-                    x: .001,
+                    x: .01,
                     y: 24,
                     z: 0,
                 },
@@ -192,70 +196,64 @@ var TrunkRender = /** @class */ (function (_super) {
     };
     return TrunkRender;
 }(EngineRender));
-/// <reference path="../EngineHeat.ts" />
-/// <reference path="../EngineType.ts" />
-/// <reference path="../model/render/RenderManager.ts" />
-/// <reference path="../model/render/BaseRender.ts" />
-/// <reference path="../model/render/TrunkRender.ts" />
-var EngineAnimation = /** @class */ (function () {
-    function EngineAnimation(coords, type) {
-        this.coords = coords;
-        this.type = type;
-        Debug.m("constructor EngineAnimation");
-        this.base = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
-        this.trunk = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
-        Debug.m(this.type);
-        this.baseRender = new BaseRender("creative");
-        this.trunkRender = new TrunkRender("creative");
-        this.baseTexture = new ModelTexture(TexturesOffset.engine["creative"]);
-        this.trunkTexture = new ModelTexture(TexturesOffset.trunk["BLUE"]);
-        this.initAnim();
+/// <reference path="EngineRender.ts" />
+/// <reference path="../ModelTexture.ts" />
+var PistonRender = /** @class */ (function (_super) {
+    __extends(PistonRender, _super);
+    function PistonRender(type) {
+        return _super.call(this, new ModelTexture(TexturesOffset.engine.base["creative"])) || this;
     }
-    EngineAnimation.prototype.initAnim = function () {
-        this.base.describe({
-            render: this.baseRender.getID()
-        });
-        this.base.load();
-        this.trunk.describe({
-            render: this.trunkRender.getID()
-        });
-        this.trunk.load();
-        //this.base.render.transform.rotate(Math.PI, Math.PI , Math.PI);
-        //this.base.render.rebuild();
-    };
-    EngineAnimation.prototype.update = function () {
-    };
-    EngineAnimation.prototype.getModelData = function () {
-        Debug.m("getModelData ");
-        Debug.m(this.baseTexture.getUV());
-        return [{
+    PistonRender.prototype.getModelData = function () {
+        return [
+            {
                 type: "box",
-                uv: this.baseTexture.getUV(),
+                uv: this.texture.getUV(),
                 coords: {
-                    x: 2,
-                    y: 32,
-                    z: -8,
+                    x: -2,
+                    y: 24,
+                    z: 0,
                 },
                 size: {
                     x: 4,
                     y: 16,
                     z: 16
                 }
-            },
-            {
-                type: "box",
-                uv: this.trunkTexture.getUV(),
-                coords: {
-                    x: 8 + 1 / 100,
-                    y: 32,
-                    z: -8,
-                },
-                size: {
-                    x: 16,
-                    y: 8,
-                    z: 8
-                }
-            }];
+            }
+        ];
+    };
+    return PistonRender;
+}(EngineRender));
+/// <reference path="../EngineHeat.ts" />
+/// <reference path="../EngineType.ts" />
+/// <reference path="../model/render/RenderManager.ts" />
+/// <reference path="../model/render/BaseRender.ts" />
+/// <reference path="../model/render/TrunkRender.ts" />
+/// <reference path="../model/render/PistonRender.ts" />
+var EngineAnimation = /** @class */ (function () {
+    function EngineAnimation(coords, type) {
+        this.coords = coords;
+        this.type = type;
+        Debug.m("constructor EngineAnimation");
+        this.baseAnimation = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
+        this.trunkAnimation = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
+        this.pistonAnimation = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
+        Debug.m(this.type);
+        this.baseRender = new BaseRender("creative");
+        this.trunkRender = new TrunkRender("creative");
+        this.pistonRender = new PistonRender("creative");
+        this.initAnimations();
+    }
+    EngineAnimation.prototype.initAnimations = function () {
+        this.baseAnimation.describe({ render: this.baseRender.getID() });
+        this.baseAnimation.load();
+        this.trunkAnimation.describe({ render: this.trunkRender.getID() });
+        this.trunkAnimation.load();
+        this.pistonAnimation.describe({ render: this.pistonRender.getID() });
+        this.pistonAnimation.load();
+        //this.baseAnimation.render.transform.rotate(Math.PI/3, Math.PI/2 , Math.PI/4);
+        //this.baseRender.rebuild();
+    };
+    EngineAnimation.prototype.update = function () {
     };
     return EngineAnimation;
 }());
