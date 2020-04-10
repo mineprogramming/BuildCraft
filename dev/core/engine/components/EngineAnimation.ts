@@ -15,19 +15,28 @@ class EngineAnimation {
     private readonly trunkRender: TrunkRender;
     private readonly pistonRender: PistonRender;
 
-    constructor(public readonly coords: IBlockPos, private readonly type: EngineType){
-        Debug.m("constructor EngineAnimation");
-        this.baseAnimation = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
-        this.trunkAnimation = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
-        this.pistonAnimation = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
+    private pistonPosition: number = 0;//TODO add getter and setter
 
-        Debug.m(this.type);
+    private pushingMultiplier: number = 1;
+    public readonly coords: IBlockPos;
+
+    constructor(pos: IBlockPos, private readonly type: EngineType){
+        this.coords = {x: pos.x + .5, y: pos.y +.5, z: pos.z + .5};
+        this.baseAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
+        this.trunkAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
+        this.pistonAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
+
+        this.pistonAnimation.setInterpolationEnabled(true);
 
         this.baseRender = new BaseRender("creative");
         this.trunkRender = new TrunkRender("creative");
         this.pistonRender = new PistonRender("creative");
 
         this.initAnimations();
+    }
+
+    public isReadyToDeployEnergy(): Boolean {
+        return this.pistonPosition > 24
     }
 
     private initAnimations(){
@@ -44,7 +53,14 @@ class EngineAnimation {
         //this.baseRender.rebuild();
     }
 
-    public update(): void{
-        
+    public update(power: number): void{
+        this.pushingMultiplier = this.pistonPosition < 0 ? 1 : this.pushingMultiplier;
+
+        this.pistonPosition += power * this.pushingMultiplier;
+        this.pistonAnimation.setPos(this.coords.x + this.pistonPosition / 50, this.coords.y, this.coords.z);
+    }
+
+    public goBack(): void{
+        this.pushingMultiplier = -1;
     }
 }

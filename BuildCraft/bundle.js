@@ -63,12 +63,19 @@ var EngineItem = /** @class */ (function () {
 }());
 var EngineHeat;
 (function (EngineHeat) {
-    EngineHeat[EngineHeat["BLUE"] = 0] = "BLUE";
-    EngineHeat[EngineHeat["GREEN"] = 1] = "GREEN";
-    EngineHeat[EngineHeat["ORANGE"] = 2] = "ORANGE";
-    EngineHeat[EngineHeat["RED"] = 3] = "RED";
-    EngineHeat[EngineHeat["BLACK"] = 4] = "BLACK";
+    EngineHeat["BLUE"] = "BLUE";
+    EngineHeat["GREEN"] = "GREEN";
+    EngineHeat["ORANGE"] = "ORANGE";
+    EngineHeat["RED"] = "RED";
+    EngineHeat["BLACK"] = "BLACK";
 })(EngineHeat || (EngineHeat = {}));
+var HeatOrder = [
+    EngineHeat.BLUE,
+    EngineHeat.GREEN,
+    EngineHeat.ORANGE,
+    EngineHeat.RED,
+    EngineHeat.BLACK
+];
 var EngineType;
 (function (EngineType) {
     EngineType["creative"] = "creative";
@@ -230,19 +237,23 @@ var PistonRender = /** @class */ (function (_super) {
 /// <reference path="../model/render/TrunkRender.ts" />
 /// <reference path="../model/render/PistonRender.ts" />
 var EngineAnimation = /** @class */ (function () {
-    function EngineAnimation(coords, type) {
-        this.coords = coords;
+    function EngineAnimation(pos, type) {
         this.type = type;
-        Debug.m("constructor EngineAnimation");
-        this.baseAnimation = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
-        this.trunkAnimation = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
-        this.pistonAnimation = new Animation.Base(this.coords.x + .5, this.coords.y + .5, this.coords.z + .5);
-        Debug.m(this.type);
+        this.pistonPosition = 0; //TODO add getter and setter
+        this.pushingMultiplier = 1;
+        this.coords = { x: pos.x + .5, y: pos.y + .5, z: pos.z + .5 };
+        this.baseAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
+        this.trunkAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
+        this.pistonAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
+        this.pistonAnimation.setInterpolationEnabled(true);
         this.baseRender = new BaseRender("creative");
         this.trunkRender = new TrunkRender("creative");
         this.pistonRender = new PistonRender("creative");
         this.initAnimations();
     }
+    EngineAnimation.prototype.isReadyToDeployEnergy = function () {
+        return this.pistonPosition > 24;
+    };
     EngineAnimation.prototype.initAnimations = function () {
         this.baseAnimation.describe({ render: this.baseRender.getID() });
         this.baseAnimation.load();
@@ -253,42 +264,86 @@ var EngineAnimation = /** @class */ (function () {
         //this.baseAnimation.render.transform.rotate(Math.PI/3, Math.PI/2 , Math.PI/4);
         //this.baseRender.rebuild();
     };
-    EngineAnimation.prototype.update = function () {
+    EngineAnimation.prototype.update = function (power) {
+        this.pushingMultiplier = this.pistonPosition < 0 ? 1 : this.pushingMultiplier;
+        this.pistonPosition += power * this.pushingMultiplier;
+        this.pistonAnimation.setPos(this.coords.x + this.pistonPosition / 50, this.coords.y, this.coords.z);
+    };
+    EngineAnimation.prototype.goBack = function () {
+        this.pushingMultiplier = -1;
     };
     return EngineAnimation;
-}());
-var TileEntityProvider = /** @class */ (function () {
-    function TileEntityProvider(blockId, model) {
-        this.blockId = blockId;
-        this.model = model;
-        TileEntity.registerPrototype(blockId, model);
-    }
-    return TileEntityProvider;
 }());
 /// <reference path="components/EngineBlock.ts" />
 /// <reference path="components/EngineItem.ts" />
 /// <reference path="components/EngineAnimation.ts" />
 /// <reference path="EngineHeat.ts" />
 /// <reference path="EngineType.ts" />
-/// <reference path="TileEntityProvider.ts" />
 /// <reference path="../Coords.ts" />
+var BCEngineTileEntity = /** @class */ (function () {
+    function BCEngineTileEntity(maxHeat, type) {
+        this.maxHeat = maxHeat;
+        this.type = type;
+        this.data = {
+            energy: 0,
+            heat: 0,
+            power: 0,
+            targetPower: 0,
+            heatStage: EngineHeat.BLUE
+        };
+        this.defaultValues = {
+            energy: 0,
+            heat: 0,
+            power: 0,
+            targetPower: 0,
+            heatStage: EngineHeat.BLUE
+        };
+        this.engineAnimation = null;
+    } //all members should be public
+    BCEngineTileEntity.prototype.init = function () {
+        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type);
+    };
+    BCEngineTileEntity.prototype.tick = function () {
+        this.engineAnimation.update(this.data.power);
+        this.updatePower();
+        this.data.heatStage = HeatOrder[Math.min(3, Math.max(0, this.getHeatStage() || 0))];
+        this.setPower(this.getHeatStage() + .4);
+        this.data.heat = Math.min(Math.max(this.data.heat, this.maxHeat), 100);
+        if (this.engineAnimation.isReadyToDeployEnergy()) {
+            this.engineAnimation.goBack();
+            this.deployEnergyToTarget();
+        }
+    };
+    BCEngineTileEntity.prototype.getHeatStage = function () {
+        var index = Math.floor(this.data.heat / this.maxHeat * 3);
+        return index;
+    };
+    BCEngineTileEntity.prototype.updatePower = function () {
+        var change = .04;
+        var add = this.data.targetPower - this.data.power;
+        if (add > change) {
+            add = change;
+        }
+        if (add < -change) {
+            add = -change;
+        }
+        this.data.power += add;
+    };
+    BCEngineTileEntity.prototype.setPower = function (power) {
+        this.data.targetPower = power;
+    };
+    BCEngineTileEntity.prototype.deployEnergyToTarget = function () {
+        //TODO deploy
+    };
+    return BCEngineTileEntity;
+}());
 var BCEngine = /** @class */ (function () {
     function BCEngine(type) {
         this.type = type;
-        this.tileEntityObject = {
-            init: function () {
-                alert("init ");
-                Debug.m(this.type);
-                this.animation = new EngineAnimation(BlockPos.getCoords(this), this.type);
-            },
-            tick: function () {
-                this.animation.update();
-            },
-            animation: null
-        };
+        this.maxHeat = 100;
         this.block = new EngineBlock(this.type);
         this.item = new EngineItem(this.type, this.block);
-        this.tileEntityProvider = new TileEntityProvider(this.block.id, this.tileEntityObject);
+        TileEntity.registerPrototype(this.block.id, new BCEngineTileEntity(this.maxHeat, this.type));
         var self = this;
         Item.registerUseFunction(this.item.stringId, function (coords, item, block) {
             Debug.m(coords.relative);
