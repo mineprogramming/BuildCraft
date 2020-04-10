@@ -1,19 +1,13 @@
-/// <reference path="components/EngineBlock.ts" />
-/// <reference path="components/EngineItem.ts" />
-/// <reference path="components/EngineAnimation.ts" />
-/// <reference path="EngineHeat.ts" />
-/// <reference path="EngineType.ts" />
-/// <reference path="../Coords.ts" />
 class BCEngineTileEntity {
     constructor(public maxHeat, public type){}//all members should be public
-    data = {// it will be rewriten during runtime
+    protected data = {// it will be rewriten during runtime
         energy: 0,
         heat: 0,
         power: 0,
         targetPower: 0,
         heatStage: EngineHeat.BLUE
     }
-    defaultValues = {
+    protected defaultValues = {
         energy: 0,
         heat: 0,
         power: 0,
@@ -23,11 +17,11 @@ class BCEngineTileEntity {
 
     engineAnimation = null
 
-    init(){
+    protected init(){
         this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type);
     }
 
-    tick(){
+    protected tick(){
         this.engineAnimation.update(this.data.power);
         this.updatePower();
 
@@ -65,29 +59,5 @@ class BCEngineTileEntity {
 
     deployEnergyToTarget(){
         //TODO deploy
-    }
-}
-abstract class BCEngine {
-    protected block: EngineBlock;
-    protected item: EngineItem;
-
-    protected maxHeat: number = 100;
-
-    constructor(public readonly type: EngineType){
-        this.block = new EngineBlock(this.type);
-        this.item = new EngineItem(this.type, this.block);
-
-        TileEntity.registerPrototype(this.block.id, new BCEngineTileEntity(this.maxHeat, this.type));
-
-        let self = this;
-        Item.registerUseFunction(this.item.stringId, function(coords, item, block){
-            Debug.m(coords.relative);
-            self.setBlock(coords.relative);
-        });
-    }
-
-    private setBlock(coords: IBlockPos): void {
-        World.setBlock(coords.x, coords.y, coords.z, this.block.id, 0);
-        World.addTileEntity(coords.x, coords.y, coords.z);
     }
 }

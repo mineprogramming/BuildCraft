@@ -1,3 +1,4 @@
+/// <reference path="../ModelTexture.ts" />
 class EngineRender {
     private readonly render;
 
