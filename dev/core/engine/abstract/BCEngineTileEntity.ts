@@ -1,3 +1,5 @@
+/// <reference path="../components/EngineAnimation.ts" />
+/// <reference path="../model/render/RenderManager.ts" />
 class BCEngineTileEntity {
     constructor(public maxHeat, public type){}//all members should be public
     protected data = {// it will be rewriten during runtime

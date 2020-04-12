@@ -1,10 +1,25 @@
 /// <reference path="../ModelTexture.ts" />
-class EngineRender {
+/// <reference path="RenderManager.ts" />
+abstract class EngineRender {
     private readonly render;
+    protected readonly texture: ModelTexture;
 
-    constructor(protected readonly texture: ModelTexture){
+    constructor(protected readonly type: string){
+        this.texture = new ModelTexture(TexturesOffset.engine.base[type]);
         this.render = new Render({skin: "model/" + this.texture.getTexture()});
         this.render.setPart("head", this.getModelData(), this.texture.getSize());
+    }
+
+    getGroupName(){
+        return EngineRender.getGroupPrefix() + this.type;
+    }
+
+    protected static getGroupPrefix(){
+        return "EngineRender"
+    }
+
+    stash(){
+        RenderManager.addToGroup(this.getGroupName(), this);
     }
 
     getID(): number {
