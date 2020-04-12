@@ -1,7 +1,7 @@
 /// <reference path="../components/EngineAnimation.ts" />
 /// <reference path="../model/render/RenderManager.ts" />
 class BCEngineTileEntity {
-    constructor(public maxHeat, public type){}//all members should be public
+    constructor(public maxHeat, public type){}// all members should be public
     protected data = {// it will be rewriten during runtime
         energy: 0,
         heat: 0,
@@ -20,7 +20,7 @@ class BCEngineTileEntity {
     engineAnimation = null
 
     protected init(){
-        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type);
+        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type, this.data.heatStage);
     }
 
     protected tick(){
@@ -39,13 +39,12 @@ class BCEngineTileEntity {
     }
 
     getHeatStage(){
-        var index = Math.floor(this.data.heat / this.maxHeat * 3);
-        return index;
+        return Math.floor(this.data.heat / this.maxHeat * 3);
     }
 
-    updatePower(){//LEGACY
-        var change = .04;
-        var add = this.data.targetPower - this.data.power;
+    updatePower(){// LEGACY
+        const change = .04;
+        let add = this.data.targetPower - this.data.power;
         if (add > change){
             add = change;
         }
@@ -60,6 +59,6 @@ class BCEngineTileEntity {
     }
 
     deployEnergyToTarget(){
-        //TODO deploy
+        // TODO deploy
     }
 }

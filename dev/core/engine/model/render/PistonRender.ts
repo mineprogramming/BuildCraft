@@ -2,7 +2,7 @@
 /// <reference path="../ModelTexture.ts" />
 class PistonRender extends EngineRender{
     constructor(type){
-        super(new ModelTexture(TexturesOffset.engine.base["creative"]))
+        super(type)
     }
 
     protected getModelData(){

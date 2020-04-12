@@ -5,13 +5,17 @@ abstract class EngineRender {
     protected readonly texture: ModelTexture;
 
     constructor(protected readonly type: string){
-        this.texture = new ModelTexture(TexturesOffset.engine.base[type]);
+        this.texture = new ModelTexture(this.getTextureOffset());
         this.render = new Render({skin: "model/" + this.texture.getTexture()});
         this.render.setPart("head", this.getModelData(), this.texture.getSize());
     }
 
     getGroupName(){
         return EngineRender.getGroupPrefix() + this.type;
+    }
+
+    protected getTextureOffset(): object {
+        return TexturesOffset.engine.base[this.type];
     }
 
     protected static getGroupPrefix(){

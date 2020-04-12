@@ -3,13 +3,13 @@ class RenderManager {
         //groupName : [ render0, render1]
     }
 
-    static getRender<T>(groupName: string, c: new () => T, type: string): T{
+    static getRender<T>(groupName: string, c: new () => T): T{
         if(Object.keys(this.availableRenders).length == 0 || this.availableRenders[groupName].length == 0){
             let render = new c();
             alert("created new render")
             return render;
         }
-        alert(`retirned wxisting render`)
+        alert(`returned existing render`)
         return this.availableRenders[groupName].pop();
     }
 

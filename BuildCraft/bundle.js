@@ -23,6 +23,29 @@ var BlockPos = /** @class */ (function () {
     };
     return BlockPos;
 }());
+var EngineHeat;
+(function (EngineHeat) {
+    EngineHeat["BLUE"] = "BLUE";
+    EngineHeat["GREEN"] = "GREEN";
+    EngineHeat["ORANGE"] = "ORANGE";
+    EngineHeat["RED"] = "RED";
+    EngineHeat["BLACK"] = "BLACK";
+})(EngineHeat || (EngineHeat = {}));
+var HeatOrder = [
+    EngineHeat.BLUE,
+    EngineHeat.GREEN,
+    EngineHeat.ORANGE,
+    EngineHeat.RED,
+    EngineHeat.BLACK
+];
+var EngineType;
+(function (EngineType) {
+    EngineType["creative"] = "creative";
+    EngineType["iron"] = "iron";
+    EngineType["redstone"] = "redstone";
+    EngineType["stirling"] = "stirling";
+    EngineType["custom"] = "custom";
+})(EngineType || (EngineType = {}));
 var EngineBlock = /** @class */ (function () {
     function EngineBlock(registryId) {
         this.registryId = registryId;
@@ -61,55 +84,26 @@ var EngineItem = /** @class */ (function () {
     ;
     return EngineItem;
 }());
-var EngineHeat;
-(function (EngineHeat) {
-    EngineHeat["BLUE"] = "BLUE";
-    EngineHeat["GREEN"] = "GREEN";
-    EngineHeat["ORANGE"] = "ORANGE";
-    EngineHeat["RED"] = "RED";
-    EngineHeat["BLACK"] = "BLACK";
-})(EngineHeat || (EngineHeat = {}));
-var HeatOrder = [
-    EngineHeat.BLUE,
-    EngineHeat.GREEN,
-    EngineHeat.ORANGE,
-    EngineHeat.RED,
-    EngineHeat.BLACK
-];
-var EngineType;
-(function (EngineType) {
-    EngineType["creative"] = "creative";
-    EngineType["iron"] = "iron";
-    EngineType["redstone"] = "redstone";
-    EngineType["stirling"] = "stirling";
-    EngineType["custom"] = "custom";
-})(EngineType || (EngineType = {}));
 var RenderManager = /** @class */ (function () {
     function RenderManager() {
     }
-    RenderManager.getRender = function (renderName) {
+    RenderManager.getRender = function (groupName, c) {
+        if (Object.keys(this.availableRenders).length == 0 || this.availableRenders[groupName].length == 0) {
+            var render = new c();
+            alert("created new render");
+            return render;
+        }
+        alert("returned existing render");
+        return this.availableRenders[groupName].pop();
     };
-    RenderManager.renders = {
-        engine: {}
+    RenderManager.addToGroup = function (groupName, render) {
+        alert("added to group " + groupName + " renderID " + render);
+        this.availableRenders[groupName].push(render);
+    };
+    RenderManager.availableRenders = {
+    //groupName : [ render0, render1]
     };
     return RenderManager;
-}());
-var EngineRender = /** @class */ (function () {
-    function EngineRender(texture) {
-        this.texture = texture;
-        this.render = new Render({ skin: "model/" + this.texture.getTexture() });
-        this.render.setPart("head", this.getModelData(), this.texture.getSize());
-    }
-    EngineRender.prototype.getID = function () {
-        return this.render.getId();
-    };
-    EngineRender.prototype.rebuild = function () {
-        this.render.rebuild();
-    };
-    EngineRender.prototype.getModelData = function () {
-        return [];
-    };
-    return EngineRender;
 }());
 var TexturesOffset = {
     engine: {
@@ -149,13 +143,47 @@ var ModelTexture = /** @class */ (function () {
     };
     return ModelTexture;
 }());
-/// <reference path="EngineRender.ts" />
 /// <reference path="../ModelTexture.ts" />
+/// <reference path="RenderManager.ts" />
+var EngineRender = /** @class */ (function () {
+    function EngineRender(type) {
+        this.type = type;
+        this.texture = new ModelTexture(this.getTextureOffset());
+        this.render = new Render({ skin: "model/" + this.texture.getTexture() });
+        this.render.setPart("head", this.getModelData(), this.texture.getSize());
+    }
+    EngineRender.prototype.getGroupName = function () {
+        return EngineRender.getGroupPrefix() + this.type;
+    };
+    EngineRender.prototype.getTextureOffset = function () {
+        return TexturesOffset.engine.base[this.type];
+    };
+    EngineRender.getGroupPrefix = function () {
+        return "EngineRender";
+    };
+    EngineRender.prototype.stash = function () {
+        RenderManager.addToGroup(this.getGroupName(), this);
+    };
+    EngineRender.prototype.getID = function () {
+        return this.render.getId();
+    };
+    EngineRender.prototype.rebuild = function () {
+        this.render.rebuild();
+    };
+    EngineRender.prototype.getModelData = function () {
+        return [];
+    };
+    return EngineRender;
+}());
+/// <reference path="EngineRender.ts" />
 var BaseRender = /** @class */ (function (_super) {
     __extends(BaseRender, _super);
-    function BaseRender(type) {
-        return _super.call(this, new ModelTexture(TexturesOffset.engine.base[type])) || this;
+    function BaseRender() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
+    BaseRender.getGroupPrefix = function () {
+        return "BaseRender";
+    };
     BaseRender.prototype.getModelData = function () {
         return [
             {
@@ -180,9 +208,12 @@ var BaseRender = /** @class */ (function (_super) {
 /// <reference path="../ModelTexture.ts" />
 var TrunkRender = /** @class */ (function (_super) {
     __extends(TrunkRender, _super);
-    function TrunkRender(type) {
-        return _super.call(this, new ModelTexture(TexturesOffset.trunk["BLUE"])) || this;
+    function TrunkRender() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
+    TrunkRender.prototype.getTextureOffset = function () {
+        return TexturesOffset.trunk[this.type];
+    };
     TrunkRender.prototype.getModelData = function () {
         return [
             {
@@ -208,7 +239,7 @@ var TrunkRender = /** @class */ (function (_super) {
 var PistonRender = /** @class */ (function (_super) {
     __extends(PistonRender, _super);
     function PistonRender(type) {
-        return _super.call(this, new ModelTexture(TexturesOffset.engine.base["creative"])) || this;
+        return _super.call(this, type) || this;
     }
     PistonRender.prototype.getModelData = function () {
         return [
@@ -237,8 +268,9 @@ var PistonRender = /** @class */ (function (_super) {
 /// <reference path="../model/render/TrunkRender.ts" />
 /// <reference path="../model/render/PistonRender.ts" />
 var EngineAnimation = /** @class */ (function () {
-    function EngineAnimation(pos, type) {
+    function EngineAnimation(pos, type, heatStage) {
         this.type = type;
+        this.heatStage = heatStage;
         this.pistonPosition = 0; //TODO add getter and setter
         this.pushingMultiplier = 1;
         this.coords = { x: pos.x + .5, y: pos.y + .5, z: pos.z + .5 };
@@ -247,7 +279,7 @@ var EngineAnimation = /** @class */ (function () {
         this.pistonAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
         this.pistonAnimation.setInterpolationEnabled(true);
         this.baseRender = new BaseRender("creative");
-        this.trunkRender = new TrunkRender("creative");
+        this.trunkRender = new TrunkRender(this.heatStage);
         this.pistonRender = new PistonRender("creative");
         this.initAnimations();
     }
@@ -274,12 +306,8 @@ var EngineAnimation = /** @class */ (function () {
     };
     return EngineAnimation;
 }());
-/// <reference path="components/EngineBlock.ts" />
-/// <reference path="components/EngineItem.ts" />
-/// <reference path="components/EngineAnimation.ts" />
-/// <reference path="EngineHeat.ts" />
-/// <reference path="EngineType.ts" />
-/// <reference path="../Coords.ts" />
+/// <reference path="../components/EngineAnimation.ts" />
+/// <reference path="../model/render/RenderManager.ts" />
 var BCEngineTileEntity = /** @class */ (function () {
     function BCEngineTileEntity(maxHeat, type) {
         this.maxHeat = maxHeat;
@@ -299,9 +327,9 @@ var BCEngineTileEntity = /** @class */ (function () {
             heatStage: EngineHeat.BLUE
         };
         this.engineAnimation = null;
-    } //all members should be public
+    } // all members should be public
     BCEngineTileEntity.prototype.init = function () {
-        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type);
+        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type, this.data.heatStage);
     };
     BCEngineTileEntity.prototype.tick = function () {
         this.engineAnimation.update(this.data.power);
@@ -315,8 +343,7 @@ var BCEngineTileEntity = /** @class */ (function () {
         }
     };
     BCEngineTileEntity.prototype.getHeatStage = function () {
-        var index = Math.floor(this.data.heat / this.maxHeat * 3);
-        return index;
+        return Math.floor(this.data.heat / this.maxHeat * 3);
     };
     BCEngineTileEntity.prototype.updatePower = function () {
         var change = .04;
@@ -333,31 +360,37 @@ var BCEngineTileEntity = /** @class */ (function () {
         this.data.targetPower = power;
     };
     BCEngineTileEntity.prototype.deployEnergyToTarget = function () {
-        //TODO deploy
+        // TODO deploy
     };
     return BCEngineTileEntity;
 }());
+/// <reference path="../components/EngineBlock.ts" />
+/// <reference path="../components/EngineItem.ts" />
+/// <reference path="../EngineHeat.ts" />
+/// <reference path="../EngineType.ts" />
+/// <reference path="../../Coords.ts" />
+/// <reference path="BCEngineTileEntity.ts" />
 var BCEngine = /** @class */ (function () {
     function BCEngine(type) {
+        var _this = this;
         this.type = type;
         this.maxHeat = 100;
         this.block = new EngineBlock(this.type);
         this.item = new EngineItem(this.type, this.block);
         TileEntity.registerPrototype(this.block.id, new BCEngineTileEntity(this.maxHeat, this.type));
-        var self = this;
         Item.registerUseFunction(this.item.stringId, function (coords, item, block) {
             Debug.m(coords.relative);
-            self.setBlock(coords.relative);
+            _this.setBlock(coords.relative);
         });
-    }
+    } // TODO register drop and register use in such methods
     BCEngine.prototype.setBlock = function (coords) {
         World.setBlock(coords.x, coords.y, coords.z, this.block.id, 0);
         World.addTileEntity(coords.x, coords.y, coords.z);
     };
     return BCEngine;
 }());
-/// <reference path="BCEngine.ts" />
-/// <reference path="EngineType.ts" />
+/// <reference path="../abstract/BCEngine.ts" />
+/// <reference path="../EngineType.ts" />
 var CreativeEngine = /** @class */ (function (_super) {
     __extends(CreativeEngine, _super);
     function CreativeEngine() {
@@ -365,5 +398,12 @@ var CreativeEngine = /** @class */ (function (_super) {
     }
     return CreativeEngine;
 }(BCEngine));
-/// <reference path="CreativeEngine.ts" />
+/// <reference path="creative/CreativeEngine.ts" />
 var creativeEngine = new CreativeEngine();
+var BCCreativeEngineTileEntity = /** @class */ (function (_super) {
+    __extends(BCCreativeEngineTileEntity, _super);
+    function BCCreativeEngineTileEntity() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return BCCreativeEngineTileEntity;
+}(BCEngineTileEntity));

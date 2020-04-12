@@ -1,2 +1,2 @@
-/// <reference path="CreativeEngine.ts" />
-var creativeEngine = new CreativeEngine();
+/// <reference path="creative/CreativeEngine.ts" />
+let creativeEngine = new CreativeEngine();

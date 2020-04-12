@@ -20,7 +20,7 @@ class EngineAnimation {
     private pushingMultiplier: number = 1;
     public readonly coords: IBlockPos;
 
-    constructor(pos: IBlockPos, private readonly type: EngineType){
+    constructor(pos: IBlockPos, private readonly type: EngineType, private heatStage: EngineHeat){
         this.coords = {x: pos.x + .5, y: pos.y +.5, z: pos.z + .5};
         this.baseAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
         this.trunkAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
@@ -29,7 +29,7 @@ class EngineAnimation {
         this.pistonAnimation.setInterpolationEnabled(true);
 
         this.baseRender = new BaseRender("creative");
-        this.trunkRender = new TrunkRender("creative");
+        this.trunkRender = new TrunkRender(this.heatStage);
         this.pistonRender = new PistonRender("creative");
 
         this.initAnimations();

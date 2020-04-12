@@ -1,8 +1,8 @@
 /// <reference path="EngineRender.ts" />
 /// <reference path="../ModelTexture.ts" />
 class TrunkRender extends EngineRender{
-    constructor(type){
-        super(new ModelTexture(TexturesOffset.trunk["BLUE"]))
+    protected getTextureOffset(): object {
+        return TexturesOffset.trunk[this.type];
     }
 
     protected getModelData(){
