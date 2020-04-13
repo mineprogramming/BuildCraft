@@ -1,6 +1,6 @@
 class RenderManager {
     private static availableRenders = {
-        //groupName : [ render0, render1]
+        // groupName : [ render0, render1]
     }
 
     static getRender<T>(groupName: string, c: new () => T): T{

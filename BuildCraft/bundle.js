@@ -101,7 +101,7 @@ var RenderManager = /** @class */ (function () {
         this.availableRenders[groupName].push(render);
     };
     RenderManager.availableRenders = {
-    //groupName : [ render0, render1]
+    // groupName : [ render0, render1]
     };
     return RenderManager;
 }());
@@ -238,8 +238,8 @@ var TrunkRender = /** @class */ (function (_super) {
 /// <reference path="../ModelTexture.ts" />
 var PistonRender = /** @class */ (function (_super) {
     __extends(PistonRender, _super);
-    function PistonRender(type) {
-        return _super.call(this, type) || this;
+    function PistonRender() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     PistonRender.prototype.getModelData = function () {
         return [
@@ -261,48 +261,72 @@ var PistonRender = /** @class */ (function (_super) {
     };
     return PistonRender;
 }(EngineRender));
+/// <reference path="../../model/render/EngineRender.ts" />
+/// <reference path="../../../Coords.ts" />
+var AnimationComponent = /** @class */ (function () {
+    function AnimationComponent(pos, render) {
+        this.render = render;
+        this.coords = { x: pos.x + .5, y: pos.y + .5, z: pos.z + .5 };
+        this.animation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
+        this.animation.describe({ render: this.render.getID() });
+        this.animation.load();
+    }
+    AnimationComponent.prototype.rotate = function (rotation) {
+        this.animation.render.transform.rotate(rotation.x, rotation.y, rotation.z);
+        this.render.rebuild();
+    };
+    AnimationComponent.prototype.destroy = function () {
+        this.render.stash();
+        this.animation.destroy();
+    };
+    return AnimationComponent;
+}());
+/// <reference path="./AnimationComponent.ts" />
+/// <reference path="../../EngineType.ts" />
+var PistonAnimation = /** @class */ (function (_super) {
+    __extends(PistonAnimation, _super);
+    function PistonAnimation(pos, type) {
+        return _super.call(this, pos, new PistonRender(type)) || this;
+    }
+    PistonAnimation.prototype.setPosition = function (pistonPosition) {
+        this.animation.setPos(this.coords.x + pistonPosition, this.coords.y, this.coords.z);
+    };
+    return PistonAnimation;
+}(AnimationComponent));
 /// <reference path="../EngineHeat.ts" />
 /// <reference path="../EngineType.ts" />
 /// <reference path="../model/render/RenderManager.ts" />
 /// <reference path="../model/render/BaseRender.ts" />
 /// <reference path="../model/render/TrunkRender.ts" />
 /// <reference path="../model/render/PistonRender.ts" />
+/// <reference path="animation/AnimationComponent.ts" />
+/// <reference path="animation/PistonAnimation.ts" />
 var EngineAnimation = /** @class */ (function () {
-    function EngineAnimation(pos, type, heatStage) {
+    function EngineAnimation(coords, type, heatStage) {
+        this.coords = coords;
         this.type = type;
         this.heatStage = heatStage;
-        this.pistonPosition = 0; //TODO add getter and setter
+        this.pistonPosition = 0;
         this.pushingMultiplier = 1;
-        this.coords = { x: pos.x + .5, y: pos.y + .5, z: pos.z + .5 };
-        this.baseAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
-        this.trunkAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
-        this.pistonAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
-        this.pistonAnimation.setInterpolationEnabled(true);
-        this.baseRender = new BaseRender("creative");
-        this.trunkRender = new TrunkRender(this.heatStage);
-        this.pistonRender = new PistonRender("creative");
-        this.initAnimations();
+        this.base = new AnimationComponent(coords, new BaseRender(this.type));
+        this.trunk = new AnimationComponent(coords, new TrunkRender(this.heatStage));
+        this.piston = new PistonAnimation(coords, this.type);
     }
-    EngineAnimation.prototype.isReadyToDeployEnergy = function () {
-        return this.pistonPosition > 24;
-    };
-    EngineAnimation.prototype.initAnimations = function () {
-        this.baseAnimation.describe({ render: this.baseRender.getID() });
-        this.baseAnimation.load();
-        this.trunkAnimation.describe({ render: this.trunkRender.getID() });
-        this.trunkAnimation.load();
-        this.pistonAnimation.describe({ render: this.pistonRender.getID() });
-        this.pistonAnimation.load();
-        //this.baseAnimation.render.transform.rotate(Math.PI/3, Math.PI/2 , Math.PI/4);
-        //this.baseRender.rebuild();
-    };
     EngineAnimation.prototype.update = function (power) {
         this.pushingMultiplier = this.pistonPosition < 0 ? 1 : this.pushingMultiplier;
-        this.pistonPosition += power * this.pushingMultiplier;
-        this.pistonAnimation.setPos(this.coords.x + this.pistonPosition / 50, this.coords.y, this.coords.z);
+        this.pistonPosition += power * this.pushingMultiplier / 64; // 64 is magical multiplier
+        this.piston.setPosition(this.pistonPosition);
+    };
+    EngineAnimation.prototype.isReadyToGoBack = function () {
+        return this.pistonPosition > .5;
     };
     EngineAnimation.prototype.goBack = function () {
         this.pushingMultiplier = -1;
+    };
+    EngineAnimation.prototype.destroy = function () {
+        this.base.destroy();
+        this.trunk.destroy();
+        this.piston.destroy();
     };
     return EngineAnimation;
 }());
@@ -337,7 +361,7 @@ var BCEngineTileEntity = /** @class */ (function () {
         this.data.heatStage = HeatOrder[Math.min(3, Math.max(0, this.getHeatStage() || 0))];
         this.setPower(this.getHeatStage() + .4);
         this.data.heat = Math.min(Math.max(this.data.heat, this.maxHeat), 100);
-        if (this.engineAnimation.isReadyToDeployEnergy()) {
+        if (this.engineAnimation.isReadyToGoBack()) {
             this.engineAnimation.goBack();
             this.deployEnergyToTarget();
         }

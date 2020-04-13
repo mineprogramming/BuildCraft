@@ -32,7 +32,7 @@ class BCEngineTileEntity {
         this.setPower(this.getHeatStage() + .4);
 
         this.data.heat = Math.min(Math.max(this.data.heat, this.maxHeat), 100);
-        if (this.engineAnimation.isReadyToDeployEnergy()){
+        if (this.engineAnimation.isReadyToGoBack()){
             this.engineAnimation.goBack();
             this.deployEnergyToTarget();
         }

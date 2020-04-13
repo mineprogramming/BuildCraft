@@ -1,10 +1,6 @@
 /// <reference path="EngineRender.ts" />
 /// <reference path="../ModelTexture.ts" />
 class PistonRender extends EngineRender{
-    constructor(type){
-        super(type)
-    }
-
     protected getModelData(){
         return [
             {
