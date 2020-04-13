@@ -23,7 +23,7 @@ abstract class EngineRender {
     }
 
     stash(){
-        RenderManager.addToGroup(this.getGroupName(), this);
+        // RenderManager.addToGroup(this.getGroupName(), this);
     }
 
     getID(): number {

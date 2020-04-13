@@ -15,6 +15,8 @@ class RenderManager {
 
     static addToGroup(groupName: string, render){
         alert(`added to group ${groupName} renderID ${render}`);
-        this.availableRenders[groupName].push(render)
+        if(this.availableRenders[groupName]) this.availableRenders[groupName] = [];
+
+        this.availableRenders[groupName].push(render);
     }
 }

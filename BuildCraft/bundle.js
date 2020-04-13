@@ -51,17 +51,16 @@ var EngineBlock = /** @class */ (function () {
         this.registryId = registryId;
         this.stringId = "engine" + this.registryId;
         this.registerBlock();
-        this.registerDropFunction();
         this.id = BlockID[this.stringId];
     }
     EngineBlock.prototype.registerBlock = function () {
         IDRegistry.genBlockID(this.stringId);
         Block.createBlock(this.stringId, [{ name: this.stringId, texture: [["empty", 0]], inCreative: false }]);
-    };
-    EngineBlock.prototype.registerDropFunction = function () {
-        Block.registerDropFunction(this.id, function () {
-            return [];
-        });
+        var staticModel = new BlockRenderer.Model();
+        // модификация модели staticModel
+        var icRenderModel = new ICRender.Model();
+        icRenderModel.addEntry(staticModel);
+        BlockRenderer.setStaticICRender(this.id, -1, icRenderModel);
     };
     return EngineBlock;
 }());
@@ -98,6 +97,8 @@ var RenderManager = /** @class */ (function () {
     };
     RenderManager.addToGroup = function (groupName, render) {
         alert("added to group " + groupName + " renderID " + render);
+        if (this.availableRenders[groupName])
+            this.availableRenders[groupName] = [];
         this.availableRenders[groupName].push(render);
     };
     RenderManager.availableRenders = {
@@ -162,7 +163,7 @@ var EngineRender = /** @class */ (function () {
         return "EngineRender";
     };
     EngineRender.prototype.stash = function () {
-        RenderManager.addToGroup(this.getGroupName(), this);
+        // RenderManager.addToGroup(this.getGroupName(), this);
     };
     EngineRender.prototype.getID = function () {
         return this.render.getId();
@@ -351,7 +352,7 @@ var BCEngineTileEntity = /** @class */ (function () {
             heatStage: EngineHeat.BLUE
         };
         this.engineAnimation = null;
-    } // all members should be public
+    }
     BCEngineTileEntity.prototype.init = function () {
         this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type, this.data.heatStage);
     };
@@ -365,6 +366,9 @@ var BCEngineTileEntity = /** @class */ (function () {
             this.engineAnimation.goBack();
             this.deployEnergyToTarget();
         }
+    };
+    BCEngineTileEntity.prototype.destroy = function () {
+        this.engineAnimation.destroy();
     };
     BCEngineTileEntity.prototype.getHeatStage = function () {
         return Math.floor(this.data.heat / this.maxHeat * 3);
@@ -396,17 +400,27 @@ var BCEngineTileEntity = /** @class */ (function () {
 /// <reference path="BCEngineTileEntity.ts" />
 var BCEngine = /** @class */ (function () {
     function BCEngine(type) {
-        var _this = this;
         this.type = type;
         this.maxHeat = 100;
         this.block = new EngineBlock(this.type);
         this.item = new EngineItem(this.type, this.block);
         TileEntity.registerPrototype(this.block.id, new BCEngineTileEntity(this.maxHeat, this.type));
+        this.registerUse();
+        this.registerDrop();
+    }
+    BCEngine.prototype.registerUse = function () {
+        var _this = this;
         Item.registerUseFunction(this.item.stringId, function (coords, item, block) {
             Debug.m(coords.relative);
             _this.setBlock(coords.relative);
         });
-    } // TODO register drop and register use in such methods
+    };
+    BCEngine.prototype.registerDrop = function () {
+        var _this = this;
+        Block.registerDropFunction(this.block.stringId, function () {
+            return [[_this.item.id, 1, 0]];
+        });
+    };
     BCEngine.prototype.setBlock = function (coords) {
         World.setBlock(coords.x, coords.y, coords.z, this.block.id, 0);
         World.addTileEntity(coords.x, coords.y, coords.z);

@@ -15,11 +15,22 @@ abstract class BCEngine {
         this.item = new EngineItem(this.type, this.block);
 
         TileEntity.registerPrototype(this.block.id, new BCEngineTileEntity(this.maxHeat, this.type));
+        this.registerUse();
+        this.registerDrop();
+    }
+
+    private registerUse(){
         Item.registerUseFunction(this.item.stringId, (coords, item, block) => {
             Debug.m(coords.relative);
             this.setBlock(coords.relative);
         });
-    }// TODO register drop and register use in such methods
+    }
+
+    private registerDrop(){
+        Block.registerDropFunction(this.block.stringId, () => {
+            return [[this.item.id, 1, 0]]
+        });
+    }
 
     private setBlock(coords: IBlockPos): void {
         World.setBlock(coords.x, coords.y, coords.z, this.block.id, 0);

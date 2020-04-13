@@ -1,7 +1,7 @@
 /// <reference path="../components/EngineAnimation.ts" />
 /// <reference path="../model/render/RenderManager.ts" />
 class BCEngineTileEntity {
-    constructor(public maxHeat, public type){}// all members should be public
+    constructor(public readonly maxHeat: number, public readonly type: EngineType){}
     protected data = {// it will be rewriten during runtime
         energy: 0,
         heat: 0,
@@ -36,6 +36,10 @@ class BCEngineTileEntity {
             this.engineAnimation.goBack();
             this.deployEnergyToTarget();
         }
+    }
+
+    destroy(){
+        this.engineAnimation.destroy();
     }
 
     getHeatStage(){
