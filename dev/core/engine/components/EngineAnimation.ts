@@ -4,63 +4,45 @@
 /// <reference path="../model/render/BaseRender.ts" />
 /// <reference path="../model/render/TrunkRender.ts" />
 /// <reference path="../model/render/PistonRender.ts" />
-
-
+/// <reference path="animation/AnimationComponent.ts" />
+/// <reference path="animation/PistonAnimation.ts" />
 class EngineAnimation {
-    private readonly baseAnimation;
-    private readonly trunkAnimation;
-    private readonly pistonAnimation;
+    private readonly base: AnimationComponent;
+    private readonly trunk: AnimationComponent;
+    private readonly piston: PistonAnimation;
 
-    private readonly baseRender: BaseRender;
-    private readonly trunkRender: TrunkRender;
-    private readonly pistonRender: PistonRender;
-
-    private pistonPosition: number = 0;//TODO add getter and setter
-
+    private pistonPosition: number = 0;
     private pushingMultiplier: number = 1;
-    public readonly coords: IBlockPos;
 
-    constructor(pos: IBlockPos, private readonly type: EngineType){
-        this.coords = {x: pos.x + .5, y: pos.y +.5, z: pos.z + .5};
-        this.baseAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
-        this.trunkAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
-        this.pistonAnimation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
-
-        this.pistonAnimation.setInterpolationEnabled(true);
-
-        this.baseRender = new BaseRender("creative");
-        this.trunkRender = new TrunkRender("creative");
-        this.pistonRender = new PistonRender("creative");
-
-        this.initAnimations();
+    constructor(public readonly coords: IBlockPos, private readonly type: EngineType, private heatStage: EngineHeat){
+        this.base = new AnimationComponent(coords, new BaseRender(this.type));
+        this.trunk = new AnimationComponent(coords, new TrunkRender(this.heatStage));
+        this.piston = new PistonAnimation(coords, this.type);
     }
 
-    public isReadyToDeployEnergy(): Boolean {
-        return this.pistonPosition > 24
-    }
+    public update(power: number, heat: EngineHeat): void{
+        if(this.heatStage !== heat){
+            this.trunk.updateRender(new TrunkRender(heat));
+            this.heatStage = heat;
+        }
 
-    private initAnimations(){
-        this.baseAnimation.describe({render: this.baseRender.getID()});
-        this.baseAnimation.load();
-
-        this.trunkAnimation.describe({render: this.trunkRender.getID()});
-        this.trunkAnimation.load();
-
-        this.pistonAnimation.describe({render: this.pistonRender.getID()});
-        this.pistonAnimation.load();
-
-        //this.baseAnimation.render.transform.rotate(Math.PI/3, Math.PI/2 , Math.PI/4);
-        //this.baseRender.rebuild();
-    }
-
-    public update(power: number): void{
         this.pushingMultiplier = this.pistonPosition < 0 ? 1 : this.pushingMultiplier;
+        this.pistonPosition += power * this.pushingMultiplier / 64; // 64 is magical multiplier
 
-        this.pistonPosition += power * this.pushingMultiplier;
-        this.pistonAnimation.setPos(this.coords.x + this.pistonPosition / 50, this.coords.y, this.coords.z);
+        this.piston.setPosition(this.pistonPosition);
     }
 
-    public goBack(): void{
+    isReadyToGoBack(): boolean {
+        return this.pistonPosition > .5
+    }
+
+    goBack(): void{
         this.pushingMultiplier = -1;
+    }
+
+    destroy(): void{
+        this.base.destroy();
+        this.trunk.destroy();
+        this.piston.destroy();
     }
 }

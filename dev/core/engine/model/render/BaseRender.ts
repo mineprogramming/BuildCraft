@@ -1,8 +1,7 @@
 /// <reference path="EngineRender.ts" />
-/// <reference path="../ModelTexture.ts" />
 class BaseRender extends EngineRender{
-    constructor(type){
-        super(new ModelTexture(TexturesOffset.engine.base[type]))
+    protected getGroupPrefix(): string {
+        return "BaseRender"
     }
 
     protected getModelData(){

@@ -5,17 +5,17 @@ class EngineBlock {
     constructor(private readonly registryId: string){
         this.stringId = "engine" + this.registryId;
         this.registerBlock();
-        this.registerDropFunction();
         this.id = BlockID[this.stringId];
     }
+
     private registerBlock(): void {
         IDRegistry.genBlockID(this.stringId);
         Block.createBlock(this.stringId,
             [{name: this.stringId, texture: [["empty", 0]], inCreative: false}]);
-    }
-    private registerDropFunction(): void {
-        Block.registerDropFunction(this.id, function(){
-            return []
-        });
+        var staticModel = new BlockRenderer.Model();
+        // модификация модели staticModel
+        var icRenderModel = new ICRender.Model();
+        icRenderModel.addEntry(staticModel);
+        BlockRenderer.setStaticICRender(this.id, -1, icRenderModel);
     }
 }

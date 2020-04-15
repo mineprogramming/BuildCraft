@@ -5,7 +5,15 @@
     "lib": ["es2018"],
 	  "outFile": "BuildCraft/bundle.js",
     "allowJs": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "plugins": [
+      {
+        "name": "typescript-tslint-plugin",
+        "alwaysShowRuleFailuresAsWarnings": false,
+        "ignoreDefinitionFiles": true,
+        "suppressWhileTypeErrorsPresent": false
+      }
+    ]
   },
   "exclude": [
     "typedoc",

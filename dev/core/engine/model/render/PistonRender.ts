@@ -1,8 +1,8 @@
 /// <reference path="EngineRender.ts" />
 /// <reference path="../ModelTexture.ts" />
-class PistonRender extends EngineRender{
-    constructor(type){
-        super(new ModelTexture(TexturesOffset.engine.base["creative"]))
+class PistonRender extends EngineRender {
+    protected getGroupPrefix(): string {
+        return "PistonRender"
     }
 
     protected getModelData(){
