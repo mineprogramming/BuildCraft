@@ -4,11 +4,19 @@ class AnimationComponent {
     protected readonly animation;
     public readonly coords: IBlockPos;
 
-    constructor(pos: IBlockPos, private readonly render: EngineRender){
+    constructor(pos: IBlockPos, private render: EngineRender){
         this.coords = {x: pos.x + .5, y: pos.y +.5, z: pos.z + .5};
         this.animation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
         this.animation.describe({render: this.render.getID()});
         this.animation.load();
+    }
+
+    updateRender(render: EngineRender): void {
+        this.render.stash();
+        this.render = render;
+
+        this.animation.describe({render: this.render.getID()});
+        this.animation.refresh();
     }
 
     rotate(rotation: IBlockPos): void{

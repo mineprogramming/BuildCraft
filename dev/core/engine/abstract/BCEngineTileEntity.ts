@@ -1,5 +1,4 @@
 /// <reference path="../components/EngineAnimation.ts" />
-/// <reference path="../model/render/RenderManager.ts" />
 class BCEngineTileEntity {
     constructor(public readonly maxHeat: number, public readonly type: EngineType){}
     protected data = {// it will be rewriten during runtime
@@ -24,7 +23,7 @@ class BCEngineTileEntity {
     }
 
     protected tick(){
-        this.engineAnimation.update(this.data.power);
+        this.engineAnimation.update(this.data.power, this.data.heatStage);
         this.updatePower();
 
         this.data.heatStage = HeatOrder[Math.min(3, Math.max(0, this.getHeatStage() || 0))];

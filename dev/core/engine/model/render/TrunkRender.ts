@@ -1,6 +1,10 @@
 /// <reference path="EngineRender.ts" />
 /// <reference path="../ModelTexture.ts" />
-class TrunkRender extends EngineRender{
+class TrunkRender extends EngineRender {
+    protected getGroupPrefix(): string {
+        return "TrunkRender"
+    }
+
     protected getTextureOffset(): object {
         return TexturesOffset.trunk[this.type];
     }

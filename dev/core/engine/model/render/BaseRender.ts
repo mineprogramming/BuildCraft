@@ -1,6 +1,6 @@
 /// <reference path="EngineRender.ts" />
 class BaseRender extends EngineRender{
-    protected static getGroupPrefix(){
+    protected getGroupPrefix(): string {
         return "BaseRender"
     }
 

@@ -86,20 +86,21 @@ var EngineItem = /** @class */ (function () {
 var RenderManager = /** @class */ (function () {
     function RenderManager() {
     }
-    RenderManager.getRender = function (groupName, c) {
-        if (Object.keys(this.availableRenders).length == 0 || this.availableRenders[groupName].length == 0) {
-            var render = new c();
-            alert("created new render");
-            return render;
+    RenderManager.getRender = function (groupName) {
+        // alert(`try to get render from group ${groupName}`);
+        if (this.availableRenders[groupName]) {
+            Debug.m("getted render + " + this.availableRenders[groupName][this.availableRenders[groupName].length - 1].getId());
+            return this.availableRenders[groupName].pop();
         }
-        alert("returned existing render");
-        return this.availableRenders[groupName].pop();
+        return null;
     };
     RenderManager.addToGroup = function (groupName, render) {
-        alert("added to group " + groupName + " renderID " + render);
-        if (this.availableRenders[groupName])
+        if (!this.availableRenders[groupName]) {
+            Debug.m("created new group " + groupName);
             this.availableRenders[groupName] = [];
+        }
         this.availableRenders[groupName].push(render);
+        Debug.m("added to group " + groupName + " new len is " + this.availableRenders[groupName].length);
     };
     RenderManager.availableRenders = {
     // groupName : [ render0, render1]
@@ -150,20 +151,26 @@ var EngineRender = /** @class */ (function () {
     function EngineRender(type) {
         this.type = type;
         this.texture = new ModelTexture(this.getTextureOffset());
-        this.render = new Render({ skin: "model/" + this.texture.getTexture() });
-        this.render.setPart("head", this.getModelData(), this.texture.getSize());
+        this.render = RenderManager.getRender(this.getGroupName()) || this.createNewRender();
     }
+    EngineRender.prototype.createNewRender = function () {
+        Debug.m("new render " + this.getGroupName());
+        var render = new Render({ skin: "model/" + this.texture.getTexture() });
+        render.setPart("head", this.getModelData(), this.texture.getSize());
+        return render;
+    };
+    EngineRender.prototype.getGroupPrefix = function () {
+        return "EngineRender";
+    };
     EngineRender.prototype.getGroupName = function () {
-        return EngineRender.getGroupPrefix() + this.type;
+        return this.getGroupPrefix() + this.type;
     };
     EngineRender.prototype.getTextureOffset = function () {
         return TexturesOffset.engine.base[this.type];
     };
-    EngineRender.getGroupPrefix = function () {
-        return "EngineRender";
-    };
     EngineRender.prototype.stash = function () {
-        // RenderManager.addToGroup(this.getGroupName(), this);
+        Debug.m("go to stash " + this.render.getId() + "   ");
+        RenderManager.addToGroup(this.getGroupName(), this.render);
     };
     EngineRender.prototype.getID = function () {
         return this.render.getId();
@@ -182,7 +189,7 @@ var BaseRender = /** @class */ (function (_super) {
     function BaseRender() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    BaseRender.getGroupPrefix = function () {
+    BaseRender.prototype.getGroupPrefix = function () {
         return "BaseRender";
     };
     BaseRender.prototype.getModelData = function () {
@@ -212,6 +219,9 @@ var TrunkRender = /** @class */ (function (_super) {
     function TrunkRender() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    TrunkRender.prototype.getGroupPrefix = function () {
+        return "TrunkRender";
+    };
     TrunkRender.prototype.getTextureOffset = function () {
         return TexturesOffset.trunk[this.type];
     };
@@ -242,6 +252,9 @@ var PistonRender = /** @class */ (function (_super) {
     function PistonRender() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    PistonRender.prototype.getGroupPrefix = function () {
+        return "PistonRender";
+    };
     PistonRender.prototype.getModelData = function () {
         return [
             {
@@ -272,6 +285,12 @@ var AnimationComponent = /** @class */ (function () {
         this.animation.describe({ render: this.render.getID() });
         this.animation.load();
     }
+    AnimationComponent.prototype.updateRender = function (render) {
+        this.render.stash();
+        this.render = render;
+        this.animation.describe({ render: this.render.getID() });
+        this.animation.refresh();
+    };
     AnimationComponent.prototype.rotate = function (rotation) {
         this.animation.render.transform.rotate(rotation.x, rotation.y, rotation.z);
         this.render.rebuild();
@@ -313,7 +332,12 @@ var EngineAnimation = /** @class */ (function () {
         this.trunk = new AnimationComponent(coords, new TrunkRender(this.heatStage));
         this.piston = new PistonAnimation(coords, this.type);
     }
-    EngineAnimation.prototype.update = function (power) {
+    EngineAnimation.prototype.update = function (power, heat) {
+        if (this.heatStage !== heat) {
+            this.trunk.updateRender(new TrunkRender(heat));
+            alert("heat updated prev is " + this.heatStage + " new is " + heat);
+            this.heatStage = heat;
+        }
         this.pushingMultiplier = this.pistonPosition < 0 ? 1 : this.pushingMultiplier;
         this.pistonPosition += power * this.pushingMultiplier / 64; // 64 is magical multiplier
         this.piston.setPosition(this.pistonPosition);
@@ -332,7 +356,6 @@ var EngineAnimation = /** @class */ (function () {
     return EngineAnimation;
 }());
 /// <reference path="../components/EngineAnimation.ts" />
-/// <reference path="../model/render/RenderManager.ts" />
 var BCEngineTileEntity = /** @class */ (function () {
     function BCEngineTileEntity(maxHeat, type) {
         this.maxHeat = maxHeat;
@@ -357,7 +380,7 @@ var BCEngineTileEntity = /** @class */ (function () {
         this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type, this.data.heatStage);
     };
     BCEngineTileEntity.prototype.tick = function () {
-        this.engineAnimation.update(this.data.power);
+        this.engineAnimation.update(this.data.power, this.data.heatStage);
         this.updatePower();
         this.data.heatStage = HeatOrder[Math.min(3, Math.max(0, this.getHeatStage() || 0))];
         this.setPower(this.getHeatStage() + .4);

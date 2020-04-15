@@ -6,8 +6,6 @@
 /// <reference path="../model/render/PistonRender.ts" />
 /// <reference path="animation/AnimationComponent.ts" />
 /// <reference path="animation/PistonAnimation.ts" />
-
-
 class EngineAnimation {
     private readonly base: AnimationComponent;
     private readonly trunk: AnimationComponent;
@@ -22,7 +20,12 @@ class EngineAnimation {
         this.piston = new PistonAnimation(coords, this.type);
     }
 
-    public update(power: number): void{
+    public update(power: number, heat: EngineHeat): void{
+        if(this.heatStage !== heat){
+            this.trunk.updateRender(new TrunkRender(heat));
+            this.heatStage = heat;
+        }
+
         this.pushingMultiplier = this.pistonPosition < 0 ? 1 : this.pushingMultiplier;
         this.pistonPosition += power * this.pushingMultiplier / 64; // 64 is magical multiplier
 

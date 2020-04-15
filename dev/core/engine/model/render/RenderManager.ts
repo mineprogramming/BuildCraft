@@ -3,20 +3,17 @@ class RenderManager {
         // groupName : [ render0, render1]
     }
 
-    static getRender<T>(groupName: string, c: new () => T): T{
-        if(Object.keys(this.availableRenders).length == 0 || this.availableRenders[groupName].length == 0){
-            let render = new c();
-            alert("created new render")
-            return render;
+    static getRender(groupName: string){
+        if(this.availableRenders[groupName]){
+            return this.availableRenders[groupName].pop();
         }
-        alert(`returned existing render`)
-        return this.availableRenders[groupName].pop();
+        return null;
     }
 
-    static addToGroup(groupName: string, render){
-        alert(`added to group ${groupName} renderID ${render}`);
-        if(this.availableRenders[groupName]) this.availableRenders[groupName] = [];
-
+    static addToGroup(groupName: string, render: number){
+        if(!this.availableRenders[groupName]){
+            this.availableRenders[groupName] = [];
+        }
         this.availableRenders[groupName].push(render);
     }
 }
