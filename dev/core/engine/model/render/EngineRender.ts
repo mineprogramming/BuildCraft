@@ -9,7 +9,7 @@ abstract class EngineRender {
         this.render = RenderManager.getRender(this.getGroupName()) || this.createNewRender();
     }
 
-    private createNewRender(){
+    private createNewRender(): Render{
         const render = new Render({skin: "model/" + this.texture.getTexture()});
         render.setPart("head", this.getModelData(), this.texture.getSize());
         return render

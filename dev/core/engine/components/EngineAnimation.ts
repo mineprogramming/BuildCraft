@@ -6,8 +6,9 @@
 /// <reference path="../model/render/PistonRender.ts" />
 /// <reference path="animation/AnimationComponent.ts" />
 /// <reference path="animation/PistonAnimation.ts" />
+/// <reference path="animation/BaseAnimation.ts" />
 class EngineAnimation {
-    private readonly base: AnimationComponent;
+    private readonly base: BaseAnimation;
     private readonly trunk: AnimationComponent;
     private readonly piston: PistonAnimation;
 
@@ -15,14 +16,14 @@ class EngineAnimation {
     private pushingMultiplier: number = 1;
 
     constructor(public readonly coords: IBlockPos, private readonly type: EngineType, private heatStage: EngineHeat){
-        this.base = new AnimationComponent(coords, new BaseRender(this.type));
-        this.trunk = new AnimationComponent(coords, new TrunkRender(this.heatStage));
+        // this.trunk = new AnimationComponent(coords, new TrunkRender(this.heatStage));
         this.piston = new PistonAnimation(coords, this.type);
+        this.base = new BaseAnimation(coords, this.type, this.heatStage);
     }
 
     public update(power: number, heat: EngineHeat): void{
         if(this.heatStage !== heat){
-            this.trunk.updateRender(new TrunkRender(heat));
+            this.base.updateHeat(heat);
             this.heatStage = heat;
         }
 
@@ -42,7 +43,7 @@ class EngineAnimation {
 
     destroy(): void{
         this.base.destroy();
-        this.trunk.destroy();
+        // this.trunk.destroy();
         this.piston.destroy();
     }
 }
