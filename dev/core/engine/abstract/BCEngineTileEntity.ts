@@ -2,6 +2,7 @@
 class BCEngineTileEntity {
     constructor(public readonly maxHeat: number, public readonly type: EngineType){}
     protected data = {// it will be rewriten during runtime
+        meta: null,
         energy: 0,
         heat: 0,
         power: 0,
@@ -9,17 +10,31 @@ class BCEngineTileEntity {
         heatStage: EngineHeat.BLUE
     }
     protected defaultValues = {
+        meta: null,
         energy: 0,
         heat: 0,
         power: 0,
         targetPower: 0,
         heatStage: EngineHeat.BLUE
     }
+    x: number; y: number; z: number;
 
-    engineAnimation = null
+    engineAnimation = null;
+    get meta(){
+        if(!this.data.meta){
+            this.data.meta = this.getConnectionSide();
+        }
+        return this.data.meta;
+    }
+
+    set meta(value){
+        this.data.meta = value;
+        this.engineAnimation.connectionSide = value;
+    }
 
     protected init(){
         this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type, this.data.heatStage);
+        this.engineAnimation.connectionSide = this.meta;
     }
 
     protected tick(){
@@ -39,6 +54,14 @@ class BCEngineTileEntity {
 
     destroy(){
         this.engineAnimation.destroy();
+    }
+
+    getConnectionSide(){
+        for(let i = 0; i < 6; i++){
+            const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
+            if(World.getBlockID(relCoords.x, relCoords.y, relCoords.z) === 1) return i;
+            return 2;
+        }
     }
 
     getHeatStage(){

@@ -326,9 +326,22 @@ var EngineAnimation = /** @class */ (function () {
         this.heatStage = heatStage;
         this.pistonPosition = 0;
         this.pushingMultiplier = 1;
+        this.meta = 1; // connected side index
         this.piston = new PistonAnimation(coords, this.type);
         this.base = new BaseAnimation(coords, this.type, this.heatStage);
     }
+    Object.defineProperty(EngineAnimation.prototype, "connectionSide", {
+        get: function () {
+            return this.meta;
+        },
+        set: function (value) {
+            alert("meta setted to " + value);
+            this.meta = value;
+            this.rotateByMeta();
+        },
+        enumerable: true,
+        configurable: true
+    });
     EngineAnimation.prototype.update = function (power, heat) {
         if (this.heatStage !== heat) {
             this.base.updateHeat(heat);
@@ -344,6 +357,9 @@ var EngineAnimation = /** @class */ (function () {
     EngineAnimation.prototype.goBack = function () {
         this.pushingMultiplier = -1;
     };
+    EngineAnimation.prototype.rotateByMeta = function () {
+        alert("rotated");
+    };
     EngineAnimation.prototype.destroy = function () {
         this.base.destroy();
         this.piston.destroy();
@@ -356,6 +372,7 @@ var BCEngineTileEntity = /** @class */ (function () {
         this.maxHeat = maxHeat;
         this.type = type;
         this.data = {
+            meta: null,
             energy: 0,
             heat: 0,
             power: 0,
@@ -363,6 +380,7 @@ var BCEngineTileEntity = /** @class */ (function () {
             heatStage: EngineHeat.BLUE
         };
         this.defaultValues = {
+            meta: null,
             energy: 0,
             heat: 0,
             power: 0,
@@ -371,8 +389,23 @@ var BCEngineTileEntity = /** @class */ (function () {
         };
         this.engineAnimation = null;
     }
+    Object.defineProperty(BCEngineTileEntity.prototype, "meta", {
+        get: function () {
+            if (!this.data.meta) {
+                this.data.meta = this.getConnectionSide();
+            }
+            return this.data.meta;
+        },
+        set: function (value) {
+            this.data.meta = value;
+            this.engineAnimation.connectionSide = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
     BCEngineTileEntity.prototype.init = function () {
         this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type, this.data.heatStage);
+        this.engineAnimation.connectionSide = this.meta;
     };
     BCEngineTileEntity.prototype.tick = function () {
         this.engineAnimation.update(this.data.power, this.data.heatStage);
@@ -387,6 +420,13 @@ var BCEngineTileEntity = /** @class */ (function () {
     };
     BCEngineTileEntity.prototype.destroy = function () {
         this.engineAnimation.destroy();
+    };
+    BCEngineTileEntity.prototype.getConnectionSide = function () {
+        for (var i = 0; i < 6; i++) {
+            var relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
+            if (World.getBlockID(relCoords.x, relCoords.y, relCoords.z) === 1)
+                return i;
+        }
     };
     BCEngineTileEntity.prototype.getHeatStage = function () {
         return Math.floor(this.data.heat / this.maxHeat * 3);

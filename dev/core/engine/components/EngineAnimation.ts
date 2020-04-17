@@ -7,11 +7,22 @@
 /// <reference path="animation/BaseAnimation.ts" />
 class EngineAnimation {
     private readonly base: BaseAnimation;
-    private readonly trunk: AnimationComponent;
     private readonly piston: PistonAnimation;
 
     private pistonPosition: number = 0;
     private pushingMultiplier: number = 1;
+
+    private meta = 1;// connected side index
+
+    public set connectionSide(value: number){
+        alert(`meta setted to ${value}`);
+        this.meta = value;
+        this.rotateByMeta();
+    }
+
+    public get connectionSide(): number {
+        return this.meta;
+    }
 
     constructor(public readonly coords: IBlockPos, private readonly type: EngineType, private heatStage: EngineHeat){
         this.piston = new PistonAnimation(coords, this.type);
@@ -36,6 +47,10 @@ class EngineAnimation {
 
     goBack(): void{
         this.pushingMultiplier = -1;
+    }
+
+    rotateByMeta(){
+        alert("rotated "+this.connectionSide);
     }
 
     destroy(): void{
