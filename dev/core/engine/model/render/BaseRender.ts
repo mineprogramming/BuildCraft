@@ -1,10 +1,9 @@
 /// <reference path="EngineRender.ts" />
 /// <reference path="../ModelTexture.ts" />
 class BaseRender extends EngineRender {
-    protected trunkTextrueUV = TexturesOffset.trunk.BLUE;
 
-    constructor(type: string, heat: EngineHeat){
-        super(type)
+    constructor(type: string, protected heat: EngineHeat){
+        super(type);
         this.updateHeatStage(heat);
     }
 
@@ -13,15 +12,11 @@ class BaseRender extends EngineRender {
     }
 
     updateHeatStage(heat: EngineHeat){
-        //  Debug.m("Current UV");
-        // Debug.m(this.trunkTextrueUV);
-        this.trunkTextrueUV = TexturesOffset.trunk[heat];
+        this.heat = heat;
+        this.render.setPart("head", this.getModelData(), this.texture.getSize());
     }
 
     protected getModelData(){
-        Debug.m(this.trunkTextrueUV);
-        Debug.m("BLUE");
-        Debug.m(TexturesOffset.trunk.BLUE);
         return [
             {
                 type: "box",
@@ -39,7 +34,7 @@ class BaseRender extends EngineRender {
             },
             {
                 type: "box",
-                uv: this.trunkTextrueUV,
+                uv: TexturesOffset.trunk[this.heat],
                 coords: {
                     x: .01,
                     y: 24,

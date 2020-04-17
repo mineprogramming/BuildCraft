@@ -183,7 +183,7 @@ var BaseRender = /** @class */ (function (_super) {
     __extends(BaseRender, _super);
     function BaseRender(type, heat) {
         var _this = _super.call(this, type) || this;
-        _this.trunkTextrueUV = TexturesOffset.trunk.BLUE;
+        _this.heat = heat;
         _this.updateHeatStage(heat);
         return _this;
     }
@@ -191,14 +191,10 @@ var BaseRender = /** @class */ (function (_super) {
         return "BaseRender";
     };
     BaseRender.prototype.updateHeatStage = function (heat) {
-        //  Debug.m("Current UV");
-        // Debug.m(this.trunkTextrueUV);
-        this.trunkTextrueUV = TexturesOffset.trunk[heat];
+        this.heat = heat;
+        this.render.setPart("head", this.getModelData(), this.texture.getSize());
     };
     BaseRender.prototype.getModelData = function () {
-        Debug.m(this.trunkTextrueUV);
-        Debug.m("BLUE");
-        Debug.m(TexturesOffset.trunk.BLUE);
         return [
             {
                 type: "box",
@@ -216,7 +212,7 @@ var BaseRender = /** @class */ (function (_super) {
             },
             {
                 type: "box",
-                uv: this.trunkTextrueUV,
+                uv: TexturesOffset.trunk[this.heat],
                 coords: {
                     x: .01,
                     y: 24,
@@ -231,39 +227,6 @@ var BaseRender = /** @class */ (function (_super) {
         ];
     };
     return BaseRender;
-}(EngineRender));
-/// <reference path="EngineRender.ts" />
-/// <reference path="../ModelTexture.ts" />
-var TrunkRender = /** @class */ (function (_super) {
-    __extends(TrunkRender, _super);
-    function TrunkRender() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    TrunkRender.prototype.getGroupPrefix = function () {
-        return "TrunkRender";
-    };
-    TrunkRender.prototype.getTextureOffset = function () {
-        return TexturesOffset.trunk[this.type];
-    };
-    TrunkRender.prototype.getModelData = function () {
-        return [
-            {
-                type: "box",
-                uv: this.texture.getUV(),
-                coords: {
-                    x: .01,
-                    y: 24,
-                    z: 0,
-                },
-                size: {
-                    x: 16,
-                    y: 8,
-                    z: 8
-                }
-            }
-        ];
-    };
-    return TrunkRender;
 }(EngineRender));
 /// <reference path="EngineRender.ts" />
 /// <reference path="../ModelTexture.ts" />
@@ -343,12 +306,9 @@ var BaseAnimation = /** @class */ (function (_super) {
         var render = new BaseRender(type, heat);
         _this = _super.call(this, pos, render) || this;
         return _this;
-        // this.render = render;
     }
     BaseAnimation.prototype.updateHeat = function (heat) {
         this.render.updateHeatStage(heat);
-        // this.render.rebuild();
-        this.animation.refresh();
     };
     return BaseAnimation;
 }(AnimationComponent));
@@ -356,9 +316,7 @@ var BaseAnimation = /** @class */ (function (_super) {
 /// <reference path="../EngineType.ts" />
 /// <reference path="../model/render/RenderManager.ts" />
 /// <reference path="../model/render/BaseRender.ts" />
-/// <reference path="../model/render/TrunkRender.ts" />
 /// <reference path="../model/render/PistonRender.ts" />
-/// <reference path="animation/AnimationComponent.ts" />
 /// <reference path="animation/PistonAnimation.ts" />
 /// <reference path="animation/BaseAnimation.ts" />
 var EngineAnimation = /** @class */ (function () {
@@ -368,7 +326,6 @@ var EngineAnimation = /** @class */ (function () {
         this.heatStage = heatStage;
         this.pistonPosition = 0;
         this.pushingMultiplier = 1;
-        // this.trunk = new AnimationComponent(coords, new TrunkRender(this.heatStage));
         this.piston = new PistonAnimation(coords, this.type);
         this.base = new BaseAnimation(coords, this.type, this.heatStage);
     }
@@ -389,7 +346,6 @@ var EngineAnimation = /** @class */ (function () {
     };
     EngineAnimation.prototype.destroy = function () {
         this.base.destroy();
-        // this.trunk.destroy();
         this.piston.destroy();
     };
     return EngineAnimation;

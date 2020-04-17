@@ -7,12 +7,9 @@ class BaseAnimation extends AnimationComponent {
     constructor(pos: IBlockPos, type: EngineType, heat: EngineHeat){
         const render = new BaseRender(type, heat);
         super(pos, render);
-        // this.render = render;
     }
 
     updateHeat(heat: EngineHeat){
         this.render.updateHeatStage(heat);
-        // this.render.rebuild();
-        this.animation.refresh();
     }
 }

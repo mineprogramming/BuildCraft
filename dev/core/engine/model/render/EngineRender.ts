@@ -1,7 +1,7 @@
 /// <reference path="../ModelTexture.ts" />
 /// <reference path="RenderManager.ts" />
 abstract class EngineRender {
-    private readonly render;
+    protected readonly render;
     protected readonly texture: ModelTexture;
 
     constructor(protected readonly type: string){
@@ -9,7 +9,7 @@ abstract class EngineRender {
         this.render = RenderManager.getRender(this.getGroupName()) || this.createNewRender();
     }
 
-    private createNewRender(): Render{
+    private createNewRender(): Render {
         const render = new Render({skin: "model/" + this.texture.getTexture()});
         render.setPart("head", this.getModelData(), this.texture.getSize());
         return render
