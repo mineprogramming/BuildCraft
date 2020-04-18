@@ -1,4 +1,5 @@
 /// <reference path="../components/EngineAnimation.ts" />
+/// <reference path="../../../importLib.ts" />
 class BCEngineTileEntity {
     constructor(public readonly maxHeat: number, public readonly type: EngineType){}
     protected data = {// it will be rewriten during runtime
