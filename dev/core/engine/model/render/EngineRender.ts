@@ -3,6 +3,7 @@
 abstract class EngineRender {
     protected readonly render;
     protected readonly texture: ModelTexture;
+    protected boxes = [];
 
     constructor(protected readonly type: string){
         this.texture = new ModelTexture(this.getTextureOffset());
@@ -15,11 +16,16 @@ abstract class EngineRender {
         return render
     }
 
+    refresh(): void {
+        alert("refresh");
+        this.render.setPart("head", this.getModelData(), this.texture.getSize());
+    }
+
     protected getGroupPrefix(): string {
         return "EngineRender"
     }
 
-    protected getGroupName(): string{
+    protected getGroupName(): string {
         return this.getGroupPrefix() + this.type;
     }
 
@@ -35,11 +41,22 @@ abstract class EngineRender {
         return this.render.getId();
     }
 
+    public set rotation(value: EngineRotation){
+        const add = 64 * value;
+        for(const box of this.boxes){
+            Debug.m("updating uv");
+            Debug.m(box.uv.x)
+            box.uv.x += add;
+            Debug.m(box.uv.x)
+            Debug.m("uv updated");
+        }
+    }
+
     public rebuild(): void {
         this.render.rebuild();
     }
 
     protected getModelData(): PartObject[] {
-        return []
+        return this.boxes;
     }
 }

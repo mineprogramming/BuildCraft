@@ -27,7 +27,8 @@
     "../declarations/core-engine.d.ts",
     "../declarations/android-declarations.d.ts",
     "../declarations/android-platform-21.d.ts",
-    "../declarations/lib/StorageInterface.d.ts"
+    "../declarations/lib/StorageInterface.d.ts",
+    "../declarations/lib/energy-net.d.ts"
   ]
 }
 

@@ -1,5 +1,11 @@
 /// <reference path="../components/EngineAnimation.ts" />
-/// <reference path="../../../importLib.ts" />
+/// <reference path="../../energy.ts" />
+
+// test
+IDRegistry.genBlockID("WIRE");
+Block.createBlock("WIRE",
+    [{name: "WIRE", texture: [["stone", 0]], inCreative: true}]);
+RF.registerWire(BlockID["WIRE"]);
 class BCEngineTileEntity {
     constructor(public readonly maxHeat: number, public readonly type: EngineType){}
     protected data = {// it will be rewriten during runtime
@@ -34,6 +40,7 @@ class BCEngineTileEntity {
     }
 
     protected init(){
+        this.meta = this.getConnectionSide();
         this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type, this.data.heatStage);
         this.engineAnimation.connectionSide = this.meta;
     }
@@ -57,12 +64,15 @@ class BCEngineTileEntity {
         this.engineAnimation.destroy();
     }
 
-    getConnectionSide(){
+    getConnectionSide(){// correct!
         for(let i = 0; i < 6; i++){
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
-            if(World.getBlockID(relCoords.x, relCoords.y, relCoords.z) === 1) return i;
-            return 2;
+            const block = World.getBlock(relCoords.x, relCoords.y, relCoords.z);
+            if(EnergyTypeRegistry.isWire(block.id, "RF")){
+                return i;
+            }
         }
+        return 2;
     }
 
     getHeatStage(){
