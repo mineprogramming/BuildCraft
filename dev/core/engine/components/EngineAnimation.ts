@@ -1,5 +1,4 @@
 /// <reference path="../EngineHeat.ts" />
-/// <reference path="../EngineType.ts" />
 /// <reference path="../model/render/RenderManager.ts" />
 /// <reference path="../model/render/BaseRender.ts" />
 /// <reference path="../model/render/PistonRender.ts" />
@@ -14,6 +13,8 @@ class EngineAnimation {
     private pistonPosition: number = 0;// TODO make setter
     private pushingMultiplier: number = 1;
 
+    private readonly yOffset = 31;// magic const
+
     private side = 1;// connected side index
 
     private directions = [
@@ -26,7 +27,6 @@ class EngineAnimation {
     ];
 
     public set connectionSide(value: number){
-        alert(`meta setted to ${value}`);
         this.side = value;
         this.rotateByMeta();
     }
@@ -34,18 +34,53 @@ class EngineAnimation {
     public get connectionSide(): number {
         return this.side;
     }
-    // TODO remove this.type
+
     constructor(public readonly coords: IBlockPos, private heatStage: EngineHeat, private engineTexture: EngineTexture){
-        // alert(typeof(this.texture)+"   EngineAnimation");
         this.piston = new PistonAnimation(coords, engineTexture);
         this.base = new BaseAnimation(coords, engineTexture);
     }
 
-    // Legacy, but it still work
-    createPiston(rotation: EngineRotation, direction: number) {
-        const coords = {x: 0, y: 0, z: 0};
+    public update(power: number, heat: EngineHeat): void {
+        this.updateTrunkHeat(heat);
+        this.movePiston(power);
+    }
 
-        const yOffset = 31;// magic const
+    private updateTrunkHeat(heat: EngineHeat): void {
+        if(this.heatStage !== heat){
+            this.heatStage = heat;
+            this.base.render.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, this.directions[this.side].rotation);
+            this.base.render.refresh();
+        }
+    }
+
+    private movePiston(power: number): void {
+        this.pushingMultiplier = this.pistonPosition < 0 ? 1 : this.pushingMultiplier;
+        this.pistonPosition += power * this.pushingMultiplier / 64; // 64 is magical multiplier
+
+        this.piston.setPosition(this.pistonPosition);
+    }
+
+    public isReadyToGoBack(): boolean {
+        return this.pistonPosition > .5
+    }
+
+    public goBack(): void {
+        this.pushingMultiplier = -1;
+    }
+
+    private rotateByMeta(): void {
+        const data = this.directions[this.side]
+        this.createPiston(data.rotation, data.direction);
+    }
+
+    public destroy(): void {
+        this.base.destroy();
+        this.piston.destroy();
+    }
+
+    // Legacy, but it still work
+    private createPiston(rotation: EngineRotation, direction: number): void {
+        const coords = {x: 0, y: 0, z: 0};
 
         switch (rotation){
             case EngineRotation.X:
@@ -59,85 +94,60 @@ class EngineAnimation {
             break;
         };
 
+        this.setupBaseBoxes(coords);
         const baseRender = this.base.render;
-        // base boxes configuration
-        baseRender.baseCoords = {
-            x: coords.x * 6,
-            y: yOffset + coords.y * 6,
-            z: coords.z * 6,
-        }
-        baseRender.baseSize = {
-            x: 4 + 12 * (1 - Math.abs(coords.x)),
-            y: 4 + 12 * (1 - Math.abs(coords.y)),
-            z: 4 + 12 * (1 - Math.abs(coords.z))
-        }
-
         baseRender.baseUV = this.engineTexture.getBaseUV(rotation);
 
-        // trunk boxes configuration
-        baseRender.trunkCoords = {
-            x: -coords.x * .1,
-            y: yOffset - coords.y * .1,
-            z: -coords.z * .1
-        }
-        baseRender.trunkSize = {
-            x: 8 + 8 * (Math.abs(coords.x)),
-            y: 8 + 8 * (Math.abs(coords.y)),
-            z: 8 + 8 * (Math.abs(coords.z))
-        }
-
+        this.setupTrunkBoxes(coords);
         baseRender.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, rotation);
         baseRender.refresh();
+
+        this.setupPistonBoxes(coords);
+        const pistonRender = this.piston.render;
+        pistonRender.pistonUV = this.engineTexture.getBaseUV(rotation);
+        pistonRender.refresh();
 
         // piston Move Vector setup
         this.piston.direction = -direction;
         this.piston.rotation = rotation;
+    }
 
-        const pistonRender = this.piston.render;
-        // piston boxes configuration
-        pistonRender.pistonCoords = {
-            x: coords.x * 2,
-            y: yOffset + coords.y * 2,
-            z: coords.z * 2
-        };
-        pistonRender.pistonSize = {
+    private setupBaseBoxes(coords: Vector): void {
+        this.base.render.baseCoords = {
+            x: coords.x * 6,
+            y: this.yOffset + coords.y * 6,
+            z: coords.z * 6,
+        }
+        this.base.render.baseSize = {
             x: 4 + 12 * (1 - Math.abs(coords.x)),
             y: 4 + 12 * (1 - Math.abs(coords.y)),
             z: 4 + 12 * (1 - Math.abs(coords.z))
         }
-        pistonRender.pistonUV = this.engineTexture.getBaseUV(rotation);
-        pistonRender.refresh();
     }
 
-    public update(power: number, heat: EngineHeat): void {
-        if(this.heatStage !== heat){
-            this.heatStage = heat;
-            this.base.render.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, this.directions[this.side].rotation);
-            this.base.render.refresh();
+    private setupTrunkBoxes(coords: Vector): void {
+        this.base.render.trunkCoords = {
+            x: -coords.x * .1,
+            y: this.yOffset - coords.y * .1,
+            z: -coords.z * .1
         }
-
-        this.pushingMultiplier = this.pistonPosition < 0 ? 1 : this.pushingMultiplier;
-        this.pistonPosition += power * this.pushingMultiplier / 64; // 64 is magical multiplier
-
-        this.piston.setPosition(this.pistonPosition);
+        this.base.render.trunkSize = {
+            x: 8 + 8 * (Math.abs(coords.x)),
+            y: 8 + 8 * (Math.abs(coords.y)),
+            z: 8 + 8 * (Math.abs(coords.z))
+        }
     }
 
-    isReadyToGoBack(): boolean {
-        return this.pistonPosition > .5
-    }
-
-    goBack(): void {
-        this.pushingMultiplier = -1;
-    }
-
-    rotateByMeta(): void {
-        const data = this.directions[this.side]
-        this.createPiston(data.rotation, data.direction);
-        Debug.m(`rotated by meta ${this.side}`);
-    }
-
-    destroy(): void {
-        this.base.destroy();
-        this.piston.destroy();
+    private setupPistonBoxes(coords: Vector): void {
+        this.piston.render.pistonCoords = {
+            x: coords.x * 2,
+            y: this.yOffset + coords.y * 2,
+            z: coords.z * 2
+        };
+        this.piston.render.pistonSize = {
+            x: 4 + 12 * (1 - Math.abs(coords.x)),
+            y: 4 + 12 * (1 - Math.abs(coords.y)),
+            z: 4 + 12 * (1 - Math.abs(coords.z))
+        }
     }
 }

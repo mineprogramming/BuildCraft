@@ -41,7 +41,6 @@ class BCEngineTileEntity {
 
     protected init(){
         this.meta = this.getConnectionSide();
-        // alert(typeof(this.texture)+"   BCEngineTileEntity");
         this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.data.heatStage, this.texture);
         this.engineAnimation.connectionSide = this.meta;
     }
@@ -65,7 +64,7 @@ class BCEngineTileEntity {
         this.engineAnimation.destroy();
     }
 
-    getConnectionSide(){// correct!
+    getConnectionSide(){
         for(let i = 0; i < 6; i++){
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
             const block = World.getBlock(relCoords.x, relCoords.y, relCoords.z);

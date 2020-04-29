@@ -1,13 +1,9 @@
 /// <reference path="../../EngineHeat.ts" />
 /// <reference path="../EngineRotation.ts" />
+/// <reference path="ITexture.ts" />
 interface Vector2 {
     x: number;
     y: number;
-}
-
-interface ITexture {
-    width: number;
-    height: number;
 }
 
 const STANDART_TEXTURE = "model/buildcraft_engine_atlas.png";
@@ -17,7 +13,6 @@ class EngineTexture {
     constructor(public readonly name: string, private readonly baseOffset, public readonly size: ITexture){}
 
     public getTrunkUV(heat: EngineHeat, rotation: EngineRotation): Vector2 {
-        // alert(HeatOrder.indexOf(heat)+"  trunk offset");
         return {x: 64 * rotation, y: 32 * HeatOrder.indexOf(heat)}
     }
 

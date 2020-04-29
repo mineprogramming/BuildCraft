@@ -1,7 +1,6 @@
 /// <reference path="../components/EngineBlock.ts" />
 /// <reference path="../components/EngineItem.ts" />
 /// <reference path="../EngineHeat.ts" />
-/// <reference path="../EngineType.ts" />
 /// <reference path="../../Coords.ts" />
 /// <reference path="../model/texture/EngineTexture.ts" />
 /// <reference path="BCEngineTileEntity.ts" />

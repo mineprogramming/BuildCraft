@@ -44,14 +44,6 @@ var HeatOrder = [
     EngineHeat.RED,
     EngineHeat.BLACK
 ];
-var EngineType;
-(function (EngineType) {
-    EngineType["creative"] = "creative";
-    EngineType["iron"] = "iron";
-    EngineType["redstone"] = "redstone";
-    EngineType["stirling"] = "stirling";
-    EngineType["custom"] = "custom";
-})(EngineType || (EngineType = {}));
 var EngineBlock = /** @class */ (function () {
     function EngineBlock(registryId) {
         this.registryId = registryId;
@@ -76,7 +68,6 @@ var EngineItem = /** @class */ (function () {
     EngineItem.prototype.registerItem = function () {
         IDRegistry.genItemID(this.stringId);
         Item.createItem(this.stringId, this.getName(), { name: "engine_" + this.registryId });
-        alert("Item Registred " + this.stringId);
     };
     EngineItem.prototype.getName = function () {
         return this.registryId + " Engine";
@@ -92,6 +83,7 @@ var EngineRotation;
 })(EngineRotation || (EngineRotation = {}));
 /// <reference path="../../EngineHeat.ts" />
 /// <reference path="../EngineRotation.ts" />
+/// <reference path="ITexture.ts" />
 var STANDART_TEXTURE = "model/buildcraft_engine_atlas.png";
 var STANDART_SIZE = { width: 512, height: 512 };
 var EngineTexture = /** @class */ (function () {
@@ -101,7 +93,6 @@ var EngineTexture = /** @class */ (function () {
         this.size = size;
     }
     EngineTexture.prototype.getTrunkUV = function (heat, rotation) {
-        // alert(HeatOrder.indexOf(heat)+"  trunk offset");
         return { x: 64 * rotation, y: 32 * HeatOrder.indexOf(heat) };
     };
     EngineTexture.prototype.getBaseUV = function (rotation) {
@@ -272,7 +263,6 @@ var AnimationComponent = /** @class */ (function () {
     return AnimationComponent;
 }());
 /// <reference path="./AnimationComponent.ts" />
-/// <reference path="../../EngineType.ts" />
 var PistonAnimation = /** @class */ (function (_super) {
     __extends(PistonAnimation, _super);
     function PistonAnimation(pos, engineTexture) {
@@ -287,13 +277,11 @@ var PistonAnimation = /** @class */ (function (_super) {
             y: this.rotation === EngineRotation.Y ? pistonPosition * -this.direction : 0,
             z: this.rotation === EngineRotation.Z ? pistonPosition * -this.direction : 0
         }; // !dont touch -1 or fix root of evil
-        // ?Game.tipMessage(JSON.stringify(move));
         this.animation.setPos(this.coords.x + move.x, this.coords.y + move.y, this.coords.z + move.z);
     };
     return PistonAnimation;
 }(AnimationComponent));
 /// <reference path="./AnimationComponent.ts" />
-/// <reference path="../../EngineType.ts" />
 /// <reference path="../../EngineHeat.ts" />
 /// <reference path="../../model/texture/EngineTexture.ts" />
 var BaseAnimation = /** @class */ (function (_super) {
@@ -307,7 +295,6 @@ var BaseAnimation = /** @class */ (function (_super) {
     return BaseAnimation;
 }(AnimationComponent));
 /// <reference path="../EngineHeat.ts" />
-/// <reference path="../EngineType.ts" />
 /// <reference path="../model/render/RenderManager.ts" />
 /// <reference path="../model/render/BaseRender.ts" />
 /// <reference path="../model/render/PistonRender.ts" />
@@ -315,13 +302,13 @@ var BaseAnimation = /** @class */ (function (_super) {
 /// <reference path="animation/PistonAnimation.ts" />
 /// <reference path="animation/BaseAnimation.ts" />
 var EngineAnimation = /** @class */ (function () {
-    // TODO remove this.type
     function EngineAnimation(coords, heatStage, engineTexture) {
         this.coords = coords;
         this.heatStage = heatStage;
         this.engineTexture = engineTexture;
         this.pistonPosition = 0; // TODO make setter
         this.pushingMultiplier = 1;
+        this.yOffset = 31; // magic const
         this.side = 1; // connected side index
         this.directions = [
             { rotation: EngineRotation.Y, direction: -1 },
@@ -331,7 +318,6 @@ var EngineAnimation = /** @class */ (function () {
             { rotation: EngineRotation.X, direction: 1 },
             { rotation: EngineRotation.X, direction: -1 }
         ];
-        // alert(typeof(this.texture)+"   EngineAnimation");
         this.piston = new PistonAnimation(coords, engineTexture);
         this.base = new BaseAnimation(coords, engineTexture);
     }
@@ -340,7 +326,6 @@ var EngineAnimation = /** @class */ (function () {
             return this.side;
         },
         set: function (value) {
-            alert("meta setted to " + value);
             this.side = value;
             this.rotateByMeta();
         },
@@ -350,7 +335,6 @@ var EngineAnimation = /** @class */ (function () {
     // Legacy, but it still work
     EngineAnimation.prototype.createPiston = function (rotation, direction) {
         var coords = { x: 0, y: 0, z: 0 };
-        var yOffset = 31; // magic const
         switch (rotation) {
             case EngineRotation.X:
                 coords.x = direction;
@@ -363,59 +347,35 @@ var EngineAnimation = /** @class */ (function () {
                 break;
         }
         ;
+        this.setupBaseBoxes(coords);
         var baseRender = this.base.render;
-        // base boxes configuration
-        baseRender.baseCoords = {
-            x: coords.x * 6,
-            y: yOffset + coords.y * 6,
-            z: coords.z * 6,
-        };
-        baseRender.baseSize = {
-            x: 4 + 12 * (1 - Math.abs(coords.x)),
-            y: 4 + 12 * (1 - Math.abs(coords.y)),
-            z: 4 + 12 * (1 - Math.abs(coords.z))
-        };
         baseRender.baseUV = this.engineTexture.getBaseUV(rotation);
-        // trunk boxes configuration
-        baseRender.trunkCoords = {
-            x: -coords.x * .1,
-            y: yOffset - coords.y * .1,
-            z: -coords.z * .1
-        };
-        baseRender.trunkSize = {
-            x: 8 + 8 * (Math.abs(coords.x)),
-            y: 8 + 8 * (Math.abs(coords.y)),
-            z: 8 + 8 * (Math.abs(coords.z))
-        };
+        this.setupTrunkBoxes(coords);
         baseRender.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, rotation);
         baseRender.refresh();
+        this.setupPistonBoxes(coords);
+        var pistonRender = this.piston.render;
+        pistonRender.pistonUV = this.engineTexture.getBaseUV(rotation);
+        pistonRender.refresh();
         // piston Move Vector setup
         this.piston.direction = -direction;
         this.piston.rotation = rotation;
-        var pistonRender = this.piston.render;
-        // piston boxes configuration
-        pistonRender.pistonCoords = {
-            x: coords.x * 2,
-            y: yOffset + coords.y * 2,
-            z: coords.z * 2
-        };
-        pistonRender.pistonSize = {
-            x: 4 + 12 * (1 - Math.abs(coords.x)),
-            y: 4 + 12 * (1 - Math.abs(coords.y)),
-            z: 4 + 12 * (1 - Math.abs(coords.z))
-        };
-        pistonRender.pistonUV = this.engineTexture.getBaseUV(rotation);
-        pistonRender.refresh();
     };
-    EngineAnimation.prototype.update = function (power, heat) {
+    EngineAnimation.prototype.updateTrunkHeat = function (heat) {
         if (this.heatStage !== heat) {
             this.heatStage = heat;
             this.base.render.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, this.directions[this.side].rotation);
             this.base.render.refresh();
         }
+    };
+    EngineAnimation.prototype.movePiston = function (power) {
         this.pushingMultiplier = this.pistonPosition < 0 ? 1 : this.pushingMultiplier;
         this.pistonPosition += power * this.pushingMultiplier / 64; // 64 is magical multiplier
         this.piston.setPosition(this.pistonPosition);
+    };
+    EngineAnimation.prototype.update = function (power, heat) {
+        this.updateTrunkHeat(heat);
+        this.movePiston(power);
     };
     EngineAnimation.prototype.isReadyToGoBack = function () {
         return this.pistonPosition > .5;
@@ -426,11 +386,46 @@ var EngineAnimation = /** @class */ (function () {
     EngineAnimation.prototype.rotateByMeta = function () {
         var data = this.directions[this.side];
         this.createPiston(data.rotation, data.direction);
-        Debug.m("rotated by meta " + this.side);
     };
     EngineAnimation.prototype.destroy = function () {
         this.base.destroy();
         this.piston.destroy();
+    };
+    EngineAnimation.prototype.setupBaseBoxes = function (coords) {
+        this.base.render.baseCoords = {
+            x: coords.x * 6,
+            y: this.yOffset + coords.y * 6,
+            z: coords.z * 6,
+        };
+        this.base.render.baseSize = {
+            x: 4 + 12 * (1 - Math.abs(coords.x)),
+            y: 4 + 12 * (1 - Math.abs(coords.y)),
+            z: 4 + 12 * (1 - Math.abs(coords.z))
+        };
+    };
+    EngineAnimation.prototype.setupTrunkBoxes = function (coords) {
+        this.base.render.trunkCoords = {
+            x: -coords.x * .1,
+            y: this.yOffset - coords.y * .1,
+            z: -coords.z * .1
+        };
+        this.base.render.trunkSize = {
+            x: 8 + 8 * (Math.abs(coords.x)),
+            y: 8 + 8 * (Math.abs(coords.y)),
+            z: 8 + 8 * (Math.abs(coords.z))
+        };
+    };
+    EngineAnimation.prototype.setupPistonBoxes = function (coords) {
+        this.piston.render.pistonCoords = {
+            x: coords.x * 2,
+            y: this.yOffset + coords.y * 2,
+            z: coords.z * 2
+        };
+        this.piston.render.pistonSize = {
+            x: 4 + 12 * (1 - Math.abs(coords.x)),
+            y: 4 + 12 * (1 - Math.abs(coords.y)),
+            z: 4 + 12 * (1 - Math.abs(coords.z))
+        };
     };
     return EngineAnimation;
 }());
@@ -531,7 +526,6 @@ var BCEngineTileEntity = /** @class */ (function () {
 /// <reference path="../components/EngineBlock.ts" />
 /// <reference path="../components/EngineItem.ts" />
 /// <reference path="../EngineHeat.ts" />
-/// <reference path="../EngineType.ts" />
 /// <reference path="../../Coords.ts" />
 /// <reference path="../model/texture/EngineTexture.ts" />
 /// <reference path="BCEngineTileEntity.ts" />
@@ -589,7 +583,6 @@ var BCCreativeEngineTileEntity = /** @class */ (function (_super) {
     return BCCreativeEngineTileEntity;
 }(BCEngineTileEntity));
 /// <reference path="../abstract/BCEngine.ts" />
-/// <reference path="../EngineType.ts" />
 /// <reference path="CreativeEngineTileEntity.ts" />
 /// <reference path="../model/texture/EngineTexture.ts" />
 var CreativeEngine = /** @class */ (function (_super) {
@@ -605,7 +598,6 @@ var CreativeEngine = /** @class */ (function (_super) {
         configurable: true
     });
     CreativeEngine.prototype.registerTileEntity = function () {
-        // alert(typeof(this.texture)+"   CreativeEngine");
         var baseOffset = { x: 256, y: 96 };
         this.tileEntity = new BCCreativeEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, baseOffset, STANDART_SIZE));
     };
