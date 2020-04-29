@@ -12,10 +12,5 @@ class EngineBlock {
         IDRegistry.genBlockID(this.stringId);
         Block.createBlock(this.stringId,
             [{name: this.stringId, texture: [["empty", 0]], inCreative: false}]);
-        var staticModel = new BlockRenderer.Model();
-        // модификация модели staticModel
-        var icRenderModel = new ICRender.Model();
-        icRenderModel.addEntry(staticModel);
-        BlockRenderer.setStaticICRender(this.id, -1, icRenderModel);
     }
 }

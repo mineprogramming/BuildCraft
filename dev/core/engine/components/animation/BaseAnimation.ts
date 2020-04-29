@@ -1,15 +1,12 @@
 /// <reference path="./AnimationComponent.ts" />
 /// <reference path="../../EngineType.ts" />
 /// <reference path="../../EngineHeat.ts" />
+/// <reference path="../../model/texture/EngineTexture.ts" />
 class BaseAnimation extends AnimationComponent {
-    protected render: BaseRender;
+    public render: BaseRender;
 
-    constructor(pos: IBlockPos, type: EngineType, heat: EngineHeat){
-        const render = new BaseRender(type, heat);
+    constructor(pos: Vector, engineTexture: EngineTexture){
+        const render = new BaseRender(engineTexture);
         super(pos, render);
-    }
-
-    updateHeat(heat: EngineHeat){
-        this.render.updateHeatStage(heat);
     }
 }

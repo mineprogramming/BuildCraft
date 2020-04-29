@@ -1,15 +1,14 @@
 /// <reference path="../abstract/BCEngine.ts" />
 /// <reference path="../EngineType.ts" />
+/// <reference path="CreativeEngineTileEntity.ts" />
+/// <reference path="../model/texture/EngineTexture.ts" />
 class CreativeEngine extends BCEngine {
-    constructor(){
-        super(EngineType.creative)
+    public get engineType(): string {
+        return "creative"
     }
-    /*protected init(): void {
-        alert("init CreativeEngine")
+    protected registerTileEntity(){
+        // alert(typeof(this.texture)+"   CreativeEngine");
+        const baseOffset = {x: 256, y: 96};
+        this.tileEntity = new BCCreativeEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, baseOffset, STANDART_SIZE));
     }
-    protected tick(): void {
-        if(World.getThreadTime() % 100 == 0){
-            alert("CreativeEngine");
-        }
-    }*/
 }

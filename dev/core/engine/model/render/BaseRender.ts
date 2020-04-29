@@ -1,51 +1,43 @@
 /// <reference path="EngineRender.ts" />
-/// <reference path="../ModelTexture.ts" />
 class BaseRender extends EngineRender {
+    protected boxes = [{
+        type: "box",// base
+        uv: null,
+        coords: null,
+        size: null
+    },
+    {
+        type: "box",// trunk
+        uv: null,
+        coords: null,
+        size: null
+    }];
 
-    constructor(type: string, protected heat: EngineHeat){
-        super(type);
-        this.updateHeatStage(heat);
+    public set baseCoords(value: Vector) {
+        this.boxes[0].coords = value;
     }
 
-    protected getGroupPrefix(): string {
-        return "BaseRender"
+    public set baseUV(value: Vector2) {
+        this.boxes[0].uv = value;
     }
 
-    updateHeatStage(heat: EngineHeat){
-        this.heat = heat;
-        this.render.setPart("head", this.getModelData(), this.texture.getSize());
+    public set baseSize(value: Vector) {
+        this.boxes[0].size = value;
     }
 
-    protected getModelData(){
-        return [
-            {
-                type: "box",
-                uv: this.texture.getUV(),
-                coords: {
-                    x: -6,
-                    y: 24,
-                    z: 0,
-                },
-                size: {
-                    x: 4,
-                    y: 16,
-                    z: 16
-                }
-            },
-            {
-                type: "box",
-                uv: TexturesOffset.trunk[this.heat],
-                coords: {
-                    x: .01,
-                    y: 24,
-                    z: 0,
-                },
-                size: {
-                    x: 16,
-                    y: 8,
-                    z: 8
-                }
-            }
-        ]
+    public set trunkCoords(value: Vector) {
+        this.boxes[1].coords = value;
+    }
+
+    public set trunkSize(value: Vector) {
+        this.boxes[1].size = value;
+    }
+
+    public set trunkUV(value: Vector2) {
+        this.boxes[1].uv = value;
+    }
+
+    protected getModelData(): PartObject[] {
+        return this.boxes;
     }
 }

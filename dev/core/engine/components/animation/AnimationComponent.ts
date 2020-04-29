@@ -2,10 +2,10 @@
 /// <reference path="../../../Coords.ts" />
 class AnimationComponent {
     protected readonly animation;
-    public readonly coords: IBlockPos;
+    public readonly coords: Vector;
 
-    constructor(pos: IBlockPos, protected render: EngineRender){
-        this.coords = {x: pos.x + .5, y: pos.y +.5, z: pos.z + .5};
+    constructor(pos: Vector, public render: EngineRender){
+        this.coords = {x: pos.x + .5, y: pos.y + 15 / 16, z: pos.z + .5};
         this.animation = new Animation.Base(this.coords.x, this.coords.y, this.coords.z);
         this.animation.describe({render: this.render.getID()});
         this.animation.load();
@@ -16,11 +16,6 @@ class AnimationComponent {
         this.render = render;
         this.animation.describe({render: this.render.getID()});
         this.animation.refresh();
-    }
-
-    rotate(rotation: IBlockPos): void{
-        this.animation.render.transform.rotate(rotation.x, rotation.y, rotation.z);
-        this.render.rebuild();
     }
 
     destroy(): void{

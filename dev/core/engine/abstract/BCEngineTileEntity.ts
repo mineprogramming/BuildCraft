@@ -1,7 +1,15 @@
 /// <reference path="../components/EngineAnimation.ts" />
+/// <reference path="../../energy.ts" />
+
+// test
+IDRegistry.genBlockID("WIRE");
+Block.createBlock("WIRE",
+    [{name: "WIRE", texture: [["stone", 0]], inCreative: true}]);
+RF.registerWire(BlockID["WIRE"]);
 class BCEngineTileEntity {
-    constructor(public readonly maxHeat: number, public readonly type: EngineType){}
+    constructor(public readonly maxHeat: number, protected texture: EngineTexture){}
     protected data = {// it will be rewriten during runtime
+        meta: null,
         energy: 0,
         heat: 0,
         power: 0,
@@ -9,17 +17,33 @@ class BCEngineTileEntity {
         heatStage: EngineHeat.BLUE
     }
     protected defaultValues = {
+        meta: null,
         energy: 0,
         heat: 0,
         power: 0,
         targetPower: 0,
         heatStage: EngineHeat.BLUE
     }
+    x: number; y: number; z: number;
 
-    engineAnimation = null
+    engineAnimation = null;
+    get meta(){
+        if(!this.data.meta){
+            this.data.meta = this.getConnectionSide();
+        }
+        return this.data.meta;
+    }
+
+    set meta(value){
+        this.data.meta = value;
+        this.engineAnimation.connectionSide = value;
+    }
 
     protected init(){
-        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type, this.data.heatStage);
+        this.meta = this.getConnectionSide();
+        // alert(typeof(this.texture)+"   BCEngineTileEntity");
+        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.data.heatStage, this.texture);
+        this.engineAnimation.connectionSide = this.meta;
     }
 
     protected tick(){
@@ -39,6 +63,17 @@ class BCEngineTileEntity {
 
     destroy(){
         this.engineAnimation.destroy();
+    }
+
+    getConnectionSide(){// correct!
+        for(let i = 0; i < 6; i++){
+            const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
+            const block = World.getBlock(relCoords.x, relCoords.y, relCoords.z);
+            if(EnergyTypeRegistry.isWire(block.id, "RF")){
+                return i;
+            }
+        }
+        return 2;
     }
 
     getHeatStage(){

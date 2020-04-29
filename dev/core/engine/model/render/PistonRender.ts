@@ -1,26 +1,25 @@
 /// <reference path="EngineRender.ts" />
-/// <reference path="../ModelTexture.ts" />
 class PistonRender extends EngineRender {
-    protected getGroupPrefix(): string {
-        return "PistonRender"
+    protected boxes = [{
+        type: "box",
+        uv: null,
+        coords: null,
+        size: null
+    }];
+
+    public set pistonCoords(value: Vector) {
+        this.boxes[0].coords = value;
     }
 
-    protected getModelData(){
-        return [
-            {
-                type: "box",
-                uv: this.texture.getUV(),
-                coords: {
-                    x: -2,
-                    y: 24,
-                    z: 0,
-                },
-                size: {
-                    x: 4,
-                    y: 16,
-                    z: 16
-                }
-            }
-        ]
+    public set pistonUV(value: Vector2) {
+        this.boxes[0].uv = value;
+    }
+
+    public set pistonSize(value: Vector) {
+        this.boxes[0].size = value;
+    }
+
+    protected getModelData(): PartObject[] {
+        return this.boxes;
     }
 }
