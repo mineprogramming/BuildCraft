@@ -1,59 +1,24 @@
-/// <reference path="../ModelTexture.ts" />
+/// <reference path="../texture/EngineTexture.ts" />
 /// <reference path="RenderManager.ts" />
 abstract class EngineRender {
-    protected readonly render;
-    protected readonly texture: ModelTexture;
+    protected readonly render: Render;
     protected boxes = [];
 
-    constructor(protected readonly type: string){
-        this.texture = new ModelTexture(this.getTextureOffset());
-        this.render = RenderManager.getRender(this.getGroupName()) || this.createNewRender();
+    constructor(protected engineTexture: EngineTexture){
+        this.render = RenderManager.getRender() || new Render({skin: this.engineTexture.name});
     }
 
-    private createNewRender(): Render {
-        const render = new Render({skin: "model/" + this.texture.getTexture()});
-        render.setPart("head", this.getModelData(), this.texture.getSize());
-        return render
-    }
-
-    refresh(): void {
+    public refresh(): void {
         alert("refresh");
-        this.render.setPart("head", this.getModelData(), this.texture.getSize());
+        this.render.setPart("head", this.getModelData(), this.engineTexture.size);
     }
 
-    protected getGroupPrefix(): string {
-        return "EngineRender"
+    public stash(): void {
+        RenderManager.store(this.render);
     }
 
-    protected getGroupName(): string {
-        return this.getGroupPrefix() + this.type;
-    }
-
-    protected getTextureOffset(): object {
-        return TexturesOffset.engine.base[this.type];
-    }
-
-    stash(): void {
-        RenderManager.addToGroup(this.getGroupName(), this.render);
-    }
-
-    getID(): number {
+    public getID(): number {
         return this.render.getId();
-    }
-
-    public set rotation(value: EngineRotation){
-        const add = 64 * value;
-        for(const box of this.boxes){
-            Debug.m("updating uv");
-            Debug.m(box.uv.x)
-            box.uv.x += add;
-            Debug.m(box.uv.x)
-            Debug.m("uv updated");
-        }
-    }
-
-    public rebuild(): void {
-        this.render.rebuild();
     }
 
     protected getModelData(): PartObject[] {

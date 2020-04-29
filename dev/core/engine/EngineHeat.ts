@@ -6,7 +6,7 @@ enum EngineHeat {
     BLACK = "BLACK"
 }
 
-var HeatOrder = [
+const HeatOrder = [
     EngineHeat.BLUE,
     EngineHeat.GREEN,
     EngineHeat.ORANGE,

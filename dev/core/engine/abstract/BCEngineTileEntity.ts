@@ -7,7 +7,7 @@ Block.createBlock("WIRE",
     [{name: "WIRE", texture: [["stone", 0]], inCreative: true}]);
 RF.registerWire(BlockID["WIRE"]);
 class BCEngineTileEntity {
-    constructor(public readonly maxHeat: number, public readonly type: EngineType){}
+    constructor(public readonly maxHeat: number, protected texture: EngineTexture){}
     protected data = {// it will be rewriten during runtime
         meta: null,
         energy: 0,
@@ -41,7 +41,8 @@ class BCEngineTileEntity {
 
     protected init(){
         this.meta = this.getConnectionSide();
-        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.type, this.data.heatStage);
+        // alert(typeof(this.texture)+"   BCEngineTileEntity");
+        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.data.heatStage, this.texture);
         this.engineAnimation.connectionSide = this.meta;
     }
 
