@@ -9,7 +9,6 @@ abstract class EngineRender {
     }
 
     public refresh(): void {
-        alert("refresh");
         this.render.setPart("head", this.getModelData(), this.engineTexture.size);
     }
 

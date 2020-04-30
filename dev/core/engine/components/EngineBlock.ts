@@ -1,3 +1,8 @@
+const engineBlockType = {
+    base: 1
+};
+// TODO complete blockType before release
+
 class EngineBlock {
     public readonly id: number;
     public readonly stringId: string;
@@ -11,6 +16,6 @@ class EngineBlock {
     private registerBlock(): void {
         IDRegistry.genBlockID(this.stringId);
         Block.createBlock(this.stringId,
-            [{name: this.stringId, texture: [["empty", 0]], inCreative: false}]);
+            [{name: this.stringId, texture: [["empty", 0]], inCreative: false}], engineBlockType);
     }
 }

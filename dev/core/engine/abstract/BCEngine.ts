@@ -12,6 +12,11 @@ abstract class BCEngine {
     protected tileEntity: BCEngineTileEntity;
 
     protected engineTexture: EngineTexture;
+
+    public get engineType(): string {
+        return null
+    }
+
     constructor(){
         this.block = new EngineBlock(this.engineType);
         this.item = new EngineItem(this.engineType, this.block);
@@ -22,15 +27,11 @@ abstract class BCEngine {
         this.registerDrop();
     }
 
-    public get engineType(): string{
-        return null
-    }
-
     protected get texture(): EngineTexture {
         return this.engineTexture;
     }
 
-    protected registerTileEntity(){
+    protected registerTileEntity(): void {
         this.tileEntity = new BCEngineTileEntity(this.maxHeat, this.texture);
     }
 
