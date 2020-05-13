@@ -9,7 +9,7 @@ abstract class BCEngine {
     protected item: EngineItem;
 
     protected maxHeat: number = 100;
-    protected tileEntity: BCEngineTileEntity;
+    protected tileEntity: BCEngineTileEntity;// ! override it in child
 
     protected engineTexture: EngineTexture;
 
@@ -21,7 +21,7 @@ abstract class BCEngine {
         this.block = new EngineBlock(this.engineType);
         this.item = new EngineItem(this.engineType, this.block);
 
-        this.registerTileEntity();
+        // this.registerTileEntity();
         TileEntity.registerPrototype(this.block.id, this.tileEntity);
         this.registerUse();
         this.registerDrop();
@@ -31,9 +31,9 @@ abstract class BCEngine {
         return this.engineTexture;
     }
 
-    protected registerTileEntity(): void {
+    /* abstract registerTileEntity(): void {
         this.tileEntity = new BCEngineTileEntity(this.maxHeat, this.texture);
-    }
+    }*/
 
     private registerUse(): void {
         Item.registerUseFunction(this.item.stringId, (coords, item, block) => {
