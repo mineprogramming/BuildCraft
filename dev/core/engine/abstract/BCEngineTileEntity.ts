@@ -6,7 +6,7 @@ IDRegistry.genBlockID("WIRE");
 Block.createBlock("WIRE",
     [{name: "WIRE", texture: [["stone", 0]], inCreative: true}]);
 RF.registerWire(BlockID["WIRE"]);
-class BCEngineTileEntity {
+abstract class BCEngineTileEntity {
     public readonly MIN_HEAT = 20;
     public readonly IDEAL_HEAT = 100;
     public readonly MAX_HEAT = 250;
@@ -47,39 +47,39 @@ class BCEngineTileEntity {
     x: number; y: number; z: number;
 
     engineAnimation = null;
-    get meta(){
+    get orientation(){
         if(!this.data.meta){
             this.data.meta = this.getConnectionSide();
         }
         return this.data.meta;
     }
 
-    set meta(value){
+    set orientation(value){
         this.data.meta = value;
         this.engineAnimation.connectionSide = value;
     }
 
     protected init(){
         this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.data.heatStage, this.texture);
-        this.engineAnimation.connectionSide = this.meta = this.getConnectionSide();
+        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide();
+        this.checkRedstonePower();
     }
 
     protected tick(){
-        if (this.lastTick < 4)this.lastTick++;
+        if (this.lastTick < 4) this.lastTick++;
 
-        /* if (checkRedstonePower) { // from PC
-            checkRedstonePower();
-        }
-        if (worldObj.isRemote) { // ? is it for client-server?
-            if (progressPart != 0) {
-                progress += getPistonSpeed();
+        // from PC
+        this.checkRedstonePower();
+        /* if (worldObj.isRemote) { // ? is it for client-server?
+            if (this.progressPart != 0) {
+                this.data.progress += this.getPistonSpeed();
 
-                if (progress > 1) {
-                    progressPart = 0;
-                    progress = 0;
+                if (this.data.progress > 1) {
+                    this.progressPart = 0;
+                    this.data.progress = 0;
                 }
             } else if (this.isPumping) {
-                progressPart = 1;
+                this.progressPart = 1;
             }
 
             return;
@@ -94,43 +94,41 @@ class BCEngineTileEntity {
 
         this.engineUpdate();
 
-        /* Object tile = getEnergyProvider(orientation);
+        const tile = this.getEnergyProvider(this.orientation);
 
-        if (progressPart != 0) {
-            progress += getPistonSpeed();
+        if (this.progressPart != 0) {
+            this.data.progress += this.getPistonSpeed();
 
-            if (progress > 0.5 && progressPart == 1) {
-                progressPart = 2;
-            } else if (progress >= 1) {
-                progress = 0;
-                progressPart = 0;
+            if (this.data.progress > 0.5 && this.progressPart == 1) {
+                this.progressPart = 2;
+            } else if (this.data.progress >= 1) {
+                this.data.progress = 0;
+                this.progressPart = 0;
             }
-        } else if (isRedstonePowered && isActive()) {
-            if (isPoweredTile(tile, orientation)) {
-                progressPart = 1;
-                setPumping(true);
-                if (getPowerToExtract() > 0) {
-                    progressPart = 1;
-                    setPumping(true);
+        } else if (this.isRedstonePowered && this.isActive()) {
+            if (this.isPoweredTile(tile, this.orientation)) {
+                this.progressPart = 1;
+                this.setPumping(true);
+                if (this.getPowerToExtract() > 0) {
+                    this.progressPart = 1;
+                    this.setPumping(true);
                 } else {
-                    setPumping(false);
+                    this.setPumping(false);
                 }
             } else {
-                setPumping(false);
+                this.setPumping(false);
             }
         } else {
-            setPumping(false);
+            this.setPumping(false);
         }
 
-        burn();
+        this.burn();
 
-        if (!isRedstonePowered) {
-            currentOutput = 0;
-        } else if (isRedstonePowered && isActive()) {
-            sendPower();
-        } */
-
-
+        if (!this.isRedstonePowered) {
+            this.currentOutput = 0;
+        } else if (this.isRedstonePowered && this.isActive()) {
+            this.sendPower();
+        }
 
         /* // old backup
         this.engineAnimation.update(this.data.power, this.data.heatStage);
@@ -199,6 +197,89 @@ class BCEngineTileEntity {
         return this.energyStage;
     }
 
+    protected sendPower(): void {
+        const tile = this.getEnergyProvider(this.orientation);
+        if (this.isPoweredTile(tile, this.orientation)) {
+            const extracted = this.getPowerToExtract();
+            if (extracted <= 0) {
+                this.setPumping(false);
+                return;
+            }
+
+            this.setPumping(true);
+
+            // TODO integrate with energyNet
+            /* if (tile instanceof IEngine) {
+                IEngine engine = (IEngine) tile;
+                int neededRF = engine.receiveEnergyFromEngine(orientation.getOpposite(), extracted, false);
+
+                extractEnergy(neededRF, true);
+            } else if (tile instanceof IEnergyReceiver) {
+                IEnergyReceiver handler = (IEnergyReceiver) tile;
+                int neededRF = handler.receiveEnergy(orientation.getOpposite(), extracted, false);
+
+                extractEnergy(neededRF, true);
+            }*/
+        }
+    }
+
+    // ? why we need it? ask PC author about it. Maybe it should be overrided in future
+    protected burn(): void {}
+
+    private getPowerToExtract(): number {
+        const tile = this.getEnergyProvider(this.orientation);
+
+        // TODO integrate with energyNet
+        /* if (tile instanceof IEngine) {
+            IEngine engine = (IEngine) tile;
+
+            int maxEnergy = engine.receiveEnergyFromEngine(orientation.getOpposite(), this.energy, true);
+            return extractEnergy(maxEnergy, false);
+        } else if (tile instanceof IEnergyReceiver) {
+            IEnergyReceiver handler = (IEnergyReceiver) tile;
+
+            int maxEnergy = handler.receiveEnergy(orientation.getOpposite(), this.energy, true);
+            return extractEnergy(maxEnergy, false);
+        }*/
+        return 0;
+    }
+
+    // TODO make setter for setPumping()
+    protected setPumping(isActive: boolean): void {
+        if (this.isPumping == isActive) return;
+
+        this.isPumping = isActive;
+        this.lastTick = 0;
+        // this.sendNetworkUpdate(); // ? is sendNetworkUpdate() for client-server?
+    }
+
+    public getEnergyProvider(orientation): TileEntity {
+        const coords = World.getRelativeCoords(this.x, this.y, this.z, orientation);
+        return World.getTileEntity(coords.x, coords.y, coords.z);
+    }
+
+    public checkRedstonePower(): void {
+        // checkRedstonePower = false;
+        // this.isRedstonePowered = worldObj.isBlockIndirectlyGettingPowered(pos) > 0;
+        // TODO nake redstone powering
+        this.isRedstonePowered = true;
+    }
+
+    public isActive(): boolean { // ? why we need it? Ask PC author... I dont know
+        return true;
+    }
+    // TODO integrate to energyNet
+    public isPoweredTile(tile: TileEntity, side: number): boolean {
+        if(!tile) return false;
+
+        /* if (tile instanceof IEngine) {
+            return ((IEngine) tile).canReceiveFromEngine(side.getOpposite());
+        } else if (tile instanceof IEnergyHandler || tile instanceof IEnergyReceiver) {
+            return ((IEnergyConnection) tile).canConnectEnergy(side.getOpposite());
+        }*/
+        return false;
+    }
+
     protected computeEnergyStage(): EngineHeat {
         const energyLevel = this.getHeatLevel();
         if (energyLevel < 0.25) {
@@ -243,7 +324,7 @@ class BCEngineTileEntity {
     }
 
     // abstract
-    public getMaxEnergy(): number { return null}
+    public abstract getMaxEnergy(): number
 
     public getEnergyLevel(): number {
         return this.data.energy / this.getMaxEnergy();
