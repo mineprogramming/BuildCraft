@@ -11,15 +11,15 @@ abstract class BCEngineTileEntity {
     public readonly IDEAL_HEAT = 100;
     public readonly MAX_HEAT = 250;
 
-    public currentOutput = 0;
-    public isRedstonePowered = false;
+    public currentOutput: number = 0;
+    public isRedstonePowered: boolean = false;
     public energyStage = EngineHeat.BLUE;
 
-    protected progressPart = 0;
+    protected progressPart: number = 0;
 
-    private isPumping = false; // Used for SMP synch // ?WTF is SMP
+    private isPumping: boolean = false; // Used for SMP synch // ?WTF is SMP
     // How many ticks ago it gave out power, capped to 4.
-    private lastTick = 0;
+    private lastTick: number = 0;
 
     constructor(public readonly maxHeat: number, protected texture: EngineTexture){}
     protected data = {// it will be rewriten during runtime
