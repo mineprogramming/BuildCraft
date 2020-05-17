@@ -21,6 +21,7 @@ abstract class BCEngineTileEntity {
     // How many ticks ago it gave out power, capped to 4.
     private lastTick: number = 0;
 
+    // TODO remove constructor
     constructor(public readonly maxHeat: number, protected texture: EngineTexture){}
     protected data = {// it will be rewriten during runtime
         meta: null, // this.orientation in PC version
@@ -43,8 +44,13 @@ abstract class BCEngineTileEntity {
         heatStage: EngineHeat.BLUE
     }
 
+    public x: number;
+    public y: number;
+    public z: number;
 
-    x: number; y: number; z: number;
+    public isEngine = true;
+
+    // TODO enum PowerMode
 
     engineAnimation = null;
     get orientation(){
