@@ -1,5 +1,8 @@
+/// <reference path="../PowerMode.ts" />
 class BCCreativeEngineTileEntity extends BCEngineTileEntity {
     //  private PowerMode powerMode = PowerMode.M2; // ! its from PC
+    private powerMode: PowerMode = PowerMode.M2;
+
     protected computeEnergyStage(): EngineHeat {
         return EngineHeat.BLACK;
     }
@@ -8,7 +11,7 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
 
     public getPistonSpeed(): number {
        // return 0.02 * (powerMode.ordinal() + 1); // ORIGINAL
-       return 0.02 * 1; // Maybe shit...
+       return 0.02 * (PowerModeOrder[this.powerMode] + 1); // Maybe shit...
     }
 
     public engineUpdate(): void {
@@ -29,6 +32,6 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
 
     public getIdealOutput(): number {
         // return powerMode.maxPower; //ORIGINAL
-        return 20;
+        return this.powerMode;
     }
 }
