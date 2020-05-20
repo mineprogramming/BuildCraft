@@ -439,7 +439,9 @@ IDRegistry.genBlockID("WIRE");
 Block.createBlock("WIRE", [{ name: "WIRE", texture: [["stone", 0]], inCreative: true }]);
 RF.registerWire(BlockID["WIRE"]);
 var BCEngineTileEntity = /** @class */ (function () {
+    // TODO remove constructor
     function BCEngineTileEntity(maxHeat, texture) {
+        var _this = this;
         this.maxHeat = maxHeat;
         this.texture = texture;
         this.MIN_HEAT = 20;
@@ -470,7 +472,17 @@ var BCEngineTileEntity = /** @class */ (function () {
             targetPower: 0,
             heatStage: EngineHeat.BLUE
         };
+        this.isEngine = true;
         this.engineAnimation = null;
+        // ! DEBUG METHODS
+        this.m = function (str, hideChat) {
+            if (hideChat)
+                Debug.m(str);
+            Logger.Log(str, "DEBUG");
+        };
+        this.debug = function () {
+            alert("energy " + _this.data.energy + "  heat " + _this.data.heat + " progress " + _this.data.progress);
+        };
     }
     Object.defineProperty(BCEngineTileEntity.prototype, "orientation", {
         get: function () {
@@ -481,17 +493,20 @@ var BCEngineTileEntity = /** @class */ (function () {
         },
         set: function (value) {
             this.data.meta = value;
-            this.engineAnimation.connectionSide = value;
+            // this.engineAnimation.connectionSide = value;
         },
         enumerable: true,
         configurable: true
     });
     BCEngineTileEntity.prototype.init = function () {
-        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.data.heatStage, this.texture);
-        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide();
+        alert("init");
+        // this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.data.heatStage, this.texture);
+        // this.engineAnimation.connectionSide
+        this.orientation = this.getConnectionSide();
         this.checkRedstonePower();
     };
     BCEngineTileEntity.prototype.tick = function () {
+        this.debug();
         if (this.lastTick < 4)
             this.lastTick++;
         // from PC
@@ -512,6 +527,7 @@ var BCEngineTileEntity = /** @class */ (function () {
         }*/
         this.updateHeat();
         if (this.getEnergyStage() === EngineHeat.BLACK) {
+            alert("EngineHeat.BLACK");
             this.data.energy = Math.max(this.data.energy - 50, 0);
             return;
         }
@@ -553,7 +569,7 @@ var BCEngineTileEntity = /** @class */ (function () {
         else if (this.isRedstonePowered && this.isActive()) {
             this.sendPower();
         }
-        /* // old backup
+        /* // !old backup
         this.engineAnimation.update(this.data.power, this.data.heatStage);
         this.updatePower();
 
@@ -598,10 +614,12 @@ var BCEngineTileEntity = /** @class */ (function () {
         // TODO deploy
     };
     BCEngineTileEntity.prototype.getEnergyStage = function () {
+        alert("getEnergyStage() " + this.energyStage);
         // if (!worldObj.isRemote) { //? client-server
-        if (this.energyStage === EngineHeat.BLACK)
+        if (this.energyStage == EngineHeat.BLACK)
             return this.energyStage;
         var newStage = this.computeEnergyStage();
+        alert("computed new heat " + newStage);
         if (this.energyStage !== newStage) {
             this.energyStage = newStage;
             if (this.energyStage === EngineHeat.BLACK)
@@ -684,8 +702,14 @@ var BCEngineTileEntity = /** @class */ (function () {
         }*/
         return false;
     };
+    BCEngineTileEntity.prototype.getHeatLevel = function () {
+        alert("getHeatLevel()" + (this.data.heat - this.MIN_HEAT) / (this.MAX_HEAT - this.MIN_HEAT));
+        return (this.data.heat - this.MIN_HEAT) / (this.MAX_HEAT - this.MIN_HEAT);
+    };
     BCEngineTileEntity.prototype.computeEnergyStage = function () {
+        alert("start computeEnergyStage");
         var energyLevel = this.getHeatLevel();
+        alert("computeEnergyStage() " + energyLevel);
         if (energyLevel < 0.25) {
             return EngineHeat.BLUE;
         }
@@ -698,20 +722,69 @@ var BCEngineTileEntity = /** @class */ (function () {
         else if (energyLevel < 1) {
             return EngineHeat.RED;
         }
-        else {
-            return EngineHeat.BLACK;
-        }
+        return EngineHeat.BLACK;
     };
     BCEngineTileEntity.prototype.getPistonSpeed = function () {
         return Math.max(0.16 * this.getHeatLevel(), 0.01);
-        // some code removed instead of pc version
+        // ? for client-server
+        /*if (!worldObj.isRemote) {
+            return Math.max(0.16f * getHeatLevel(), 0.01f);
+        }
+
+        switch (getEnergyStage()) {
+            case BLUE:
+                return 0.02F;
+            case GREEN:
+                return 0.04F;
+            case YELLOW:
+                return 0.08F;
+            case RED:
+                return 0.16F;
+            default:
+                return 0;
+        }*/
     };
-    BCEngineTileEntity.prototype.getHeatLevel = function () {
-        return (this.data.heat - this.MIN_HEAT) / (this.MAX_HEAT - this.MIN_HEAT);
+    BCEngineTileEntity.prototype.addEnergy = function (addition) {
+        if (this.getEnergyStage() == EngineHeat.BLACK)
+            return;
+        this.data.energy += addition;
+        if (this.data.energy > this.getMaxEnergy()) {
+            this.data.energy = this.getMaxEnergy();
+        }
+    };
+    BCEngineTileEntity.prototype.getEnergyStored = function () {
+        return this.data.energy;
+    };
+    BCEngineTileEntity.prototype.getMaxEnergyStored = function () {
+        return this.getMaxEnergy();
+    };
+    BCEngineTileEntity.prototype.extractEnergy = function (energyMax, doExtract) {
+        var max = Math.min(energyMax, this.getCurrentOutputLimit());
+        var extracted;
+        var energy = this.data.energy;
+        if (energy >= max) {
+            extracted = max;
+            if (doExtract) {
+                energy -= max;
+            }
+        }
+        else {
+            extracted = energy;
+            if (doExtract) {
+                energy = 0;
+            }
+        }
+        return extracted;
+    };
+    BCEngineTileEntity.prototype.canConnectEnergy = function (from) {
+        return from == this.orientation;
     };
     BCEngineTileEntity.prototype.overheat = function () {
         this.isPumping = false;
         // TODO make some explode!
+    };
+    BCEngineTileEntity.prototype.getCurrentOutputLimit = function () {
+        return Number.MAX_VALUE;
     };
     BCEngineTileEntity.prototype.engineUpdate = function () {
         // if (!isRedstonePowered) {// TODO make redstone check
@@ -724,13 +797,59 @@ var BCEngineTileEntity = /** @class */ (function () {
         // }
     };
     BCEngineTileEntity.prototype.updateHeat = function () {
+        alert("updateHeat() " + ((this.MAX_HEAT - this.MIN_HEAT) * this.getEnergyLevel()) + this.MIN_HEAT);
         this.data.heat = ((this.MAX_HEAT - this.MIN_HEAT) * this.getEnergyLevel()) + this.MIN_HEAT;
     };
     BCEngineTileEntity.prototype.getEnergyLevel = function () {
         return this.data.energy / this.getMaxEnergy();
     };
     BCEngineTileEntity.prototype.destroy = function () {
-        this.engineAnimation.destroy();
+        // this.engineAnimation.destroy();
+    };
+    BCEngineTileEntity.prototype.getOppositeSide = function (side) {
+        switch (side) {
+            case 0:
+                return 1;
+            case 1:
+                return 0;
+            case 2:
+                return 3;
+            case 3:
+                return 2;
+            case 4:
+                return 5;
+            case 5:
+                return 4;
+        }
+    };
+    // TODO add IEngine interface
+    // IEngine
+    BCEngineTileEntity.prototype.canReceiveFromEngine = function (side) {
+        return side == this.getOppositeSide(this.orientation);
+    };
+    BCEngineTileEntity.prototype.receiveEnergyFromEngine = function (side, amount, simulate) {
+        if (this.canReceiveFromEngine(side)) {
+            var targetEnergy = Math.min(this.getMaxEnergy() - this.data.energy, amount);
+            if (!simulate) {
+                this.data.energy += targetEnergy;
+            }
+            return targetEnergy;
+        }
+        return 0;
+    };
+    // TODO add IHeatable interface
+    // IHeatable
+    BCEngineTileEntity.prototype.getMinHeatValue = function () {
+        return this.MIN_HEAT;
+    };
+    BCEngineTileEntity.prototype.getIdealHeatValue = function () {
+        return this.IDEAL_HEAT;
+    };
+    BCEngineTileEntity.prototype.getMaxHeatValue = function () {
+        return this.MAX_HEAT;
+    };
+    BCEngineTileEntity.prototype.getCurrentHeatValue = function () {
+        return this.data.heat;
     };
     return BCEngineTileEntity;
 }());
@@ -745,8 +864,7 @@ var BCEngine = /** @class */ (function () {
         this.maxHeat = 100;
         this.block = new EngineBlock(this.engineType);
         this.item = new EngineItem(this.engineType, this.block);
-        // this.registerTileEntity();
-        TileEntity.registerPrototype(this.block.id, this.tileEntity);
+        TileEntity.registerPrototype(this.block.id, this.requireTileEntity());
         this.registerUse();
         this.registerDrop();
     }
@@ -786,24 +904,49 @@ var BCEngine = /** @class */ (function () {
     };
     return BCEngine;
 }());
+var PowerMode;
+(function (PowerMode) {
+    PowerMode[PowerMode["M2"] = 20] = "M2";
+    PowerMode[PowerMode["M4"] = 40] = "M4";
+    PowerMode[PowerMode["M8"] = 80] = "M8";
+    PowerMode[PowerMode["M16"] = 160] = "M16";
+    PowerMode[PowerMode["M32"] = 320] = "M32";
+    PowerMode[PowerMode["M64"] = 640] = "M64";
+    PowerMode[PowerMode["M128"] = 1280] = "M128";
+    PowerMode[PowerMode["M256"] = 2560] = "M256";
+})(PowerMode || (PowerMode = {}));
+;
+var PowerModeOrder = [
+    PowerMode.M2,
+    PowerMode.M4,
+    PowerMode.M8,
+    PowerMode.M16,
+    PowerMode.M32,
+    PowerMode.M64,
+    PowerMode.M128,
+    PowerMode.M256
+];
+/// <reference path="../PowerMode.ts" />
 var BCCreativeEngineTileEntity = /** @class */ (function (_super) {
     __extends(BCCreativeEngineTileEntity, _super);
     function BCCreativeEngineTileEntity() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        //  private PowerMode powerMode = PowerMode.M2; // ! its from PC
+        _this.powerMode = PowerMode.M2;
+        return _this;
     }
-    //  private PowerMode powerMode = PowerMode.M2; // ! its from PC
     BCCreativeEngineTileEntity.prototype.computeEnergyStage = function () {
         return EngineHeat.BLACK;
     };
     BCCreativeEngineTileEntity.prototype.updateHeat = function () { };
     BCCreativeEngineTileEntity.prototype.getPistonSpeed = function () {
         // return 0.02 * (powerMode.ordinal() + 1); // ORIGINAL
-        return 0.02 * 1; // Maybe shit...
+        return 0.02 * (PowerModeOrder[this.powerMode] + 1); // Maybe shit...
     };
     BCCreativeEngineTileEntity.prototype.engineUpdate = function () {
         _super.prototype.engineUpdate.call(this);
         if (this.isRedstonePowered) {
-            this.data.energy += this.getIdealOutput();
+            this.addEnergy(this.getIdealOutput());
         }
     };
     BCCreativeEngineTileEntity.prototype.isBurning = function () {
@@ -814,7 +957,7 @@ var BCCreativeEngineTileEntity = /** @class */ (function (_super) {
     };
     BCCreativeEngineTileEntity.prototype.getIdealOutput = function () {
         // return powerMode.maxPower; //ORIGINAL
-        return 20;
+        return this.powerMode;
     };
     return BCCreativeEngineTileEntity;
 }(BCEngineTileEntity));
@@ -833,9 +976,8 @@ var CreativeEngine = /** @class */ (function (_super) {
         enumerable: true,
         configurable: true
     });
-    CreativeEngine.prototype.registerTileEntity = function () {
-        var baseOffset = { x: 256, y: 96 };
-        this.tileEntity = new BCCreativeEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, baseOffset, STANDART_SIZE));
+    CreativeEngine.prototype.requireTileEntity = function () {
+        return new BCCreativeEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, { x: 256, y: 96 }, STANDART_SIZE));
     };
     return CreativeEngine;
 }(BCEngine));

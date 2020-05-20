@@ -9,7 +9,6 @@ abstract class BCEngine {
     protected item: EngineItem;
 
     protected maxHeat: number = 100;
-    protected tileEntity: BCEngineTileEntity;// ! override it in child
 
     protected engineTexture: EngineTexture;
 
@@ -17,12 +16,12 @@ abstract class BCEngine {
         return null
     }
 
+    protected abstract requireTileEntity(): object
+
     constructor(){
         this.block = new EngineBlock(this.engineType);
         this.item = new EngineItem(this.engineType, this.block);
-
-        // this.registerTileEntity();
-        TileEntity.registerPrototype(this.block.id, this.tileEntity);
+        TileEntity.registerPrototype(this.block.id, this.requireTileEntity());
         this.registerUse();
         this.registerDrop();
     }

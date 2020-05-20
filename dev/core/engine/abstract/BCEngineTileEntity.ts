@@ -48,9 +48,7 @@ abstract class BCEngineTileEntity {
     public y: number;
     public z: number;
 
-    public isEngine = true;
-
-    // TODO enum PowerMode
+    public readonly isEngine: boolean = true;
 
     engineAnimation = null;
     get orientation(){
@@ -60,18 +58,31 @@ abstract class BCEngineTileEntity {
         return this.data.meta;
     }
 
-    set orientation(value){
+    // ! DEBUG METHODS
+    private m = (str: any, hideChat?: boolean) => {
+        if(hideChat) Debug.m(str);
+        Logger.Log(str, "DEBUG");
+    }
+    private debug = () => {
+        alert(`energy ${this.data.energy}  heat ${this.data.heat} progress ${this.data.progress}`);
+    }
+
+    set orientation(value: number){
         this.data.meta = value;
-        this.engineAnimation.connectionSide = value;
+        // this.engineAnimation.connectionSide = value;
     }
 
     protected init(){
-        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.data.heatStage, this.texture);
-        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide();
+        alert("init");
+        // this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.data.heatStage, this.texture);
+        // this.engineAnimation.connectionSide
+        this.orientation = this.getConnectionSide();
         this.checkRedstonePower();
     }
 
     protected tick(){
+
+        this.debug();
         if (this.lastTick < 4) this.lastTick++;
 
         // from PC
@@ -94,6 +105,7 @@ abstract class BCEngineTileEntity {
         this.updateHeat();
 
         if (this.getEnergyStage() === EngineHeat.BLACK) {
+            alert("EngineHeat.BLACK");
             this.data.energy = Math.max(this.data.energy - 50, 0);
             return;
         }
@@ -136,7 +148,7 @@ abstract class BCEngineTileEntity {
             this.sendPower();
         }
 
-        /* // old backup
+        /* // !old backup
         this.engineAnimation.update(this.data.power, this.data.heatStage);
         this.updatePower();
 
@@ -187,12 +199,13 @@ abstract class BCEngineTileEntity {
     }
 
     public getEnergyStage(): EngineHeat {
+        alert("getEnergyStage() "+this.energyStage);
         // if (!worldObj.isRemote) { //? client-server
-            if (this.energyStage === EngineHeat.BLACK) return this.energyStage;
+            if (this.energyStage == EngineHeat.BLACK) return this.energyStage;
 
 
             const newStage = this.computeEnergyStage();
-
+            alert("computed new heat "+ newStage)
             if (this.energyStage !== newStage) {
                 this.energyStage = newStage;
                 if (this.energyStage === EngineHeat.BLACK) this.overheat();
@@ -286,8 +299,15 @@ abstract class BCEngineTileEntity {
         return false;
     }
 
+    public getHeatLevel(): number {
+        alert("getHeatLevel()" + (this.data.heat - this.MIN_HEAT) / (this.MAX_HEAT - this.MIN_HEAT));
+        return (this.data.heat - this.MIN_HEAT) / (this.MAX_HEAT - this.MIN_HEAT);
+    }
+
     protected computeEnergyStage(): EngineHeat {
+        alert("start computeEnergyStage");
         const energyLevel = this.getHeatLevel();
+        alert("computeEnergyStage() "+ energyLevel);
         if (energyLevel < 0.25) {
             return EngineHeat.BLUE;
         } else if (energyLevel < 0.5) {
@@ -296,23 +316,86 @@ abstract class BCEngineTileEntity {
             return EngineHeat.ORANGE;
         } else if (energyLevel < 1) {
             return EngineHeat.RED;
-        } else {
-            return EngineHeat.BLACK;
         }
+        return EngineHeat.BLACK;
     }
 
     public getPistonSpeed(): number {
         return Math.max(0.16 * this.getHeatLevel(), 0.01);
-        // some code removed instead of pc version
+        // ? for client-server
+        /*if (!worldObj.isRemote) {
+            return Math.max(0.16f * getHeatLevel(), 0.01f);
+        }
+
+        switch (getEnergyStage()) {
+            case BLUE:
+                return 0.02F;
+            case GREEN:
+                return 0.04F;
+            case YELLOW:
+                return 0.08F;
+            case RED:
+                return 0.16F;
+            default:
+                return 0;
+        }*/
     }
 
-    public getHeatLevel(): number {
-        return (this.data.heat - this.MIN_HEAT) / (this.MAX_HEAT - this.MIN_HEAT);
+    public addEnergy(addition: number): void {
+        if (this.getEnergyStage() == EngineHeat.BLACK) return;
+
+        this.data.energy += addition;
+
+        if (this.data.energy > this.getMaxEnergy()) {
+            this.data.energy = this.getMaxEnergy();
+        }
+    }
+
+    public getEnergyStored(): number {
+        return this.data.energy;
+    }
+
+    public getMaxEnergyStored(): number {
+        return this.getMaxEnergy();
+    }
+
+    public extractEnergy(energyMax: number, doExtract: number): number {
+        const max = Math.min(energyMax, this.getCurrentOutputLimit());
+
+        let extracted;
+        let energy = this.data.energy;
+
+        if (energy >= max) {
+            extracted = max;
+
+            if (doExtract) {
+                energy -= max;
+            }
+        } else {
+            extracted = energy;
+
+            if (doExtract) {
+                energy = 0;
+            }
+        }
+
+        return extracted;
+    }
+    public canConnectEnergy(from: number): boolean {
+        return from == this.orientation;
     }
 
     public overheat(): void {
         this.isPumping = false;
         // TODO make some explode!
+    }
+
+    public abstract isBurning(): boolean
+
+    public abstract getIdealOutput(): number
+
+    public getCurrentOutputLimit(): number {
+        return Number.MAX_VALUE;
     }
 
     protected engineUpdate(): void {
@@ -326,6 +409,7 @@ abstract class BCEngineTileEntity {
     }
 
     public updateHeat(): void {
+        alert("updateHeat() " + ((this.MAX_HEAT - this.MIN_HEAT) * this.getEnergyLevel()) + this.MIN_HEAT);
         this.data.heat = ((this.MAX_HEAT - this.MIN_HEAT) * this.getEnergyLevel()) + this.MIN_HEAT;
     }
 
@@ -337,6 +421,57 @@ abstract class BCEngineTileEntity {
     }
 
     destroy(){ // TileEntity event
-        this.engineAnimation.destroy();
+        // this.engineAnimation.destroy();
+    }
+
+    private getOppositeSide(side: number): number {
+        switch(side){
+            case 0:
+                return 1;
+            case 1:
+                return 0;
+            case 2:
+                return 3;
+            case 3:
+                return 2;
+            case 4:
+                return 5;
+            case 5:
+                return 4;
+        }
+    }
+
+    // TODO add IEngine interface
+    // IEngine
+    public canReceiveFromEngine(side: number): boolean {
+        return side == this.getOppositeSide(this.orientation);
+    }
+
+    public receiveEnergyFromEngine(side: number, amount: number, simulate: boolean): number {
+        if (this.canReceiveFromEngine(side)) {
+            const targetEnergy = Math.min(this.getMaxEnergy() - this.data.energy, amount);
+            if (!simulate) {
+                this.data.energy += targetEnergy;
+            }
+            return targetEnergy;
+        }
+        return 0;
+    }
+
+    // TODO add IHeatable interface
+    // IHeatable
+    public getMinHeatValue(): number {
+        return this.MIN_HEAT;
+    }
+    public getIdealHeatValue(): number {
+        return this.IDEAL_HEAT;
+    }
+
+    public getMaxHeatValue(): number {
+        return this.MAX_HEAT;
+    }
+
+    public getCurrentHeatValue(): number {
+        return this.data.heat;
     }
 }

@@ -18,7 +18,7 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
         super.engineUpdate();
 
         if (this.isRedstonePowered) {
-            this.data.energy += this.getIdealOutput();
+            this.addEnergy(this.getIdealOutput());
         }
     }
 
