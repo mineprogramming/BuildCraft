@@ -1,6 +1,6 @@
 LIBRARY({
 	name: "StorageInterface",
-	version: 5,
+	version: 6,
 	shared: true,
 	api: "CoreEngine"
 });
@@ -134,6 +134,7 @@ let StorageInterface = {
 			Logger.Log("failed to create storage interface: no tile entity for id "+id, "ERROR");
 		}
 	},
+
 	// doesn't override native container slot (only slot object)
 	addItemToSlot: function(item, slot, count){
 		if(slot.id == 0 || slot.id == item.id && slot.data == item.data){
@@ -211,7 +212,7 @@ let StorageInterface = {
 		let count = 0;
 		let slots = [];
 		let slotsInitialized = false;
-		side = side + Math.pow(-1, side);
+		side ^= 1; // opposite side
 		
 		if(tileEntity){
 			if(tileEntity.interface){
@@ -223,7 +224,7 @@ let StorageInterface = {
 			}
 		}
 		if(!slotsInitialized){
-			slots = this.getContainerSlots(container, 0, side);
+			slots = this.getContainerSlots(container, 1, side);
 		}
 		for(let i in slots){
 			let slot = container.getSlot(slots[i]);
@@ -244,7 +245,7 @@ let StorageInterface = {
 		let count = 0;
 		let slots = [];
 		let slotsInitialized = false;
-		let outputSide = side + Math.pow(-1, side);
+		let outputSide = side ^ 1;
 		
 		if(outputTile){
 			if(outputTile.interface){
@@ -257,7 +258,7 @@ let StorageInterface = {
 			}
 		}
 		if(!slotsInitialized){
-			slots = this.getContainerSlots(container, 1, outputSide);
+			slots = this.getContainerSlots(container, 2, outputSide);
 		}
 		for(let i in slots){
 			let slot = container.getSlot(slots[i]);
@@ -284,7 +285,7 @@ let StorageInterface = {
 			}
 		}
 		if(liquid){
-			let outputSide = inputSide + Math.pow(-1, inputSide);
+			let outputSide = inputSide ^ 1;
 			if(!output.interface || output.interface.canTransportLiquid(liquid, outputSide)){
 				this.transportLiquid(liquid, maxAmount, output, input, outputSide);
 			}
@@ -293,7 +294,7 @@ let StorageInterface = {
 	
 	transportLiquid: function(liquid, maxAmount, output, input, outputSide){
 		if(liquid){
-			let inputSide = outputSide + Math.pow(-1, outputSide);
+			let inputSide = outputSide ^ 1;
 			let inputStorage = input.interface || input.liquidStorage;
 			let outputStorage = output.interface || output.liquidStorage;
 			if(!input.interface && inputStorage.getLimit(liquid) < LIQUID_STORAGE_MAX_LIMIT || input.interface && input.interface.canReceiveLiquid(liquid, inputSide)){
@@ -311,21 +312,31 @@ let StorageInterface = {
 				slots.push(name);
 			}
 		} else {
-			if(container.getType() == 1){
+			var type = mode? container.getType() : 0;
+			switch(type){
+			case 1:
+			case 38:
+			case 39:
 				if(mode == 1){
+					slots.push((side == 1)? 0 : 1);
+				}
+				if(mode == 2){
 					slots.push(2);
 				}
-				else if(side == 1){
-					slots.push(0);
+			break;
+			case 8:
+				if(mode == 1){
+					slots.push((side == 1)? 0 : 4);
 				}
-				else if(side > 1){
-					slots.push(1);
+				if(mode == 2){
+					slots.push(1, 2, 3);
 				}
-			}
-			else {
+			break;
+			default:
 				for(let i = 0; i < container.getSize(); i++){
 					slots.push(i);
 				}
+			break;
 			}
 		}
 		return slots;
@@ -378,7 +389,7 @@ let StorageInterface = {
 				let tileEntity = container.tileEntity;
 				let slots = [];
 				let slotsInitialized = false;
-				let outputSide = parseInt(side) + Math.pow(-1, parseInt(side));
+				let outputSide = parseInt(side) ^ 1;
 				
 				if(tileEntity){
 					if(tileEntity.interface){
@@ -391,7 +402,7 @@ let StorageInterface = {
 					}
 				}
 				if(!slotsInitialized){
-					slots = this.getContainerSlots(container, 1, outputSide);
+					slots = this.getContainerSlots(container, 2, outputSide);
 				}
 				for(let i in slots){
 					let slot = container.getSlot(slots[i]);
