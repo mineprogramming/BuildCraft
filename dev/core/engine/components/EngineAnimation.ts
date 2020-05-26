@@ -1,7 +1,4 @@
 /// <reference path="../EngineHeat.ts" />
-/// <reference path="../model/render/RenderManager.ts" />
-/// <reference path="../model/render/BaseRender.ts" />
-/// <reference path="../model/render/PistonRender.ts" />
 /// <reference path="../model/EngineRotation.ts" />
 /// <reference path="animation/PistonAnimation.ts" />
 /// <reference path="animation/BaseAnimation.ts" />
@@ -10,12 +7,9 @@ class EngineAnimation {
     private readonly base: BaseAnimation;
     private readonly piston: PistonAnimation;
 
-    private pistonPosition: number = 0;// TODO make setter
-    private pushingMultiplier: number = 1;
+    private readonly yOffset: number = 31;// magic const
 
-    private readonly yOffset = 31;// magic const
-
-    private side = 1;// connected side index
+    private side: number = 1;// connected side index
 
     private directions = [
         {rotation: EngineRotation.Y, direction: -1},
@@ -35,15 +29,13 @@ class EngineAnimation {
         return this.side;
     }
 
-    constructor(public readonly coords: IBlockPos, private heatStage: EngineHeat, private engineTexture: EngineTexture){
+    constructor(public readonly coords: Vector, private heatStage: EngineHeat, private engineTexture: EngineTexture){
         this.piston = new PistonAnimation(coords, engineTexture);
         this.base = new BaseAnimation(coords, engineTexture);
     }
 
     public update(progress: number, heat: EngineHeat): void {
-        if (progress > 0.5) {
-            progress = 1 - progress;
-        }
+        if (progress > 0.5) progress = 1 - progress;
 
         this.updateTrunkHeat(heat);
         this.piston.setPosition(progress);
@@ -55,21 +47,6 @@ class EngineAnimation {
             this.base.render.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, this.directions[this.side].rotation);
             this.base.render.refresh();
         }
-    }
-
-    private movePiston(power: number): void {
-        this.pushingMultiplier = this.pistonPosition < 0 ? 1 : this.pushingMultiplier;
-        this.pistonPosition += power * this.pushingMultiplier / 64; // 64 is magical multiplier
-
-        this.piston.setPosition(this.pistonPosition);
-    }
-
-    public isReadyToGoBack(): boolean {
-        return this.pistonPosition > .5
-    }
-
-    public goBack(): void {
-        this.pushingMultiplier = -1;
     }
 
     private rotateByMeta(): void {

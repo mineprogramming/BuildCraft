@@ -7,10 +7,6 @@ class CreativeEngine extends BCEngine {
     }
 
     protected requireTileEntity(){
-        return new BCCreativeEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, {x: 256, y: 96}, STANDART_SIZE));
+        return new BCCreativeEngineTileEntity(new EngineTexture(STANDART_TEXTURE, {x: 256, y: 96}, STANDART_SIZE));
     }
-    /*protected registerTileEntity(){
-        const baseOffset = {x: 256, y: 96};
-        this.tileEntity = new BCCreativeEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, baseOffset, STANDART_SIZE));
-    }*/
 }

@@ -1,7 +1,6 @@
 /// <reference path="../components/EngineBlock.ts" />
 /// <reference path="../components/EngineItem.ts" />
 /// <reference path="../EngineHeat.ts" />
-/// <reference path="../../Coords.ts" />
 /// <reference path="../model/texture/EngineTexture.ts" />
 /// <reference path="BCEngineTileEntity.ts" />
 abstract class BCEngine {
@@ -29,10 +28,6 @@ abstract class BCEngine {
     protected get texture(): EngineTexture {
         return this.engineTexture;
     }
-
-    /* abstract registerTileEntity(): void {
-        this.tileEntity = new BCEngineTileEntity(this.maxHeat, this.texture);
-    }*/
 
     private registerUse(): void {
         Item.registerUseFunction(this.item.stringId, (coords, item, block) => {

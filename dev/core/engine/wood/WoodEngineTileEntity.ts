@@ -16,12 +16,7 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
         return EngineHeat.RED;
     }
 
-    public getCurrentOutputLimit(): number {
-        return 10;
-    }
-
     public getPistonSpeed(): number {
-        // Debug.m("getPistonSpeed()");
         // if (!worldObj.isRemote) { // ? is it again client-server?
             return Math.max(0.08 * this.getHeatLevel(), 0.01);
         // }
@@ -42,9 +37,7 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
         super.engineUpdate();
 
         if (this.isRedstonePowered) {
-            // Debug.m("powered");
             if (World.getThreadTime() % 16 == 0) {
-                // Debug.m("added");
                 this.addEnergy(10);
             }
         }
@@ -52,6 +45,10 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
 
     public isBurning(): boolean {
         return this.isRedstonePowered;
+    }
+
+    public getCurrentOutputLimit(): number {
+        return 10;
     }
 
     public getMaxEnergy(): number {
@@ -80,7 +77,6 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
 
             const tile = this.getEnergyProvider(this.orientation);
 
-            // TODO energyNet integration
             if (tile && tile.canReceiveEnergy(this.getOppositeSide(this.orientation), "RF")) {
                 super.sendPower();
             } else {

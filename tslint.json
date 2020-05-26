@@ -11,6 +11,9 @@
         "no-consecutive-blank-lines": false,
         "no-reference": false,
         "triple-equals": false,
+        "no-empty": false,
+        "no-string-literal": false,
+        "radix": false,
         "no-console": {
             "severity": "warning",
             "options": ["debug", "info", "log", "time", "timeEnd", "trace"]

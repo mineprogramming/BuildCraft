@@ -1,5 +1,4 @@
 /// <reference path="../../model/render/EngineRender.ts" />
-/// <reference path="../../../Coords.ts" />
 class AnimationComponent {
     protected readonly animation;
     public readonly coords: Vector;
@@ -11,14 +10,14 @@ class AnimationComponent {
         this.animation.load();
     }
 
-    updateRender(render: EngineRender): void {
+    public updateRender(render: EngineRender): void {
         this.render.stash();
         this.render = render;
         this.animation.describe({render: this.render.getID()});
         this.animation.refresh();
     }
 
-    destroy(): void{
+    public destroy(): void{
         this.render.stash();
         this.animation.destroy();
     }
