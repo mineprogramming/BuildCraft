@@ -40,9 +40,13 @@ class EngineAnimation {
         this.base = new BaseAnimation(coords, engineTexture);
     }
 
-    public update(power: number, heat: EngineHeat): void {
+    public update(progress: number, heat: EngineHeat): void {
+        if (progress > 0.5) {
+            progress = 1 - progress;
+        }
+
         this.updateTrunkHeat(heat);
-        this.movePiston(power);
+        this.piston.setPosition(progress);
     }
 
     private updateTrunkHeat(heat: EngineHeat): void {
