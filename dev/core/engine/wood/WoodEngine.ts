@@ -9,10 +9,6 @@ class WoodEngine extends BCEngine {
     }
 
     protected requireTileEntity(){
-        return new BCWoodEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, {x: 256, y: 96}, STANDART_SIZE));
+        return new BCWoodEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, {x: 256, y: 0}, STANDART_SIZE));
     }
-    /*protected registerTileEntity(){
-        const baseOffset = {x: 256, y: 96};
-        this.tileEntity = new BCCreativeEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, baseOffset, STANDART_SIZE));
-    }*/
 }

@@ -81,7 +81,7 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
             const tile = this.getEnergyProvider(this.orientation);
 
             // TODO energyNet integration
-            if (tile.canReceiveEnergy(this.getOppositeSide(this.orientation), "RF")) {
+            if (tile && tile.canReceiveEnergy(this.getOppositeSide(this.orientation), "RF")) {
                 super.sendPower();
             } else {
                 this.data.energy = 0;

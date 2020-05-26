@@ -9,12 +9,12 @@ TileEntity.registerPrototype(BlockID["Capacitor"], {
     },
     energyReceive: function(type, amount, voltage) {
         this.data.progress += amount;
-        Debug.m(`energy received ${amount}`);
+        //Debug.m(`energy received ${amount}`);
         return amount;
     },
     tick: function(){
-        if(this.data.progress >= 100){
-            this.data.progress -= 100;
+        if(this.data.progress >= 10000){
+            this.data.progress -= 10000;
             World.drop(this.x, this.y +1, this.z, 264, 1, 0);
         }
     }

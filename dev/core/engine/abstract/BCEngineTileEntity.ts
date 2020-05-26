@@ -34,7 +34,7 @@ abstract class BCEngineTileEntity {
         heatStage: EngineHeat.BLUE
     }
     protected defaultValues = {
-        meta: null, // this.orientation in PC version
+        meta: null, // this.orientation in PC version //? maybe we can use it instead of save value?
         energy: 0, // this.energy in PC version
         heat: this.MIN_HEAT, // this.heat in PC version
         progress: 0,
@@ -59,32 +59,24 @@ abstract class BCEngineTileEntity {
     }
 
     set orientation(value: number){
+        // alert(`orientation ${value} type anim is ${typeof(this.engineAnimation)}`);
         this.data.meta = value;
         this.engineAnimation.connectionSide = value;
     }
 
-    // ! DEBUG METHODS
-    private m = (str: any, hideChat?: boolean) => {
-        if(hideChat) Debug.m(str);
-        Logger.Log(str, "DEBUG");
-    }
-    private debug = () => {
-        Debug.m("energy " + this.data.energy + " heat " + this.data.heat + " stage " + this.getEnergyStage() + " progress " + this.data.progress + "  speed " + this.getPistonSpeed() + " part " + this.progressPart);
-        // Debug.m(`energy ${this.data.energy} heat ${this.data.heat} stage ${this.getEnergyStage()} progress ${this.data.progress}  speed ${this.getPistonSpeed()} part ${this.progressPart}`);
-    }
-
-    protected init(){
-        alert("init");
-        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.data.heatStage, this.texture);
-        // this.engineAnimation.connectionSide
-        this.orientation = this.getConnectionSide();
+    init(){ // !TileEntity event
+        // alert("init");
+        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.getEnergyStage(), this.texture);
+        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide();
         this.checkRedstonePower();
     }
 
     protected tick(){
         //this.debug();
-        // Debug.m("energy " + this.data.energy + " heat " + this.data.heat + " stage " + this.getEnergyStage() + " progress " + this.data.progress + "  speed " + this.getPistonSpeed() + " part " + this.progressPart);
+        // Debug.m(`energy ${this.data.energy} heat ${this.data.heat} stage ${this.getEnergyStage()} progress ${this.data.progress}  speed ${this.getPistonSpeed()} part ${this.progressPart}`);
         if (this.lastTick < 4) this.lastTick++;
+
+        this.engineAnimation.update(this.data.progress, this.getEnergyStage());
 
         // from PC
         this.checkRedstonePower();
@@ -156,13 +148,14 @@ abstract class BCEngineTileEntity {
         }
     }
 
-    getConnectionSide(){
+    protected getConnectionSide(){
         for(let i = 0; i < 6; i++){
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
             const block = World.getBlock(relCoords.x, relCoords.y, relCoords.z);
+            // TODO make it for only RF
             const machine = EnergyTileRegistry.accessMachineAtCoords(relCoords.x, relCoords.y, relCoords.z);
             if(machine){
-                alert(`finded consumer ${i}`);
+                // alert(`finded consumer ${i}`);
                 return i;
             }
         }
@@ -216,8 +209,9 @@ abstract class BCEngineTileEntity {
 
     private getPowerToExtract(): number {
         const tile = this.getEnergyProvider(this.orientation);
+        if(!tile) return 0;
+
         const oppositeSide = this.getOppositeSide(this.orientation);
-        // Debug.m(Object.keys(tile));
         // TODO check integration with energyNet
         if (tile.isEngine) {
             const maxEnergy = tile.receiveEnergyFromEngine(oppositeSide, this.data.energy, true);
@@ -388,8 +382,8 @@ abstract class BCEngineTileEntity {
         return this.data.energy / this.getMaxEnergy();
     }
 
-    destroy(){ // TileEntity event
-        // this.engineAnimation.destroy();
+    public destroy(){ // !TileEntity event
+        this.engineAnimation.destroy();
     }
 
     protected getOppositeSide(side: number): number {

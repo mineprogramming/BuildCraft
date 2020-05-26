@@ -27,12 +27,12 @@ TileEntity.registerPrototype(BlockID["Capacitor"], {
     },
     energyReceive: function (type, amount, voltage) {
         this.data.progress += amount;
-        Debug.m("energy received " + amount);
+        //Debug.m(`energy received ${amount}`);
         return amount;
     },
     tick: function () {
-        if (this.data.progress >= 100) {
-            this.data.progress -= 100;
+        if (this.data.progress >= 10000) {
+            this.data.progress -= 10000;
             World.drop(this.x, this.y + 1, this.z, 264, 1, 0);
         }
     }
@@ -77,7 +77,7 @@ var EngineBlock = /** @class */ (function () {
     }
     EngineBlock.prototype.registerBlock = function () {
         IDRegistry.genBlockID(this.stringId);
-        Block.createBlock(this.stringId, [{ name: this.stringId, texture: [["bc_pump", 0]], inCreative: false }], engineBlockType);
+        Block.createBlock(this.stringId, [{ name: this.stringId, texture: [["empty", 0]], inCreative: false }], engineBlockType);
     };
     return EngineBlock;
 }());
@@ -355,9 +355,12 @@ var EngineAnimation = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    EngineAnimation.prototype.update = function (power, heat) {
+    EngineAnimation.prototype.update = function (progress, heat) {
+        if (progress > 0.5) {
+            progress = 1 - progress;
+        }
         this.updateTrunkHeat(heat);
-        this.movePiston(power);
+        this.piston.setPosition(progress);
     };
     EngineAnimation.prototype.updateTrunkHeat = function (heat) {
         if (this.heatStage !== heat) {
@@ -461,7 +464,6 @@ RF.registerWire(BlockID["WIRE"]);
 var BCEngineTileEntity = /** @class */ (function () {
     // TODO remove constructor
     function BCEngineTileEntity(maxHeat, texture) {
-        var _this = this;
         this.maxHeat = maxHeat;
         this.texture = texture;
         this.MIN_HEAT = 20;
@@ -494,16 +496,6 @@ var BCEngineTileEntity = /** @class */ (function () {
         };
         this.isEngine = true;
         this.engineAnimation = null;
-        // ! DEBUG METHODS
-        this.m = function (str, hideChat) {
-            if (hideChat)
-                Debug.m(str);
-            Logger.Log(str, "DEBUG");
-        };
-        this.debug = function () {
-            Debug.m("energy " + _this.data.energy + " heat " + _this.data.heat + " stage " + _this.getEnergyStage() + " progress " + _this.data.progress + "  speed " + _this.getPistonSpeed() + " part " + _this.progressPart);
-            // Debug.m(`energy ${this.data.energy} heat ${this.data.heat} stage ${this.getEnergyStage()} progress ${this.data.progress}  speed ${this.getPistonSpeed()} part ${this.progressPart}`);
-        };
     }
     Object.defineProperty(BCEngineTileEntity.prototype, "orientation", {
         get: function () {
@@ -513,24 +505,25 @@ var BCEngineTileEntity = /** @class */ (function () {
             return this.data.meta;
         },
         set: function (value) {
+            // alert(`orientation ${value} type anim is ${typeof(this.engineAnimation)}`);
             this.data.meta = value;
-            // this.engineAnimation.connectionSide = value;
+            this.engineAnimation.connectionSide = value;
         },
         enumerable: true,
         configurable: true
     });
     BCEngineTileEntity.prototype.init = function () {
-        alert("init");
-        // this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.data.heatStage, this.texture);
-        // this.engineAnimation.connectionSide
-        this.orientation = this.getConnectionSide();
+        // alert("init");
+        this.engineAnimation = new EngineAnimation(BlockPos.getCoords(this), this.getEnergyStage(), this.texture);
+        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide();
         this.checkRedstonePower();
     };
     BCEngineTileEntity.prototype.tick = function () {
         //this.debug();
-        Debug.m("energy " + this.data.energy + " heat " + this.data.heat + " stage " + this.getEnergyStage() + " progress " + this.data.progress + "  speed " + this.getPistonSpeed() + " part " + this.progressPart);
+        // Debug.m(`energy ${this.data.energy} heat ${this.data.heat} stage ${this.getEnergyStage()} progress ${this.data.progress}  speed ${this.getPistonSpeed()} part ${this.progressPart}`);
         if (this.lastTick < 4)
             this.lastTick++;
+        this.engineAnimation.update(this.data.progress, this.getEnergyStage());
         // from PC
         this.checkRedstonePower();
         /* if (worldObj.isRemote) { // ? is it for client-server?
@@ -556,26 +549,26 @@ var BCEngineTileEntity = /** @class */ (function () {
         this.engineUpdate();
         var tile = this.getEnergyProvider(this.orientation);
         if (this.progressPart != 0) {
-            Debug.m("part not 0");
+            // Debug.m(`part not 0`);
             this.data.progress += this.getPistonSpeed();
             if (this.data.progress > 0.5 && this.progressPart == 1) {
-                Debug.m("part set to 2");
+                // Debug.m("part set to 2");
                 this.progressPart = 2;
             }
             else if (this.data.progress >= 1) {
                 this.data.progress = 0;
-                Debug.m("this.data.progress >= 1");
+                // Debug.m("this.data.progress >= 1");
                 this.progressPart = 0;
             }
         }
         else if (this.isRedstonePowered && this.isActive()) {
-            Debug.m("active!");
+            // Debug.m("active!");
             if (this.isPoweredTile(tile, this.orientation)) {
-                Debug.m("powered tile!");
+                // Debug.m("powered tile!");
                 this.progressPart = 1;
                 this.setPumping(true);
                 if (this.getPowerToExtract() > 0) {
-                    Debug.m("this.getPowerToExtract() > 0");
+                    // Debug.m("this.getPowerToExtract() > 0");
                     this.progressPart = 1;
                     this.setPumping(true);
                 }
@@ -602,9 +595,10 @@ var BCEngineTileEntity = /** @class */ (function () {
         for (var i = 0; i < 6; i++) {
             var relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
             var block = World.getBlock(relCoords.x, relCoords.y, relCoords.z);
+            // TODO make it for only RF
             var machine = EnergyTileRegistry.accessMachineAtCoords(relCoords.x, relCoords.y, relCoords.z);
             if (machine) {
-                alert("finded consumer " + i);
+                // alert(`finded consumer ${i}`);
                 return i;
             }
         }
@@ -637,6 +631,7 @@ var BCEngineTileEntity = /** @class */ (function () {
             this.setPumping(true);
             var oppositeSide = this.getOppositeSide(this.orientation);
             // TODO test Integration
+            Debug.m("send Power");
             if (tile.isEngine) {
                 var neededRF = tile.receiveEnergyFromEngine(oppositeSide, extracted, false);
                 this.extractEnergy(neededRF, true);
@@ -651,9 +646,11 @@ var BCEngineTileEntity = /** @class */ (function () {
     BCEngineTileEntity.prototype.burn = function () { };
     BCEngineTileEntity.prototype.getPowerToExtract = function () {
         var tile = this.getEnergyProvider(this.orientation);
+        if (!tile)
+            return 0;
         var oppositeSide = this.getOppositeSide(this.orientation);
-        // Debug.m(Object.keys(tile));
         // TODO check integration with energyNet
+        Debug.m("getPowerToExtract");
         if (tile.isEngine) {
             var maxEnergy = tile.receiveEnergyFromEngine(oppositeSide, this.data.energy, true);
             return this.extractEnergy(maxEnergy, false);
@@ -690,6 +687,7 @@ var BCEngineTileEntity = /** @class */ (function () {
         if (!tile)
             return false;
         var oppositeSide = this.getOppositeSide(this.orientation);
+        Debug.m("isPoweredTile");
         if (tile.isEngine) {
             return tile.canReceiveFromEngine(oppositeSide);
         }
@@ -801,7 +799,7 @@ var BCEngineTileEntity = /** @class */ (function () {
         return this.data.energy / this.getMaxEnergy();
     };
     BCEngineTileEntity.prototype.destroy = function () {
-        // this.engineAnimation.destroy();
+        this.engineAnimation.destroy();
     };
     BCEngineTileEntity.prototype.getOppositeSide = function (side) {
         switch (side) {
@@ -1052,7 +1050,7 @@ var BCWoodEngineTileEntity = /** @class */ (function (_super) {
             this.hasSent = true;
             var tile = this.getEnergyProvider(this.orientation);
             // TODO energyNet integration
-            if (tile.canReceiveEnergy(this.getOppositeSide(this.orientation), "RF")) {
+            if (tile && tile.canReceiveEnergy(this.getOppositeSide(this.orientation), "RF")) {
                 _super.prototype.sendPower.call(this);
             }
             else {
@@ -1082,7 +1080,7 @@ var WoodEngine = /** @class */ (function (_super) {
         configurable: true
     });
     WoodEngine.prototype.requireTileEntity = function () {
-        return new BCWoodEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, { x: 256, y: 96 }, STANDART_SIZE));
+        return new BCWoodEngineTileEntity(this.maxHeat, new EngineTexture(STANDART_TEXTURE, { x: 256, y: 0 }, STANDART_SIZE));
     };
     return WoodEngine;
 }(BCEngine));
