@@ -110,6 +110,9 @@ var EngineTexture = /** @class */ (function () {
     EngineTexture.prototype.getBaseUV = function (rotation) {
         return { x: this.baseOffset.x + 64 * rotation, y: this.baseOffset.y };
     };
+    EngineTexture.prototype.getChamberUV = function () {
+        return { x: 192, y: 0 };
+    };
     return EngineTexture;
 }());
 var RenderManager = /** @class */ (function () {
@@ -204,8 +207,8 @@ var BaseAnimation = /** @class */ (function (_super) {
 /// <reference path="animation/PistonAnimation.ts" />
 /// <reference path="animation/BaseAnimation.ts" />
 var EngineAnimation = /** @class */ (function () {
-    function EngineAnimation(coords, heatStage, engineTexture) {
-        this.coords = coords;
+    function EngineAnimation(position, heatStage, engineTexture) {
+        this.position = position;
         this.heatStage = heatStage;
         this.engineTexture = engineTexture;
         this.yOffset = 31; // magic const
@@ -218,8 +221,8 @@ var EngineAnimation = /** @class */ (function () {
             { rotation: EngineRotation.X, direction: 1 },
             { rotation: EngineRotation.X, direction: -1 }
         ];
-        this.piston = new PistonAnimation(coords, engineTexture);
-        this.base = new BaseAnimation(coords, engineTexture);
+        this.piston = new PistonAnimation(position, engineTexture);
+        this.base = new BaseAnimation(position, engineTexture);
     }
     Object.defineProperty(EngineAnimation.prototype, "connectionSide", {
         get: function () {
@@ -237,6 +240,7 @@ var EngineAnimation = /** @class */ (function () {
             progress = 1 - progress;
         this.updateTrunkHeat(heat);
         this.piston.setPosition(progress);
+        this.updateChamberPosition(progress);
     };
     EngineAnimation.prototype.updateTrunkHeat = function (heat) {
         if (this.heatStage !== heat) {
@@ -244,6 +248,21 @@ var EngineAnimation = /** @class */ (function () {
             this.base.render.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, this.directions[this.side].rotation);
             this.base.render.refresh();
         }
+    };
+    EngineAnimation.prototype.updateChamberPosition = function (progress) {
+        // progress : [0, .5]
+        var realPos = 5 + Math.ceil(20 * -progress) / 2;
+        this.base.render.chamberCoords = {
+            x: this.coords.x * realPos,
+            y: this.yOffset + this.coords.y * realPos,
+            z: this.coords.z * realPos
+        };
+        this.base.render.chamberSize = {
+            x: 4 + (this.coords.x ? Math.ceil(20 * progress * Math.abs(this.coords.x)) : 6),
+            y: 4 + (this.coords.y ? Math.ceil(20 * progress * Math.abs(this.coords.y)) : 6),
+            z: 4 + (this.coords.z ? Math.ceil(20 * progress * Math.abs(this.coords.z)) : 6)
+        };
+        this.base.render.refreshChamber();
     };
     EngineAnimation.prototype.rotateByMeta = function () {
         var data = this.directions[this.side];
@@ -268,12 +287,16 @@ var EngineAnimation = /** @class */ (function () {
                 break;
         }
         ;
+        this.coords = coords;
         this.setupBaseBoxes(coords);
         var baseRender = this.base.render;
         baseRender.baseUV = this.engineTexture.getBaseUV(rotation);
         this.setupTrunkBoxes(coords);
         baseRender.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, rotation);
         baseRender.refresh();
+        //this.setupChamberBoxes(coords);
+        baseRender.chamberUV = this.engineTexture.getChamberUV();
+        baseRender.refreshChamber();
         this.setupPistonBoxes(coords);
         var pistonRender = this.piston.render;
         pistonRender.pistonUV = this.engineTexture.getBaseUV(rotation);
@@ -286,7 +309,7 @@ var EngineAnimation = /** @class */ (function () {
         this.base.render.baseCoords = {
             x: coords.x * 6,
             y: this.yOffset + coords.y * 6,
-            z: coords.z * 6,
+            z: coords.z * 6
         };
         this.base.render.baseSize = {
             x: 4 + 12 * (1 - Math.abs(coords.x)),
@@ -316,6 +339,19 @@ var EngineAnimation = /** @class */ (function () {
             x: 4 + 12 * (1 - Math.abs(coords.x)),
             y: 4 + 12 * (1 - Math.abs(coords.y)),
             z: 4 + 12 * (1 - Math.abs(coords.z))
+        };
+    };
+    EngineAnimation.prototype.setupChamberBoxes = function (coords) {
+        this.base.render.chamberCoords = {
+            x: coords.x * 6,
+            y: this.yOffset + coords.y * 6,
+            z: coords.z * 6
+        };
+        // it will be rewritten in runtime
+        this.base.render.chamberSize = {
+            x: 10 + 8 * (1 - Math.abs(coords.x)),
+            y: 10 + 8 * (1 - Math.abs(coords.y)),
+            z: 10 + 8 * (1 - Math.abs(coords.z))
         };
     };
     return EngineAnimation;
@@ -931,9 +967,16 @@ var BaseRender = /** @class */ (function (_super) {
                 coords: null,
                 size: null
             }];
+        _this.chamberBoxes = [{
+                type: "box",
+                uv: null,
+                coords: null,
+                size: null
+            }];
         return _this;
     }
     Object.defineProperty(BaseRender.prototype, "baseCoords", {
+        // Base
         set: function (value) {
             this.boxes[0].coords = value;
         },
@@ -955,6 +998,7 @@ var BaseRender = /** @class */ (function (_super) {
         configurable: true
     });
     Object.defineProperty(BaseRender.prototype, "trunkCoords", {
+        // Trunk
         set: function (value) {
             this.boxes[1].coords = value;
         },
@@ -975,6 +1019,37 @@ var BaseRender = /** @class */ (function (_super) {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(BaseRender.prototype, "chamberCoords", {
+        // Chamber
+        set: function (value) {
+            //Debug.m("chamber coords setted");
+            this.chamberBoxes[0].coords = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BaseRender.prototype, "chamberSize", {
+        set: function (value) {
+            //Debug.m("chamber size setted");
+            this.chamberBoxes[0].size = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BaseRender.prototype, "chamberUV", {
+        set: function (value) {
+            // Debug.m("chamber uv setted");
+            this.chamberBoxes[0].uv = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    BaseRender.prototype.refreshChamber = function () {
+        //Debug.m("chamber refreshed");
+        var part = this.render.addPart("head.chamber");
+        this.render.setPart("head.chamber", this.chamberBoxes, this.engineTexture.size);
+    };
+    ;
     BaseRender.prototype.getModelData = function () {
         return this.boxes;
     };
