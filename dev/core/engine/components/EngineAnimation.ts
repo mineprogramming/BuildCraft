@@ -53,16 +53,16 @@ class EngineAnimation {
 
     private updateChamberPosition(progress: number): void {
         // progress : [0, .5]
-        const realPos = 5 + Math.ceil(20 * -progress)/2;
+        const realPos = 5 + -Math.ceil(10 * progress);
         this.base.render.chamberCoords = {
             x: this.coords.x * realPos,
             y: this.yOffset +  this.coords.y * realPos,
             z: this.coords.z * realPos
         };
         this.base.render.chamberSize = {
-            x: 4 + (this.coords.x ? Math.ceil(20 * progress * Math.abs(this.coords.x)): 6),
-            y: 4 + (this.coords.y ? Math.ceil(20 * progress * Math.abs(this.coords.y)): 6),
-            z: 4 + (this.coords.z ? Math.ceil(20 * progress * Math.abs(this.coords.z)): 6)
+            x: 4 + (this.coords.x ? 2*Math.ceil(10 * progress) * Math.abs(this.coords.x): 6),
+            y: 4 + (this.coords.y ? 2*Math.ceil(10 * progress) * Math.abs(this.coords.y): 6),
+            z: 4 + (this.coords.z ? 2*Math.ceil(10 * progress) * Math.abs(this.coords.z): 6)
         };
         this.base.render.refreshChamber();
     }
