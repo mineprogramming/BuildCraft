@@ -19,4 +19,8 @@ class EngineTexture {
     public getBaseUV(rotation: EngineRotation): Vector2 {
         return {x: this.baseOffset.x + 64 * rotation, y: this.baseOffset.y}
     }
+
+    public getChamberUV(): Vector2 {
+        return {x: 192, y: 0}
+    }
 }
