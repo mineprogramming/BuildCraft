@@ -251,16 +251,16 @@ var EngineAnimation = /** @class */ (function () {
     };
     EngineAnimation.prototype.updateChamberPosition = function (progress) {
         // progress : [0, .5]
-        var realPos = 5 + Math.ceil(20 * -progress) / 2;
+        var realPos = 5 + -Math.ceil(10 * progress);
         this.base.render.chamberCoords = {
             x: this.coords.x * realPos,
             y: this.yOffset + this.coords.y * realPos,
             z: this.coords.z * realPos
         };
         this.base.render.chamberSize = {
-            x: 4 + (this.coords.x ? Math.ceil(20 * progress * Math.abs(this.coords.x)) : 6),
-            y: 4 + (this.coords.y ? Math.ceil(20 * progress * Math.abs(this.coords.y)) : 6),
-            z: 4 + (this.coords.z ? Math.ceil(20 * progress * Math.abs(this.coords.z)) : 6)
+            x: 4 + (this.coords.x ? 2 * Math.ceil(10 * progress) * Math.abs(this.coords.x) : 6),
+            y: 4 + (this.coords.y ? 2 * Math.ceil(10 * progress) * Math.abs(this.coords.y) : 6),
+            z: 4 + (this.coords.z ? 2 * Math.ceil(10 * progress) * Math.abs(this.coords.z) : 6)
         };
         this.base.render.refreshChamber();
     };
@@ -294,7 +294,6 @@ var EngineAnimation = /** @class */ (function () {
         this.setupTrunkBoxes(coords);
         baseRender.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, rotation);
         baseRender.refresh();
-        //this.setupChamberBoxes(coords);
         baseRender.chamberUV = this.engineTexture.getChamberUV();
         baseRender.refreshChamber();
         this.setupPistonBoxes(coords);
@@ -339,19 +338,6 @@ var EngineAnimation = /** @class */ (function () {
             x: 4 + 12 * (1 - Math.abs(coords.x)),
             y: 4 + 12 * (1 - Math.abs(coords.y)),
             z: 4 + 12 * (1 - Math.abs(coords.z))
-        };
-    };
-    EngineAnimation.prototype.setupChamberBoxes = function (coords) {
-        this.base.render.chamberCoords = {
-            x: coords.x * 6,
-            y: this.yOffset + coords.y * 6,
-            z: coords.z * 6
-        };
-        // it will be rewritten in runtime
-        this.base.render.chamberSize = {
-            x: 10 + 8 * (1 - Math.abs(coords.x)),
-            y: 10 + 8 * (1 - Math.abs(coords.y)),
-            z: 10 + 8 * (1 - Math.abs(coords.z))
         };
     };
     return EngineAnimation;
