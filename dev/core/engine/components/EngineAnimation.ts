@@ -40,7 +40,8 @@ class EngineAnimation {
 
         this.updateTrunkHeat(heat);
         this.piston.setPosition(progress);
-        this.updateChamberPosition(progress);
+        // *will be finished coming soon
+        // this.updateChamberPosition(progress);
     }
 
     private updateTrunkHeat(heat: EngineHeat): void {
@@ -103,8 +104,9 @@ class EngineAnimation {
         baseRender.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, rotation);
         baseRender.refresh();
 
-        baseRender.chamberUV = this.engineTexture.getChamberUV();
-        baseRender.refreshChamber();
+        // *will be finished coming soon
+        // baseRender.chamberUV = this.engineTexture.getChamberUV();
+        // baseRender.refreshChamber();
 
         this.setupPistonBoxes(coords);
         const pistonRender = this.piston.render;

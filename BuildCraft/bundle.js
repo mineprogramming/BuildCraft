@@ -240,7 +240,8 @@ var EngineAnimation = /** @class */ (function () {
             progress = 1 - progress;
         this.updateTrunkHeat(heat);
         this.piston.setPosition(progress);
-        this.updateChamberPosition(progress);
+        // *will be finished coming soon
+        // this.updateChamberPosition(progress);
     };
     EngineAnimation.prototype.updateTrunkHeat = function (heat) {
         if (this.heatStage !== heat) {
@@ -294,8 +295,9 @@ var EngineAnimation = /** @class */ (function () {
         this.setupTrunkBoxes(coords);
         baseRender.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, rotation);
         baseRender.refresh();
-        baseRender.chamberUV = this.engineTexture.getChamberUV();
-        baseRender.refreshChamber();
+        // *will be finished coming soon
+        // baseRender.chamberUV = this.engineTexture.getChamberUV();
+        // baseRender.refreshChamber();
         this.setupPistonBoxes(coords);
         var pistonRender = this.piston.render;
         pistonRender.pistonUV = this.engineTexture.getBaseUV(rotation);
