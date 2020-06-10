@@ -1,6 +1,8 @@
 /// <reference path="../components/EngineAnimation.ts" />
 /// <reference path="../../energy.ts" />
-abstract class BCEngineTileEntity {
+/// <reference path="../interface/IHeatable.ts" />
+/// <reference path="../interface/IEngine.ts" />
+abstract class BCEngineTileEntity implements IHeatable, IEngine {
     public readonly MIN_HEAT: number = 20;
     public readonly IDEAL_HEAT: number = 100;
     public readonly MAX_HEAT: number = 250;
@@ -357,7 +359,6 @@ abstract class BCEngineTileEntity {
         }
     }
 
-    // TODO add IEngine interface
     // IEngine
     public canReceiveFromEngine(side: number): boolean {
         return side == this.getOppositeSide(this.orientation);
@@ -374,7 +375,6 @@ abstract class BCEngineTileEntity {
         return 0;
     }
 
-    // TODO add IHeatable interface
     // IHeatable
     public getMinHeatValue(): number {
         return this.MIN_HEAT;
