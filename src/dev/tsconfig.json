@@ -1,0 +1,65 @@
+{
+	"compilerOptions": {
+		"target": "ES5",
+		"lib": [
+			"ESNext"
+		],
+		"outFile": "C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\build\\typescript\\main.js",
+		"experimentalDecorators": true,
+		"downlevelIteration": true,
+		"allowJs": true
+	},
+	"exclude": [
+		"**/node_modules/*",
+		"dom",
+		"webpack"
+	],
+	"include": [
+		"block",
+		"core",
+		"tsconfig.json",
+		"block/capacitor.ts",
+		"core/energy.ts",
+		"core/engine",
+		"core/importLib.ts",
+		"core/engine/abstract",
+		"core/engine/components",
+		"core/engine/creative",
+		"core/engine/EngineHeat.ts",
+		"core/engine/Engines.ts",
+		"core/engine/model",
+		"core/engine/PowerMode.ts",
+		"core/engine/wood",
+		"core/engine/abstract/BCEngine.ts",
+		"core/engine/abstract/BCEngineTileEntity.ts",
+		"core/engine/components/animation",
+		"core/engine/components/EngineAnimation.ts",
+		"core/engine/components/EngineBlock.ts",
+		"core/engine/components/EngineItem.ts",
+		"core/engine/components/animation/AnimationComponent.ts",
+		"core/engine/components/animation/BaseAnimation.ts",
+		"core/engine/components/animation/PistonAnimation.ts",
+		"core/engine/creative/CreativeEngine.ts",
+		"core/engine/creative/CreativeEngineTileEntity.ts",
+		"core/engine/model/EngineRotation.ts",
+		"core/engine/model/render",
+		"core/engine/model/texture",
+		"core/engine/model/render/BaseRender.ts",
+		"core/engine/model/render/EngineRender.ts",
+		"core/engine/model/render/PistonRender.ts",
+		"core/engine/model/render/RenderManager.ts",
+		"core/engine/model/texture/EngineTexture.ts",
+		"core/engine/model/texture/ITexture.ts",
+		"core/engine/wood/WoodEngine.ts",
+		"core/engine/wood/WoodEngineTileEntity.ts"
+	],
+	"files": [
+		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\android-declarations.d.ts",
+		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\android.d.ts",
+		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\core-engine.d.ts",
+		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\lib\\energy-net.d.ts",
+		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\lib\\LiquidLib.d.ts",
+		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\lib\\numbers.d.ts",
+		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\lib\\StorageInterface.d.ts"
+	]
+}

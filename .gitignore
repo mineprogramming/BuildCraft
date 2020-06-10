@@ -11,6 +11,4 @@
 
 toolchain/*
 output
-mod.icmod
-.idea
 **/__pycache__
