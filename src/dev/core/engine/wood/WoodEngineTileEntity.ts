@@ -78,7 +78,7 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
             const tile = this.getEnergyProvider(this.orientation);
 
             // TODO add check for .canConnectRedstoneEngine
-            if (tile && tile.canReceiveEnergy(this.getOppositeSide(this.orientation), "RF")) {
+            if (tile && tile.canReceiveEnergy(World.getInverseBlockSide(this.orientation), "RF")) {
                 super.sendPower();
             } else {
                 this.data.energy = 0;

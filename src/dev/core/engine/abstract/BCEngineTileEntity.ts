@@ -17,18 +17,17 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     // How many ticks ago it gave out power, capped to 4.
     private lastTick: number = 0;
 
-    // TODO remove constructor
     constructor(protected texture: EngineTexture){}
-    protected data = {// it will be rewriten during runtime
-        meta: null, // this.orientation in PC version
-        energy: 0, // this.energy in PC version
-        heat: this.MIN_HEAT, // this.heat in PC version
+    protected data = {// * it will be rewriten during runtime
+        meta: null, // * this.orientation in PC version
+        energy: 0, // * this.energy in PC version
+        heat: this.MIN_HEAT, // * this.heat in PC version
         progress: 0
     }
     protected defaultValues = {
-        meta: null, // this.orientation in PC version //? maybe we can use it instead of save value?
-        energy: 0, // this.energy in PC version
-        heat: this.MIN_HEAT, // this.heat in PC version
+        meta: null, // * this.orientation in PC version //? maybe we can use it instead of save value?
+        energy: 0, // * this.energy in PC version
+        heat: this.MIN_HEAT, // * this.heat in PC version
         progress: 0
     }
 
@@ -39,6 +38,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     public readonly isEngine: boolean = true;
 
     public engineAnimation: EngineAnimation = null;
+
     get orientation(){
         if(!this.data.meta){
             this.data.meta = this.getConnectionSide();
@@ -51,15 +51,33 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         this.engineAnimation.connectionSide = value;
     }
 
-    public init(){ // !TileEntity event
+    get pumping(): boolean{
+        return this.isPumping;
+    }
+
+    set pumping(value: boolean){
+        if (this.isPumping == value) return;
+        this.isPumping = value;
+        this.lastTick = 0;
+    }
+
+    // !TileEntity event
+    public init(){
         this.engineAnimation = new EngineAnimation(this, this.getEnergyStage(), this.texture);
         this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide();
     }
 
+    // !TileEntity event
+    public destroy(){
+        this.engineAnimation.destroy();
+    }
+
+    // !TileEntity event
     public redstone(params){
         this.isRedstonePowered = params.signal > 0;
     }
 
+    // !TileEntity event
     protected tick(){
         if (this.lastTick < 4) this.lastTick++;
 
@@ -103,18 +121,18 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         } else if (this.isRedstonePowered && this.isActive()) {
             if (this.isPoweredTile(tile, this.orientation)) {
                 this.progressPart = 1;
-                this.setPumping(true);
+                this.pumping = true;
                 if (this.getPowerToExtract() > 0) {
                     this.progressPart = 1;
-                    this.setPumping(true);
+                    this.pumping = true;
                 } else {
-                    this.setPumping(false);
+                    this.pumping = false;
                 }
             } else {
-                this.setPumping(false);
+                this.pumping = false;
             }
         } else {
-            this.setPumping(false);
+            this.pumping = false;
         }
 
         this.burn();
@@ -126,31 +144,23 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         }
     }
 
+    public isActive(): boolean { // ? why we need it? Ask PC author... I dont know
+        return true;
+    }
+
     protected getConnectionSide(){
         for(let i = 0; i < 6; i++){
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
-            const block = World.getBlock(relCoords.x, relCoords.y, relCoords.z);
-            // TODO make it for only RF
-            const machine = EnergyTileRegistry.accessMachineAtCoords(relCoords.x, relCoords.y, relCoords.z);
-            if(machine){
-                return i;
-            }
+            // ! ?. is new ESNext feature. Its amazing!
+            const energyTypes = EnergyTileRegistry.accessMachineAtCoords(relCoords.x, relCoords.y, relCoords.z)?.__energyTypes;
+            if(energyTypes?.RF) return i;
         }
         return 2;
     }
 
-    public getEnergyStage(): EngineHeat {
-        // if (!worldObj.isRemote) { //? client-server
-            if (this.energyStage == EngineHeat.BLACK) return this.energyStage;
-
-            const newStage = this.computeEnergyStage();
-            if (this.energyStage !== newStage) {
-                this.energyStage = newStage;
-                if (this.energyStage === EngineHeat.BLACK) this.overheat();
-                // sendNetworkUpdate(); //? client-server
-            }
-        // }
-        return this.energyStage;
+    public getEnergyProvider(orientation: number): any {
+        const coords = World.getRelativeCoords(this.x, this.y, this.z, orientation);
+        return EnergyTileRegistry.accessMachineAtCoords(coords.x, coords.y, coords.z);
     }
 
     protected sendPower(): void {
@@ -158,13 +168,13 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         if (this.isPoweredTile(tile, this.orientation)) {
             const extracted = this.getPowerToExtract();
             if (extracted <= 0) {
-                this.setPumping(false);
+                this.pumping = false;
                 return;
             }
 
-            this.setPumping(true);
+            this.pumping = true;
 
-            const oppositeSide = this.getOppositeSide(this.orientation);
+            const oppositeSide = World.getInverseBlockSide(this.orientation);
 
             if (tile.isEngine) {
                 const neededRF = tile.receiveEnergyFromEngine(oppositeSide, extracted, false);
@@ -176,14 +186,11 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         }
     }
 
-    // ? why we need it? ask PC author about it. Maybe it should be overrided in future
-    protected burn(): void {}
-
     private getPowerToExtract(): number {
         const tile = this.getEnergyProvider(this.orientation);
         if(!tile) return 0;
 
-        const oppositeSide = this.getOppositeSide(this.orientation);
+        const oppositeSide = World.getInverseBlockSide(this.orientation);
 
         if (tile.isEngine) {
             const maxEnergy = tile.receiveEnergyFromEngine(oppositeSide, this.data.energy, true);
@@ -195,27 +202,9 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         return 0;
     }
 
-    // TODO make setter for setPumping()
-    protected setPumping(isActive: boolean): void {
-        if (this.isPumping == isActive) return;
-
-        this.isPumping = isActive;
-        this.lastTick = 0;
-        // this.sendNetworkUpdate(); // ? is sendNetworkUpdate() for client-server?
-    }
-
-    public getEnergyProvider(orientation: number): any {
-        const coords = World.getRelativeCoords(this.x, this.y, this.z, orientation);
-        return EnergyTileRegistry.accessMachineAtCoords(coords.x, coords.y, coords.z);
-    }
-
-    public isActive(): boolean { // ? why we need it? Ask PC author... I dont know
-        return true;
-    }
-
     public isPoweredTile(tile: any, side: number): boolean {
         if(!tile) return false;
-        const oppositeSide = this.getOppositeSide(this.orientation);
+        const oppositeSide = World.getInverseBlockSide(this.orientation);
 
         if (tile.isEngine) {
             return tile.canReceiveFromEngine(oppositeSide);
@@ -224,24 +213,6 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
             return tile.canReceiveEnergy(oppositeSide, "RF");
         }
         return false;
-    }
-
-    public getHeatLevel(): number {
-        return (this.data.heat - this.MIN_HEAT) / (this.MAX_HEAT - this.MIN_HEAT);
-    }
-
-    protected computeEnergyStage(): EngineHeat {
-        const energyLevel = this.getHeatLevel();
-        if (energyLevel < 0.25) {
-            return EngineHeat.BLUE;
-        } else if (energyLevel < 0.5) {
-            return EngineHeat.GREEN;
-        } else if (energyLevel < 0.75) {
-            return EngineHeat.ORANGE;
-        } else if (energyLevel < 1) {
-            return EngineHeat.RED;
-        }
-        return EngineHeat.BLACK;
     }
 
     public getPistonSpeed(): number {
@@ -264,6 +235,20 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         }*/
     }
 
+    public getEnergyStage(): EngineHeat {
+        // if (!worldObj.isRemote) { //? client-server
+            if (this.energyStage == EngineHeat.BLACK) return this.energyStage;
+
+            const newStage = this.computeEnergyStage();
+            if (this.energyStage !== newStage) {
+                this.energyStage = newStage;
+                if (this.energyStage === EngineHeat.BLACK) this.overheat();
+                // sendNetworkUpdate(); //? client-server
+            }
+        // }
+        return this.energyStage;
+    }
+
     public addEnergy(addition: number): void {
         if (this.getEnergyStage() == EngineHeat.BLACK) return;
 
@@ -273,12 +258,34 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         }
     }
 
+    protected computeEnergyStage(): EngineHeat {
+        const energyLevel = this.getHeatLevel();
+        if (energyLevel < 0.25) {
+            return EngineHeat.BLUE;
+        } else if (energyLevel < 0.5) {
+            return EngineHeat.GREEN;
+        } else if (energyLevel < 0.75) {
+            return EngineHeat.ORANGE;
+        } else if (energyLevel < 1) {
+            return EngineHeat.RED;
+        }
+        return EngineHeat.BLACK;
+    }
+
     public getEnergyStored(): number {
         return this.data.energy;
     }
 
     public getMaxEnergyStored(): number {
         return this.getMaxEnergy();
+    }
+
+    public canConnectEnergy(from: number): boolean {
+        return from == this.orientation;
+    }
+
+    public getEnergyLevel(): number {
+        return this.data.energy / this.getMaxEnergy();
     }
 
     public extractEnergy(energyMax: number, doExtract: boolean): number {
@@ -301,18 +308,6 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
         return extracted;
     }
-    public canConnectEnergy(from: number): boolean {
-        return from == this.orientation;
-    }
-
-    public overheat(): void {
-        this.isPumping = false;
-        // TODO make some explode!
-    }
-
-    public abstract isBurning(): boolean
-
-    public abstract getIdealOutput(): number
 
     public getCurrentOutputLimit(): number {
         return Number.MAX_VALUE;
@@ -328,40 +323,32 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         }
     }
 
+    public getHeatLevel(): number {
+        return (this.data.heat - this.MIN_HEAT) / (this.MAX_HEAT - this.MIN_HEAT);
+    }
+
     public updateHeat(): void {
         this.data.heat = ((this.MAX_HEAT - this.MIN_HEAT) * this.getEnergyLevel()) + this.MIN_HEAT;
     }
 
+    public overheat(): void {
+        this.isPumping = false;
+        World.explode(this.x, this.y, this.z, 3, true);
+    }
+
+    // ? why we need it? ask PC author about it. Maybe it should be overrided in future
+    protected burn(): void {}
+
+    // abstract methods
+    public abstract isBurning(): boolean
+
+    public abstract getIdealOutput(): number
+
     public abstract getMaxEnergy(): number
-
-    public getEnergyLevel(): number {
-        return this.data.energy / this.getMaxEnergy();
-    }
-
-    public destroy(){ // !TileEntity event
-        this.engineAnimation.destroy();
-    }
-
-    protected getOppositeSide(side: number): number {
-        switch(side){
-            case 0:
-                return 1;
-            case 1:
-                return 0;
-            case 2:
-                return 3;
-            case 3:
-                return 2;
-            case 4:
-                return 5;
-            case 5:
-                return 4;
-        }
-    }
 
     // IEngine
     public canReceiveFromEngine(side: number): boolean {
-        return side == this.getOppositeSide(this.orientation);
+        return side == World.getInverseBlockSide(this.orientation);
     }
 
     public receiveEnergyFromEngine(side: number, amount: number, simulate: boolean): number {
