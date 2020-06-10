@@ -21,21 +21,13 @@ abstract class BCEngineTileEntity {
         meta: null, // this.orientation in PC version
         energy: 0, // this.energy in PC version
         heat: this.MIN_HEAT, // this.heat in PC version
-        progress: 0,
-
-        power: 0,
-        targetPower: 0,
-        heatStage: EngineHeat.BLUE
+        progress: 0
     }
     protected defaultValues = {
         meta: null, // this.orientation in PC version //? maybe we can use it instead of save value?
         energy: 0, // this.energy in PC version
         heat: this.MIN_HEAT, // this.heat in PC version
-        progress: 0,
-
-        power: 0,
-        targetPower: 0,
-        heatStage: EngineHeat.BLUE
+        progress: 0
     }
 
     public x: number;
