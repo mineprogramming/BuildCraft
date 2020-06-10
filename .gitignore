@@ -12,3 +12,4 @@
 toolchain/*
 output
 **/__pycache__
+test.ts
