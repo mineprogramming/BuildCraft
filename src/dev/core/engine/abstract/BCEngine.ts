@@ -20,6 +20,7 @@ abstract class BCEngine {
     constructor(){
         this.block = new EngineBlock(this.engineType);
         this.item = new EngineItem(this.engineType, this.block);
+        Block.setupAsRedstoneReceiver(this.block.stringId, true)
         TileEntity.registerPrototype(this.block.id, this.requireTileEntity());
         this.registerUse();
         this.registerDrop();

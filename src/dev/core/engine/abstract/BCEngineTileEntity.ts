@@ -52,7 +52,10 @@ abstract class BCEngineTileEntity {
     public init(){ // !TileEntity event
         this.engineAnimation = new EngineAnimation(this, this.getEnergyStage(), this.texture);
         this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide();
-        this.checkRedstonePower();
+    }
+
+    public redstone(params){
+        this.isRedstonePowered = params.signal > 0;
     }
 
     protected tick(){
@@ -61,7 +64,6 @@ abstract class BCEngineTileEntity {
         this.engineAnimation.update(this.data.progress, this.getEnergyStage());
 
         // from PC
-        this.checkRedstonePower();
         /* if (worldObj.isRemote) { // ? is it for client-server?
             if (this.progressPart != 0) {
                 this.data.progress += this.getPistonSpeed();
@@ -205,13 +207,6 @@ abstract class BCEngineTileEntity {
         return EnergyTileRegistry.accessMachineAtCoords(coords.x, coords.y, coords.z);
     }
 
-    public checkRedstonePower(): void {
-        // checkRedstonePower = false;
-        // this.isRedstonePowered = worldObj.isBlockIndirectlyGettingPowered(pos) > 0;
-        // TODO make redstone powering
-        this.isRedstonePowered = true;
-    }
-
     public isActive(): boolean { // ? why we need it? Ask PC author... I dont know
         return true;
     }
@@ -322,7 +317,7 @@ abstract class BCEngineTileEntity {
     }
 
     protected engineUpdate(): void {
-        if (!this.isRedstonePowered) {// TODO make redstone check
+        if (!this.isRedstonePowered) {
             if (this.data.energy >= 10) {
                 this.data.energy -= 10;
             } else if (this.data.energy < 10) {
