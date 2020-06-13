@@ -41,7 +41,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     get orientation(){
         if(!this.data.meta){
-            this.data.meta = this.getConnectionSide();
+            this.data.meta = this.getConnectionSide(false);
         }
         return this.data.meta;
     }
@@ -64,7 +64,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     // !TileEntity event
     public init(){
         this.engineAnimation = new EngineAnimation(this, this.getEnergyStage(), this.texture);
-        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide();
+        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide(false);
     }
 
     // !TileEntity event
@@ -78,7 +78,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     }
 
     // !TileEntity event
-    protected tick(){
+    public tick(){
         if (this.lastTick < 4) this.lastTick++;
 
         this.engineAnimation.update(this.data.progress, this.getEnergyStage());
@@ -144,17 +144,36 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         }
     }
 
+    public click(id, count, data) {
+        if(id != ItemID.bcWrench) return false;
+        if (this.getEnergyStage() == EngineHeat.BLACK) {
+            this.energyStage = this.computeEnergyStage();
+            // sendNetworkUpdate(); // ? again networking!
+        }
+        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide(true);
+        return true;
+    }
+
     public isActive(): boolean { // ? why we need it? Ask PC author... I dont know
         return true;
     }
 
-    protected getConnectionSide(){
-        for(let i = 0; i < 6; i++){
+    protected getConnectionSide(findNext : boolean){
+        // * In common situation ends when i gets max in 5 index
+        // * But if fhis function calling by wrench index can go beyound
+        // * I think this code is poor, but maybe i fix it in future
+        for(let t = 0; t < 12; t++){
+            const i = t % 6;
+            if(findNext) {
+                if(this.orientation == t) findNext = false;
+                continue;
+            }
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
             // ! ?. is new ESNext feature. Its amazing!
             const energyTypes = EnergyTileRegistry.accessMachineAtCoords(relCoords.x, relCoords.y, relCoords.z)?.__energyTypes;
             if(energyTypes?.RF) return i;
         }
+        // default value
         return 2;
     }
 
