@@ -41,7 +41,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     get orientation(){
         if(!this.data.meta){
-            this.data.meta = this.getConnectionSide(false);
+            this.data.meta = this.getConnectionSide();
         }
         return this.data.meta;
     }
@@ -64,7 +64,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     // !TileEntity event
     public init(){
         this.engineAnimation = new EngineAnimation(this, this.getEnergyStage(), this.texture);
-        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide(false);
+        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide();
     }
 
     // !TileEntity event
@@ -158,7 +158,8 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         return true;
     }
 
-    protected getConnectionSide(findNext : boolean){
+    /** @param findNext - use true value if you want to rerotate engine like a wrench */
+    protected getConnectionSide(findNext : boolean = false){
         // * In common situation ends when i gets max in 5 index
         // * But if fhis function calling by wrench index can go beyound
         // * I think this code is poor, but maybe i fix it in future
