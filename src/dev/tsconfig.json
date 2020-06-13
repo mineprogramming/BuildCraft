@@ -17,6 +17,7 @@
 	"include": [
 		"block",
 		"core",
+		"item",
 		"tsconfig.json",
 		"block/capacitor.ts",
 		"core/energy.ts",
@@ -54,7 +55,9 @@
 		"core/engine/model/texture/EngineTexture.ts",
 		"core/engine/model/texture/ITexture.ts",
 		"core/engine/wood/WoodEngine.ts",
-		"core/engine/wood/WoodEngineTileEntity.ts"
+		"core/engine/wood/WoodEngineTileEntity.ts",
+		"item/gears.ts",
+		"item/wrench.ts"
 	],
 	"files": [
 		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\android-declarations.d.ts",
