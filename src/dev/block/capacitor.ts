@@ -16,6 +16,9 @@ TileEntity.registerPrototype(BlockID["Capacitor"], {
             this.data.progress -= 100;
             World.drop(this.x, this.y + 1, this.z, 264, 1, 0);
         }
+    },
+    canConnectRedstoneEngine(){
+        return true;
     }
 });
 EnergyTileRegistry.addEnergyTypeForId(BlockID["Capacitor"], RF);
