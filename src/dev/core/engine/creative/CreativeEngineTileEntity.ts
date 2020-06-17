@@ -8,26 +8,16 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
         this.defaultValues.powerMode = PowerMode.M2;
     }
 
-    // !TileEntity event
-    public init(){
-        super.init();
-        Debug.m(Object.keys(this));
-    }
-
     public click(id: number, count: number, data: number) {
         if(id != ItemID.bcWrench) return false;
 
         if(Entity.getSneaking(Player.get())){
             this.data.energy = 0;
-            Debug.m(`current mode ${this.data.powerMode}`);
             let currentModeIndex = PowerModeOrder.indexOf(this.data.powerMode);
             this.data.powerMode = PowerModeOrder[++currentModeIndex % PowerModeOrder.length];
-            Debug.m(`new mode ${this.data.powerMode} and speed ${this.getPistonSpeed()}`);
             return true;
         }
         this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide(true);
-        Debug.m("not sneaking");
-        Debug.m(`${this.data.progress}`);
         return false;
     }
 

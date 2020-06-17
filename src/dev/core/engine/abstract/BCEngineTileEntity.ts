@@ -79,7 +79,6 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     // !TileEntity event
     public tick(){
-        Debug.m("tick");
         if (this.lastTick < 4) this.lastTick++;
 
         this.engineAnimation.update(this.data.progress, this.getEnergyStage());
@@ -112,20 +111,15 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         const tile = this.getEnergyProvider(this.orientation);
 
         if (this.progressPart != 0) {
-            Debug.m(`part != 0`);
             this.data.progress += this.getPistonSpeed();
             if (this.data.progress > 0.5 && this.progressPart == 1) {
                 this.progressPart = 2;
-                Debug.m(`part to 2`);
             } else if (this.data.progress >= 1) {
                 this.data.progress = 0;
                 this.progressPart = 0;
-                Debug.m(`part to 0`);
             }
         } else if (this.isRedstonePowered && this.isActive()) {
-            Debug.m(`red powered`);
             if (this.isPoweredTile(tile, this.orientation)) {
-                Debug.m(`part to 1`);
                 this.progressPart = 1;
                 this.pumping = true;
                 if (this.getPowerToExtract() > 0) {
@@ -148,7 +142,6 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         } else if (this.isRedstonePowered && this.isActive()) {
             this.sendPower();
         }
-        Debug.m("end tick");
     }
 
     public click(id, count, data) {
