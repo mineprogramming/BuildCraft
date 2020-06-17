@@ -15,6 +15,7 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
             this.data.energy = 0;
             let currentModeIndex = PowerModeOrder.indexOf(this.data.powerMode);
             this.data.powerMode = PowerModeOrder[++currentModeIndex % PowerModeOrder.length];
+            Game.tipMessage(`Mode switched to ${this.data.powerMode}RF`);
             return true;
         }
         this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide(true);
