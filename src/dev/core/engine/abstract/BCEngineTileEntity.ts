@@ -13,18 +13,18 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     protected progressPart: number = 0;
 
-    private isPumping: boolean = false; // Used for SMP synch // ?WTF is SMP
+    protected isPumping: boolean = false; // Used for SMP synch // ?WTF is SMP
     // How many ticks ago it gave out power, capped to 4.
     private lastTick: number = 0;
 
     constructor(protected texture: EngineTexture){}
-    protected data = {// * it will be rewriten during runtime
+    protected data: any = {// * it will be rewriten during runtime
         meta: null, // * this.orientation in PC version
         energy: 0, // * this.energy in PC version
         heat: this.MIN_HEAT, // * this.heat in PC version
         progress: 0
     }
-    protected defaultValues = {
+    protected defaultValues: any = {
         meta: null, // * this.orientation in PC version //? maybe we can use it instead of save value?
         energy: 0, // * this.energy in PC version
         heat: this.MIN_HEAT, // * this.heat in PC version
@@ -101,7 +101,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
         this.updateHeat();
 
-        if (this.getEnergyStage() === EngineHeat.BLACK){
+        if (this.getEnergyStage() === EngineHeat.OVERHEAT){
             this.data.energy = Math.max(this.data.energy - 50, 0);
             return;
         }
@@ -146,7 +146,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     public click(id, count, data) {
         if(id != ItemID.bcWrench) return false;
-        if (this.getEnergyStage() == EngineHeat.BLACK) {
+        if (this.getEnergyStage() == EngineHeat.OVERHEAT) {
             this.energyStage = this.computeEnergyStage();
             // sendNetworkUpdate(); // ? again networking!
         }
@@ -257,12 +257,12 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     public getEnergyStage(): EngineHeat {
         // if (!worldObj.isRemote) { //? client-server
-            if (this.energyStage == EngineHeat.BLACK) return this.energyStage;
+            if (this.energyStage == EngineHeat.OVERHEAT) return this.energyStage;
 
             const newStage = this.computeEnergyStage();
             if (this.energyStage !== newStage) {
                 this.energyStage = newStage;
-                if (this.energyStage === EngineHeat.BLACK) this.overheat();
+                if (this.energyStage === EngineHeat.OVERHEAT) this.overheat();
                 // sendNetworkUpdate(); //? client-server
             }
         // }
@@ -270,7 +270,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     }
 
     public addEnergy(addition: number): void {
-        if (this.getEnergyStage() == EngineHeat.BLACK) return;
+        if (this.getEnergyStage() == EngineHeat.OVERHEAT) return;
 
         this.data.energy += addition;
         if (this.data.energy > this.getMaxEnergy()) {
@@ -289,7 +289,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         } else if (energyLevel < 1) {
             return EngineHeat.RED;
         }
-        return EngineHeat.BLACK;
+        return EngineHeat.OVERHEAT;
     }
 
     public getEnergyStored(): number {
