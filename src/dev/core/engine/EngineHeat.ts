@@ -3,6 +3,7 @@ enum EngineHeat {
     GREEN = "GREEN",
     ORANGE = "ORANGE",
     RED = "RED",
+    OVERHEAT = "OVERHEAT",
     BLACK = "BLACK"
 }
 

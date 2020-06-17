@@ -7,9 +7,11 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
         super(texture);
         this.defaultValues.powerMode = PowerMode.M2;
     }
+
     // !TileEntity event
     public init(){
         super.init();
+        Debug.m(Object.keys(this));
     }
 
     public click(id: number, count: number, data: number) {
@@ -20,11 +22,12 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
             Debug.m(`current mode ${this.data.powerMode}`);
             let currentModeIndex = PowerModeOrder.indexOf(this.data.powerMode);
             this.data.powerMode = PowerModeOrder[++currentModeIndex % PowerModeOrder.length];
-            Debug.m(`new mode ${this.data.powerMode}`);
+            Debug.m(`new mode ${this.data.powerMode} and speed ${this.getPistonSpeed()}`);
             return true;
         }
         this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide(true);
         Debug.m("not sneaking");
+        Debug.m(`${this.data.progress}`);
         return false;
     }
 
@@ -36,7 +39,7 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
 
     public getPistonSpeed(): number {
        // return 0.02 * (powerMode.ordinal() + 1); // ORIGINAL
-       return 0.02 * (PowerModeOrder[this.data.powerMode] + 1); // Maybe shit...
+       return 0.02 * (PowerModeOrder.indexOf(this.data.powerMode) + 1); // Maybe shit...
     }
 
     public engineUpdate(): void {

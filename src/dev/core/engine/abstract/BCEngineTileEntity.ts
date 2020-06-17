@@ -13,7 +13,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     protected progressPart: number = 0;
 
-    private isPumping: boolean = false; // Used for SMP synch // ?WTF is SMP
+    protected isPumping: boolean = false; // Used for SMP synch // ?WTF is SMP
     // How many ticks ago it gave out power, capped to 4.
     private lastTick: number = 0;
 
@@ -79,6 +79,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     // !TileEntity event
     public tick(){
+        Debug.m("tick");
         if (this.lastTick < 4) this.lastTick++;
 
         this.engineAnimation.update(this.data.progress, this.getEnergyStage());
@@ -101,7 +102,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
         this.updateHeat();
 
-        if (this.getEnergyStage() === EngineHeat.BLACK){
+        if (this.getEnergyStage() === EngineHeat.OVERHEAT){
             this.data.energy = Math.max(this.data.energy - 50, 0);
             return;
         }
@@ -111,15 +112,20 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         const tile = this.getEnergyProvider(this.orientation);
 
         if (this.progressPart != 0) {
+            Debug.m(`part != 0`);
             this.data.progress += this.getPistonSpeed();
             if (this.data.progress > 0.5 && this.progressPart == 1) {
                 this.progressPart = 2;
+                Debug.m(`part to 2`);
             } else if (this.data.progress >= 1) {
                 this.data.progress = 0;
                 this.progressPart = 0;
+                Debug.m(`part to 0`);
             }
         } else if (this.isRedstonePowered && this.isActive()) {
+            Debug.m(`red powered`);
             if (this.isPoweredTile(tile, this.orientation)) {
+                Debug.m(`part to 1`);
                 this.progressPart = 1;
                 this.pumping = true;
                 if (this.getPowerToExtract() > 0) {
@@ -142,11 +148,12 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         } else if (this.isRedstonePowered && this.isActive()) {
             this.sendPower();
         }
+        Debug.m("end tick");
     }
 
     public click(id, count, data) {
         if(id != ItemID.bcWrench) return false;
-        if (this.getEnergyStage() == EngineHeat.BLACK) {
+        if (this.getEnergyStage() == EngineHeat.OVERHEAT) {
             this.energyStage = this.computeEnergyStage();
             // sendNetworkUpdate(); // ? again networking!
         }
@@ -257,12 +264,12 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     public getEnergyStage(): EngineHeat {
         // if (!worldObj.isRemote) { //? client-server
-            if (this.energyStage == EngineHeat.BLACK) return this.energyStage;
+            if (this.energyStage == EngineHeat.OVERHEAT) return this.energyStage;
 
             const newStage = this.computeEnergyStage();
             if (this.energyStage !== newStage) {
                 this.energyStage = newStage;
-                if (this.energyStage === EngineHeat.BLACK) this.overheat();
+                if (this.energyStage === EngineHeat.OVERHEAT) this.overheat();
                 // sendNetworkUpdate(); //? client-server
             }
         // }
@@ -270,7 +277,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     }
 
     public addEnergy(addition: number): void {
-        if (this.getEnergyStage() == EngineHeat.BLACK) return;
+        if (this.getEnergyStage() == EngineHeat.OVERHEAT) return;
 
         this.data.energy += addition;
         if (this.data.energy > this.getMaxEnergy()) {
@@ -289,7 +296,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         } else if (energyLevel < 1) {
             return EngineHeat.RED;
         }
-        return EngineHeat.BLACK;
+        return EngineHeat.OVERHEAT;
     }
 
     public getEnergyStored(): number {
