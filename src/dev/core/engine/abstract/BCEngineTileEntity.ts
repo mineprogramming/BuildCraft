@@ -18,13 +18,13 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     private lastTick: number = 0;
 
     constructor(protected texture: EngineTexture){}
-    protected data = {// * it will be rewriten during runtime
+    protected data: any = {// * it will be rewriten during runtime
         meta: null, // * this.orientation in PC version
         energy: 0, // * this.energy in PC version
         heat: this.MIN_HEAT, // * this.heat in PC version
         progress: 0
     }
-    protected defaultValues = {
+    protected defaultValues: any = {
         meta: null, // * this.orientation in PC version //? maybe we can use it instead of save value?
         energy: 0, // * this.energy in PC version
         heat: this.MIN_HEAT, // * this.heat in PC version

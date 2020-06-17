@@ -1,7 +1,32 @@
 /// <reference path="../PowerMode.ts" />
 class BCCreativeEngineTileEntity extends BCEngineTileEntity {
     //  private PowerMode powerMode = PowerMode.M2; // ! its from PC
-    private powerMode: PowerMode = PowerMode.M2;
+    public energyStage = EngineHeat.BLACK;
+
+    constructor(protected texture: EngineTexture){
+        super(texture);
+        this.defaultValues.powerMode = PowerMode.M2;
+    }
+    // !TileEntity event
+    public init(){
+        super.init();
+    }
+
+    public click(id: number, count: number, data: number) {
+        if(id != ItemID.bcWrench) return false;
+
+        if(Entity.getSneaking(Player.get())){
+            this.data.energy = 0;
+            Debug.m(`current mode ${this.data.powerMode}`);
+            let currentModeIndex = PowerModeOrder.indexOf(this.data.powerMode);
+            this.data.powerMode = PowerModeOrder[++currentModeIndex % PowerModeOrder.length];
+            Debug.m(`new mode ${this.data.powerMode}`);
+            return true;
+        }
+        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide(true);
+        Debug.m("not sneaking");
+        return false;
+    }
 
     protected computeEnergyStage(): EngineHeat {
         return EngineHeat.BLACK;
@@ -11,7 +36,7 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
 
     public getPistonSpeed(): number {
        // return 0.02 * (powerMode.ordinal() + 1); // ORIGINAL
-       return 0.02 * (PowerModeOrder[this.powerMode] + 1); // Maybe shit...
+       return 0.02 * (PowerModeOrder[this.data.powerMode] + 1); // Maybe shit...
     }
 
     public engineUpdate(): void {
@@ -32,6 +57,6 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
 
     public getIdealOutput(): number {
         // return powerMode.maxPower; //ORIGINAL
-        return this.powerMode;
+        return this.data.powerMode;
     }
 }
