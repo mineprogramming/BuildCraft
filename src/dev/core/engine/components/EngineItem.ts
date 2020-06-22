@@ -3,7 +3,7 @@ class EngineItem {
     public readonly stringId: string;
 
     constructor(private readonly registryId: string, public readonly engineBlock: EngineBlock){
-        this.stringId = "engine" + this.registryId;
+        this.stringId = "engine_" + this.registryId;
         this.registerItem();
         this.id = ItemID[this.stringId];
     }

@@ -9,7 +9,7 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
     }
 
     public click(id: number, count: number, data: number) {
-        if(id != ItemID.bcWrench) return false;
+        if(id != ItemID.bc_wrench) return false;
 
         if(Entity.getSneaking(Player.get())){
             this.data.energy = 0;

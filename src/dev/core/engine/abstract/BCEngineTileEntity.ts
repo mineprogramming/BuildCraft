@@ -145,7 +145,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     }
 
     public click(id, count, data) {
-        if(id != ItemID.bcWrench) return false;
+        if(id != ItemID.bc_wrench) return false;
         if (this.getEnergyStage() == EngineHeat.OVERHEAT) {
             this.energyStage = this.computeEnergyStage();
             // sendNetworkUpdate(); // ? again networking!

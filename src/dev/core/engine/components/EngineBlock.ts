@@ -8,7 +8,7 @@ class EngineBlock {
     public readonly stringId: string;
 
     constructor(private readonly registryId: string){
-        this.stringId = "engine" + this.registryId;
+        this.stringId = "engine_" + this.registryId;
         this.registerBlock();
         this.id = BlockID[this.stringId];
     }
