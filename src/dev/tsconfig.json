@@ -4,7 +4,7 @@
 		"lib": [
 			"ESNext"
 		],
-		"outFile": "C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\build\\typescript\\main.js",
+		"outFile": "C:\\GitProjects\\BuildCraftProject\\toolchain\\build\\typescript\\main.js",
 		"experimentalDecorators": true,
 		"downlevelIteration": true,
 		"allowJs": true
@@ -61,19 +61,21 @@
 		"core/pipe/components",
 		"core/pipe/PipeCobble.ts",
 		"core/pipe/pipes.ts",
+		"core/pipe/renderer",
 		"core/pipe/abstract/BCPipe.ts",
 		"core/pipe/abstract/BCTransportPipe.ts",
 		"core/pipe/components/PipeBlock.ts",
+		"core/pipe/renderer/BCPipeRenderer.ts",
 		"item/gears.ts",
 		"item/wrench.ts"
 	],
 	"files": [
-		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\android-declarations.d.ts",
-		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\android.d.ts",
-		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\core-engine.d.ts",
-		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\lib\\energy-net.d.ts",
-		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\lib\\LiquidLib.d.ts",
-		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\lib\\numbers.d.ts",
-		"C:\\Users\\Nikolay\\Desktop\\Work\\Horizon\\BuildCraftProject\\toolchain\\jslibs\\lib\\StorageInterface.d.ts"
+		"C:\\GitProjects\\BuildCraftProject\\toolchain\\jslibs\\android-declarations.d.ts",
+		"C:\\GitProjects\\BuildCraftProject\\toolchain\\jslibs\\android.d.ts",
+		"C:\\GitProjects\\BuildCraftProject\\toolchain\\jslibs\\core-engine.d.ts",
+		"C:\\GitProjects\\BuildCraftProject\\toolchain\\jslibs\\lib\\energy-net.d.ts",
+		"C:\\GitProjects\\BuildCraftProject\\toolchain\\jslibs\\lib\\LiquidLib.d.ts",
+		"C:\\GitProjects\\BuildCraftProject\\toolchain\\jslibs\\lib\\numbers.d.ts",
+		"C:\\GitProjects\\BuildCraftProject\\toolchain\\jslibs\\lib\\StorageInterface.d.ts"
 	]
 }
