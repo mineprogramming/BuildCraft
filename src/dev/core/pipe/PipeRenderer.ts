@@ -1,6 +1,6 @@
 /// <reference path="connector/IPipeConnector.ts" />
 class PipeRenderer {
-    constructor(private connector: IPipeConnector){}
+    constructor(private connector: IPipeConnector, private texture: PipeTexture){}
 
     public get standartICrender(){
         const render = new ICRender.Model();

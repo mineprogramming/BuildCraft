@@ -7,7 +7,7 @@ class PipeBlock {
     public readonly id: number;
     public readonly stringId: string;
 
-    constructor(public readonly material: string, public readonly transportType: string){
+    constructor(public readonly material: string, public readonly transportType: string, private texture: PipeTexture){
         this.stringId = `pipe_${this.transportType}_${this.material}`;
         this.registerBlock();
         this.id = BlockID[this.stringId];
@@ -17,7 +17,7 @@ class PipeBlock {
     private registerBlock(): void {
         IDRegistry.genBlockID(this.stringId);
         Block.createBlock(this.stringId,
-            [{name: this.stringId, texture: [[this.stringId, 0]], inCreative: true}], pipeBlockType);
+            [{name: this.stringId, texture: [this.texture.block], inCreative: true}], pipeBlockType);
     }
 
     private registerShape(): void {
