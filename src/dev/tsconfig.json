@@ -65,7 +65,7 @@
 		"core/pipe/abstract/BCPipe.ts",
 		"core/pipe/abstract/BCTransportPipe.ts",
 		"core/pipe/components/PipeBlock.ts",
-		"core/pipe/renderer/BCPipeRenderer.ts",
+		"core/pipe/BCPipeRenderer.ts",
 		"item/gears.ts",
 		"item/wrench.ts"
 	],

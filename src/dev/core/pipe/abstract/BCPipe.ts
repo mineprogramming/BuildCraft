@@ -2,6 +2,10 @@
 abstract class BCPipe {
     protected block: PipeBlock;
 
+    constructor(){
+        this.block = new PipeBlock(this.material, this.transportType);
+    }
+
     public get material(): string {
         return null
     }
@@ -12,13 +16,5 @@ abstract class BCPipe {
 
     protected canConnectToPipe(): boolean {
         return false
-    }
-
-    public renderConnections(): void {
-
-    }
-
-    constructor(){
-        this.block = new PipeBlock(this.material, this.transportType);
     }
 }
