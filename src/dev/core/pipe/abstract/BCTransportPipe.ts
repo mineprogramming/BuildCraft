@@ -4,6 +4,11 @@ class BCTransportPipe extends BCPipe {
         if(!this.connector) this.connector = new TransportPipeConnector();
         return this.connector;
     }
+
+    protected get renderGroup(): string {
+        return "BCTransportPipe";
+    }
+
     public get transportType(): string {
         return "item"
     }

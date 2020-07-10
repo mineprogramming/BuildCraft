@@ -10,11 +10,21 @@ abstract class BCPipe {
     constructor(){
         this.block = new PipeBlock(this.material, this.transportType, this.pipeTexture);
         this.renderer = new PipeRenderer(this.pipeConnector, this.pipeTexture);
+        this.registerBlockToGroup();
+    }
+
+    protected registerBlockToGroup(): void {
+        ICRender.getGroup(this.renderGroup).add(this.block.id, -1);
+        alert(`block registered for group ${this.renderGroup}`);
     }
 
     protected get pipeConnector(): IPipeConnector {
         alert("BCPipeConnector");
         return null;
+    }
+
+    protected get renderGroup(): string {
+        return "BCPipe";
     }
 
     protected get pipeTexture(): PipeTexture {
