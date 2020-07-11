@@ -7,7 +7,7 @@ class PipeCobble extends BCTransportPipe {
 
     protected get pipeTexture(): PipeTexture {
         const textureName = `pipe_${this.transportType}_${this.material}`
-        if(!this.texture) this.texture = new PipeTexture([textureName, 0], [textureName, 0]);
+        if(!this.texture) this.texture = new PipeTexture({name: textureName, data: 0}, {name: textureName, data: 0});
         return this.texture;
     }
 }

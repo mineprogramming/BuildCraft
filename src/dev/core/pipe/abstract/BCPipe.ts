@@ -9,13 +9,17 @@ abstract class BCPipe {
 
     constructor(){
         this.block = new PipeBlock(this.material, this.transportType, this.pipeTexture);
-        this.renderer = new PipeRenderer(this.pipeConnector, this.pipeTexture);
+        this.renderer = new PipeRenderer(this.pipeConnector, this.pipeTexture, this.renderGroup);
         this.registerBlockToGroup();
     }
 
     protected registerBlockToGroup(): void {
-        ICRender.getGroup(this.renderGroup).add(this.block.id, -1);
+        this.renderGroup.add(this.block.id, -1);
         alert(`block registered for group ${this.renderGroup}`);
+    }
+
+    protected get ICRenderGroup(): ICRenderGroup {
+        return null
     }
 
     protected get pipeConnector(): IPipeConnector {
@@ -23,8 +27,8 @@ abstract class BCPipe {
         return null;
     }
 
-    protected get renderGroup(): string {
-        return "BCPipe";
+    protected get renderGroup(): ICRenderGroup {
+        return ICRender.getGroup("BCPipe");
     }
 
     protected get pipeTexture(): PipeTexture {
