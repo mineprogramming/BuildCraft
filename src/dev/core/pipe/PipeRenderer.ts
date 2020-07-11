@@ -2,6 +2,8 @@
 class PipeRenderer {
     constructor(private connector: IPipeConnector, private texture: PipeTexture, private renderGroup: ICRenderGroup){}
 
+    public readonly width = .5;
+
     public get standartICrender(){
         const render = new ICRender.Model();
         return render;
@@ -9,6 +11,13 @@ class PipeRenderer {
 
     public getICrenderAtCoords(coords: Vector){
 
+    }
+
+    public enableRender(id: number, data: number){
+        alert(`render enabled for ${id}`);
+        const render = this.getStandartModel();
+        BlockRenderer.setStaticICRender(id, data, render);
+        BlockRenderer.enableCoordMapping(id, data, render);
     }
 
     public getBoxes(width: number): any[] {
@@ -23,8 +32,9 @@ class PipeRenderer {
     }
 
     public getStandartModel(): ICRender.Model {
+        const width = this.width;
         const render = new ICRender.Model();
-        const boxes = this.getBoxes(.5);
+        const boxes = this.getBoxes(width);
         for (const box of boxes) {
             const model = BlockRenderer.createModel();
             const texture = this.texture.connection;
@@ -33,6 +43,12 @@ class PipeRenderer {
             model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data);
             render.addEntry(model).setCondition(condition);
         }
+
+        const model = BlockRenderer.createModel();
+        const p0 = 0.5 - width / 2;
+        const p1 = 0.5 + width / 2;
+        model.addBox(p0, p0, p0, p1, p1, p1, this.texture.block.name, this.texture.block.data);
+        render.addEntry(model);
         return render;
     }
 }

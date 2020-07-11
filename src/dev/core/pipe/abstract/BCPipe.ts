@@ -11,6 +11,7 @@ abstract class BCPipe {
         this.block = new PipeBlock(this.material, this.transportType, this.pipeTexture);
         this.renderer = new PipeRenderer(this.pipeConnector, this.pipeTexture, this.renderGroup);
         this.registerBlockToGroup();
+        this.renderer.enableRender(this.block.id, 0);
     }
 
     protected registerBlockToGroup(): void {
