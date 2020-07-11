@@ -17,7 +17,7 @@ class PipeBlock {
     private registerBlock(): void {
         IDRegistry.genBlockID(this.stringId);
         Block.createBlock(this.stringId,
-            [{name: this.stringId, texture: [this.texture.block], inCreative: true}], pipeBlockType);
+            [{name: this.stringId, texture: [[this.texture.block.name, this.texture.block.data]], inCreative: true}], pipeBlockType);
     }
 
     private registerShape(): void {
