@@ -1,4 +1,4 @@
-/// <reference path="abstract/BCPipe.ts" />
-/// <reference path="PipeCobble.ts" />
+/// <reference path="PipeStone.ts" />
 
 const cobblePipe = new PipeCobble();
+const stonePipe = new PipeStone();

@@ -63,6 +63,7 @@
 		"core/pipe/PipeCobble.ts",
 		"core/pipe/PipeRenderer.ts",
 		"core/pipe/pipes.ts",
+		"core/pipe/PipeStone.ts",
 		"core/pipe/renderer",
 		"core/pipe/abstract/BCPipe.ts",
 		"core/pipe/abstract/BCTransportPipe.ts",
@@ -70,6 +71,7 @@
 		"core/pipe/components/PipeTexture.ts",
 		"core/pipe/connector/CobblePipeConnector.ts",
 		"core/pipe/connector/PipeConnector.ts",
+		"core/pipe/connector/StonePipeConnector.ts",
 		"core/pipe/connector/TransportPipeConnector.ts",
 		"item/gears.ts",
 		"item/wrench.ts"
