@@ -1,6 +1,6 @@
-/// <reference path="connector/IPipeConnector.ts" />
+/// <reference path="connector/PipeConnector.ts" />
 class PipeRenderer {
-    constructor(private connector: IPipeConnector, private texture: PipeTexture, private renderGroup: ICRenderGroup){}
+    constructor(private connector: PipeConnector, private texture: PipeTexture, private renderGroup: ICRenderGroup){}
 
     public readonly width = .5;
 
@@ -15,7 +15,7 @@ class PipeRenderer {
 
     public enableRender(id: number, data: number){
         alert(`render enabled for ${id}`);
-        const render = this.getStandartModel();
+        const render = this.standartModel;
         BlockRenderer.setStaticICRender(id, data, render);
         BlockRenderer.enableCoordMapping(id, data, render);
     }
@@ -31,7 +31,7 @@ class PipeRenderer {
         ]
     }
 
-    public getStandartModel(): ICRender.Model {
+    public get standartModel(): ICRender.Model {
         const width = this.width;
         const render = new ICRender.Model();
         const boxes = this.getBoxes(width);
@@ -42,8 +42,14 @@ class PipeRenderer {
 
             model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data);
             render.addEntry(model).setCondition(condition);
+
+            // Connecting to TileEntities
+            const tileConnectionsModel = this.connector.getModifiedModel(box, this.texture);
+            const tileConnectionsCondition = this.connector.getModelCondition(box);
+            render.addEntry(tileConnectionsModel).setCondition(tileConnectionsCondition);
         }
 
+        // standart box
         const model = BlockRenderer.createModel();
         const p0 = 0.5 - width / 2;
         const p1 = 0.5 + width / 2;

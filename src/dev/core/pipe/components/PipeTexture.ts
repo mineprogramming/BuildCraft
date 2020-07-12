@@ -3,5 +3,5 @@ type TexturePair = {
     data: number
 }
 class PipeTexture {
-    constructor(public block: TexturePair, public connection: TexturePair, public containerConnection?: TexturePair){}
+    constructor(public block: TexturePair, public connection: TexturePair, public containerConnection: TexturePair = connection){}
 }

@@ -21,4 +21,5 @@ TileEntity.registerPrototype(BlockID["Capacitor"], {
         return true;
     }
 });
-EnergyTileRegistry.addEnergyTypeForId(BlockID["Capacitor"], RF);
+EnergyTileRegistry.addEnergyTypeForId(BlockID.Capacitor, RF);
+ICRender.getGroup("ItemMachine").add(BlockID.Capacitor, 0);

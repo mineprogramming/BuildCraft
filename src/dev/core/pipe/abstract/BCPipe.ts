@@ -1,9 +1,9 @@
 /// <reference path="../components/PipeBlock.ts" />
 /// <reference path="../components/PipeTexture.ts" />
-/// <reference path="../connector/IPipeConnector.ts" />
+/// <reference path="../connector/PipeConnector.ts" />
 abstract class BCPipe {
     private block: PipeBlock;
-    protected connector: IPipeConnector;
+    protected connector: PipeConnector;
     protected texture: PipeTexture;
     private renderer: PipeRenderer;
 
@@ -23,7 +23,7 @@ abstract class BCPipe {
         return null
     }
 
-    protected get pipeConnector(): IPipeConnector {
+    protected get pipeConnector(): PipeConnector {
         alert("BCPipeConnector");
         return null;
     }
