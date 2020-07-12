@@ -68,6 +68,7 @@
 		"core/pipe/abstract/BCTransportPipe.ts",
 		"core/pipe/components/PipeBlock.ts",
 		"core/pipe/components/PipeTexture.ts",
+		"core/pipe/connector/CobblePipeConnector.ts",
 		"core/pipe/connector/PipeConnector.ts",
 		"core/pipe/connector/TransportPipeConnector.ts",
 		"item/gears.ts",

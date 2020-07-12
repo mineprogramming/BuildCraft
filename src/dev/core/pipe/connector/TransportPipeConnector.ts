@@ -4,6 +4,12 @@ class TransportPipeConnector implements PipeConnector {
         return groupName == "ItemMachine"
     }
 
+    get connectionGroupNames(): {name: string, exclude: boolean}[] {
+        return [
+            {name: "BCPipeCobble", exclude: true}
+        ]
+    };
+
     public getModifiedModel(box: any, pipeTexture: PipeTexture): BlockRenderer.BlockModel {
         // Connecting to TileEntities
         const model = BlockRenderer.createModel();

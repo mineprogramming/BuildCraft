@@ -1,8 +1,17 @@
 /// <reference path="abstract/BCTransportPipe.ts" />
-/// <reference path="connector/TransportPipeConnector.ts" />
+/// <reference path="connector/CobblePipeConnector.ts" />
 class PipeCobble extends BCTransportPipe {
     public get material(): string {
         return "cobble"
+    }
+
+    protected get pipeConnector(): PipeConnector {
+        if(!this.connector) this.connector = new CobblePipeConnector();
+        return this.connector;
+    }
+
+    protected get renderGroup(): ICRenderGroup {
+        return ICRender.getGroup("BCPipeCobble");
     }
 
     protected get pipeTexture(): PipeTexture {

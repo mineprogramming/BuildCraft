@@ -38,7 +38,13 @@ class PipeRenderer {
         for (const box of boxes) {
             const model = BlockRenderer.createModel();
             const texture = this.texture.connection;
-            const condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], this.renderGroup, false);
+
+            let condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], this.renderGroup, false);
+            for(const cond of this.connector.connectionGroupNames){
+                const newGroup = ICRender.getGroup(cond.name);
+                const additionCondition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], newGroup, cond.exclude);
+                condition = ICRender.AND(condition, additionCondition);
+            }
 
             model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data);
             render.addEntry(model).setCondition(condition);
