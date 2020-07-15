@@ -61,6 +61,7 @@
 		"core/pipe/components",
 		"core/pipe/connector",
 		"core/pipe/PipeCobble.ts",
+		"core/pipe/PipeGold.ts",
 		"core/pipe/PipeRenderer.ts",
 		"core/pipe/pipes.ts",
 		"core/pipe/PipeStone.ts",
