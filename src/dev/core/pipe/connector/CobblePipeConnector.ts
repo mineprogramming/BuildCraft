@@ -1,8 +1,8 @@
-/// <reference path="TransportPipeConnector.ts" />
+/// <reference path="abstract/TransportPipeConnector.ts" />
 class CobblePipeConnector extends TransportPipeConnector {
     get connectionGroupNames(): {name: string, exclude: boolean}[] {
         return [
-            {name: "BCTransportPipe", exclude: true}
+            {name: "BCPipeStone", exclude: true}
         ]
     };
 }

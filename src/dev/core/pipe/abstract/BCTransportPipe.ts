@@ -5,8 +5,10 @@ class BCTransportPipe extends BCPipe {
         return this.connector;
     }
 
-    protected get renderGroup(): ICRenderGroup {
-        return ICRender.getGroup("BCTransportPipe");
+    protected get renderGroups(): {main: ICRenderGroup, addition?: ICRenderGroup} {
+        return {
+            main: ICRender.getGroup("BCTransportPipe")
+        };
     }
 
     public get transportType(): string {

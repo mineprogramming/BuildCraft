@@ -1,4 +1,4 @@
-/// <reference path="connector/PipeConnector.ts" />
+/// <reference path="connector/abstract/PipeConnector.ts" />
 class PipeRenderer {
     constructor(private connector: PipeConnector, private texture: PipeTexture, private renderGroup: ICRenderGroup){}
 

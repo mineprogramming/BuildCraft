@@ -1,6 +1,6 @@
 /// <reference path="../components/PipeBlock.ts" />
 /// <reference path="../components/PipeTexture.ts" />
-/// <reference path="../connector/PipeConnector.ts" />
+/// <reference path="../connector/abstract/PipeConnector.ts" />
 abstract class BCPipe {
     private block: PipeBlock;
     protected connector: PipeConnector;
@@ -9,14 +9,17 @@ abstract class BCPipe {
 
     constructor(){
         this.block = new PipeBlock(this.material, this.transportType, this.pipeTexture);
-        this.renderer = new PipeRenderer(this.pipeConnector, this.pipeTexture, this.renderGroup);
+        this.renderer = new PipeRenderer(this.pipeConnector, this.pipeTexture, this.renderGroups.main);
         this.registerBlockToGroup();
         this.renderer.enableRender(this.block.id, 0);
     }
 
     protected registerBlockToGroup(): void {
-        this.renderGroup.add(this.block.id, -1);
-        alert(`block registered for group ${this.renderGroup}`);
+        const groups = this.renderGroups;
+        groups.main.add(this.block.id, -1);
+        if(groups.addition)
+            groups.addition.add(this.block.id, -1);
+        // alert(`block registered for group ${this.renderGroup}`);
     }
 
     protected get ICRenderGroup(): ICRenderGroup {
@@ -28,8 +31,10 @@ abstract class BCPipe {
         return null;
     }
 
-    protected get renderGroup(): ICRenderGroup {
-        return ICRender.getGroup("BCPipe");
+    protected get renderGroups(): {main: ICRenderGroup, addition?: ICRenderGroup} {
+        return {
+            main: ICRender.getGroup("BCPipe")
+        };
     }
 
     protected get pipeTexture(): PipeTexture {

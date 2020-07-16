@@ -5,9 +5,7 @@ class TransportPipeConnector implements PipeConnector {
     }
 
     get connectionGroupNames(): {name: string, exclude: boolean}[] {
-        return [
-            {name: "BCPipeCobble", exclude: true}
-        ]
+        return []
     };
 
     public getModifiedModel(box: any, pipeTexture: PipeTexture): BlockRenderer.BlockModel {
