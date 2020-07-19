@@ -553,6 +553,7 @@ declare namespace ICRender {
         setCondition(condition: ICRenderCondition)
     }
     function AND(cond1: ICRenderCondition, cond2:ICRenderCondition): ICRenderCondition;
+    function OR(cond1: ICRenderCondition, cond2:ICRenderCondition): ICRenderCondition;
     function BLOCK(x: number, y: number, z: number, group: ICRenderGroup, exclude: boolean): ICRenderCondition;
 
 }
