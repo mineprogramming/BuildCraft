@@ -1,19 +1,19 @@
-/// <reference path="abstract/BCTransportPipe.ts" />
-/// <reference path="connector/StonePipeConnector.ts" />
-class PipeStone extends BCTransportPipe {
+/// <reference path="../abstract/BCTransportPipe.ts" />
+/// <reference path="CobblePipeConnector.ts" />
+class PipeCobble extends BCTransportPipe {
     public get material(): string {
-        return "stone"
+        return "cobble"
     }
 
     protected get pipeConnector(): PipeConnector {
-        if(!this.connector) this.connector = new StonePipeConnector();
+        if(!this.connector) this.connector = new CobblePipeConnector();
         return this.connector;
     }
 
     protected get renderGroups(): {main: ICRenderGroup, addition?: ICRenderGroup} {
         return {
             main: ICRender.getGroup("BCTransportPipe"),
-            addition: ICRender.getGroup("BCPipeStone")
+            addition: ICRender.getGroup("BCPipeCobble")
         };
     }
 

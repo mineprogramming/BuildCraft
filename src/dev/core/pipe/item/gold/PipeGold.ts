@@ -1,4 +1,4 @@
-/// <reference path="abstract/BCTransportPipe.ts" />
+/// <reference path="../abstract/BCTransportPipe.ts" />
 class PipeGold extends BCTransportPipe {
     public get material(): string {
         return "gold"

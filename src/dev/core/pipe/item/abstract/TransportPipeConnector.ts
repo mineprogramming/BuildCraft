@@ -1,4 +1,4 @@
-/// <reference path="PipeConnector.ts" />
+/// <reference path="../../abstract/PipeConnector.ts" />
 class TransportPipeConnector extends PipeConnector {
     public canConnectToGroup(groupName: string): boolean {
         return groupName == "ItemMachine"

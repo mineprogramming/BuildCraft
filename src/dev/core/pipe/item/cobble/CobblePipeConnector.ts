@@ -1,4 +1,4 @@
-/// <reference path="abstract/TransportPipeConnector.ts" />
+/// <reference path="../abstract/TransportPipeConnector.ts" />
 class CobblePipeConnector extends TransportPipeConnector {
     public getConnectionRules(): ConnectionRule[] {
         const old = super.getConnectionRules();

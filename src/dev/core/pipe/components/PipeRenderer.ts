@@ -1,4 +1,4 @@
-/// <reference path="connector/abstract/PipeConnector.ts" />
+/// <reference path="../abstract/PipeConnector.ts" />
 class PipeRenderer {
     constructor(private connector: PipeConnector, private texture: PipeTexture, private renderGroup: ICRenderGroup){}
 
@@ -35,7 +35,7 @@ class PipeRenderer {
         const render = new ICRender.Model();
         const boxes = this.getBoxes(width);
         for (const box of boxes) {
-            const model = BlockRenderer.createModel();
+            const renderModel = BlockRenderer.createModel();
             const texture = this.texture.connection;
 
             let condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], this.renderGroup, false);
@@ -50,8 +50,8 @@ class PipeRenderer {
                 }
             }
 
-            model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data);
-            render.addEntry(model).setCondition(condition);
+            renderModel.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data);
+            render.addEntry(renderModel).setCondition(condition);
         }
 
         // standart box
