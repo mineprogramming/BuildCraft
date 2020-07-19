@@ -70,6 +70,7 @@
 		"core/pipe/item/gold",
 		"core/pipe/item/ItemPipes.ts",
 		"core/pipe/item/stone",
+		"core/pipe/item/wooden",
 		"core/pipe/item/abstract/BCTransportPipe.ts",
 		"core/pipe/item/abstract/TransportPipeConnector.ts",
 		"core/pipe/item/cobble/CobblePipeConnector.ts",
@@ -77,6 +78,8 @@
 		"core/pipe/item/gold/PipeGold.ts",
 		"core/pipe/item/stone/PipeStone.ts",
 		"core/pipe/item/stone/StonePipeConnector.ts",
+		"core/pipe/item/wooden/PipeWooden.ts",
+		"core/pipe/item/wooden/WoodenPipeConnector.ts",
 		"item/gears.ts",
 		"item/wrench.ts"
 	],
