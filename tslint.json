@@ -2,8 +2,9 @@
     "extends": "tslint:recommended",
     "rules": {
         "max-line-length": {
-            "options": [150]
+            "options": [120]
         },
+        "quotemark": [true, "double"],
         "new-parens": true,
         "no-arg": true,
         "no-bitwise": true,
