@@ -19,7 +19,6 @@ abstract class BCPipe {
         groups.main.add(this.block.id, -1);
         if(groups.addition)
             groups.addition.add(this.block.id, -1);
-        // alert(`block registered for group ${this.renderGroup}`);
     }
 
     protected get ICRenderGroup(): ICRenderGroup {

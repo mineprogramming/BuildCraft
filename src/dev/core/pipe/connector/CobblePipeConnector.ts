@@ -1,8 +1,8 @@
 /// <reference path="abstract/TransportPipeConnector.ts" />
 class CobblePipeConnector extends TransportPipeConnector {
-    get connectionGroupNames(): {name: string, exclude: boolean}[] {
-        return [
-            {name: "BCPipeStone", exclude: true}
-        ]
-    };
+    public getConnectionRules(): ConnectionRule[] {
+        const old = super.getConnectionRules();
+        old.push({name: "BCPipeStone", exclude: true, isANDrule: true});
+        return old;
+    }
 }

@@ -14,7 +14,6 @@ class PipeRenderer {
     }
 
     public enableRender(id: number, data: number){
-        alert(`render enabled for ${id}`);
         const render = this.standartModel;
         BlockRenderer.setStaticICRender(id, data, render);
         BlockRenderer.enableCoordMapping(id, data, render);
@@ -40,19 +39,19 @@ class PipeRenderer {
             const texture = this.texture.connection;
 
             let condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], this.renderGroup, false);
-            for(const cond of this.connector.connectionGroupNames){
-                const newGroup = ICRender.getGroup(cond.name);
-                const additionCondition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], newGroup, cond.exclude);
-                condition = ICRender.AND(condition, additionCondition);
+            const groupRules = this.connector.getConnectionRules();
+            for(const rule of groupRules){
+                const newGroup = ICRender.getGroup(rule.name);
+                const additionCondition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], newGroup, rule.exclude);
+                if(rule.isANDrule){
+                    condition = ICRender.AND(condition, additionCondition);
+                } else {
+                    condition = ICRender.OR(condition, additionCondition);
+                }
             }
 
             model.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data);
             render.addEntry(model).setCondition(condition);
-
-            // Connecting to TileEntities
-            const tileConnectionsModel = this.connector.getModifiedModel(box, this.texture);
-            const tileConnectionsCondition = this.connector.getModelCondition(box);
-            render.addEntry(tileConnectionsModel).setCondition(tileConnectionsCondition);
         }
 
         // standart box
