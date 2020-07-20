@@ -1,8 +1,6 @@
 /// <reference path="WoodenPipeStorageConnector.ts" />
 class WoodenPipeTileEntity {
-    constructor(protected renderer: PipeRenderer, protected texture: PipeTexture){
-
-    }
+    constructor(protected renderer: PipeRenderer, protected texture: PipeTexture) { }
     // * it will be rewriten during runtime
     protected data: any = {}
 
@@ -29,19 +27,22 @@ class WoodenPipeTileEntity {
     }
 
     // !TileEntity event
-    public tick() {
-        
+    public tick(): void {
+
     }
 
     // !TileEntity event
-    public init() {
+    public init(): void {
         this.storageConnector = new WoodenPipeStorageConnector(this, this.renderer, this.texture);
+        this.updateConnectionSide();
+    }
+
+    public updateConnectionSide(): void {
         this.storageConnector.connectionSide = this.orientation = this.getConnectionSide();
-        alert(this.orientation);
     }
 
     /** @param findNext - use true value if you want to rerotate pipe like a wrench */
-    protected getConnectionSide(findNext: boolean = false) {
+    protected getConnectionSide(findNext: boolean = false): number | null {
         // * In common situation ends when i gets max in 5 index
         // * But if fhis function calling by wrench index can go beyound
         // * I think this code is poor, but maybe i fix it in future

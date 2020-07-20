@@ -13,7 +13,7 @@ class WoodenPipeStorageConnector {
         return this.side;
     }
 
-    private renderConnections() {
+    private renderConnections(): void {
         const boxes = this.renderer.getBoxes(this.renderer.width);
         const standartModel = this.renderer.standartModel;
 
@@ -36,7 +36,7 @@ class WoodenPipeStorageConnector {
                 renderModel.addBox(box.box[0], box.box[1], box.box[2],
                     box.box[3], box.box[4], box.box[5], this.texture.connection.name, this.texture.connection.data);
             }
-            standartModel.addEntry(renderModel)
+            standartModel.addEntry(renderModel);
         }
         BlockRenderer.mapAtCoords(this.coords.x, this.coords.y, this.coords.z, standartModel);
         Debug.m("mapped!");
