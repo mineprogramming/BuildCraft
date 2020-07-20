@@ -2,7 +2,7 @@
     "extends": "tslint:recommended",
     "rules": {
         "max-line-length": {
-            "options": [120]
+            "options": [130]
         },
         "quotemark": [true, "double"],
         "new-parens": true,
@@ -15,6 +15,7 @@
         "no-empty": false,
         "no-string-literal": false,
         "radix": false,
+        "forin": false,
         "no-console": {
             "severity": "warning",
             "options": ["debug", "info", "log", "time", "timeEnd", "trace"]
