@@ -6,6 +6,12 @@ class PipeWooden extends BCTransportPipe {
         super();
         TileEntity.registerPrototype(this.block.id, new WoodenPipeTileEntity(this.pipeRenderer, this.texture));
         EnergyTileRegistry.addEnergyTypeForId(this.block.id, RF);
+        Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords) => {
+            const tile = World.getTileEntity(coords.x, coords.y, coords.z);
+            // !remove before release
+            // if(!tile) return;
+            tile.updateConnectionSide();
+        });
     }
 
     public get material(): string {

@@ -14,7 +14,7 @@ class WoodenPipeTileEntity {
     public y: number;
     public z: number;
 
-    get orientation() {
+    get orientation(): number {
         if (!this.data.connectionSide) {
             this.data.connectionSide = this.getConnectionSide();
         }
@@ -37,8 +37,19 @@ class WoodenPipeTileEntity {
         this.updateConnectionSide();
     }
 
-    public updateConnectionSide(): void {
-        this.storageConnector.connectionSide = this.orientation = this.getConnectionSide();
+    // !TileEntity event
+    public destroy(){
+        this.storageConnector.destroy();
+    }
+
+    public click(id, count, data) {
+        if (id != ItemID.bc_wrench) return false;
+        this.updateConnectionSide(true);
+        return true;
+    }
+
+    public updateConnectionSide(findNext: boolean = false): void {
+        this.storageConnector.connectionSide = this.orientation = this.getConnectionSide(findNext);
     }
 
     /** @param findNext - use true value if you want to rerotate pipe like a wrench */
