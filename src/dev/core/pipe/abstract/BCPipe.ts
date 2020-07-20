@@ -2,7 +2,7 @@
 /// <reference path="../components/PipeTexture.ts" />
 /// <reference path="PipeConnector.ts" />
 abstract class BCPipe {
-    private block: PipeBlock;
+    protected block: PipeBlock;
     protected connector: PipeConnector;
     protected texture: PipeTexture;
     private renderer: PipeRenderer;

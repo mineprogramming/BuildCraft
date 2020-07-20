@@ -1,6 +1,13 @@
 /// <reference path="../abstract/BCTransportPipe.ts" />
 /// <reference path="WoodenPipeConnector.ts" />
+/// <reference path="WoodenPipeTileEntity.ts" />
 class PipeWooden extends BCTransportPipe {
+    constructor(){
+        super();
+        TileEntity.registerPrototype(this.block.id, new WoodenPipeTileEntity());
+        EnergyTileRegistry.addEnergyTypeForId(this.block.id, RF);
+    }
+
     public get material(): string {
         return "wood"
     }
