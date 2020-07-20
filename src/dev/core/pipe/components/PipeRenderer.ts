@@ -21,12 +21,12 @@ class PipeRenderer {
 
     public getBoxes(width: number): any[] {
         return [
-            {side: [1, 0, 0], box: [0.5 + width / 2, 0.5 - width / 2, 0.5 - width / 2, 1, 0.5 + width / 2, 0.5 + width / 2]},
-            {side: [-1, 0, 0], box: [0, 0.5 - width / 2, 0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2]},
-            {side: [0, 1, 0], box: [0.5 - width / 2, 0.5 + width / 2, 0.5 - width / 2, 0.5 + width / 2, 1, 0.5 + width / 2]},
-            {side: [0, -1, 0], box: [0.5 - width / 2, 0, 0.5 - width / 2, 0.5 + width / 2, 0.5 - width / 2, 0.5 + width / 2]},
-            {side: [0, 0, 1], box: [0.5 - width / 2, 0.5 - width / 2, 0.5 + width / 2, 0.5 + width / 2, 0.5 + width / 2, 1]},
-            {side: [0, 0, -1], box: [0.5 - width / 2, 0.5 - width / 2, 0, 0.5 + width / 2, 0.5 + width / 2, 0.5 - width / 2]},
+            {side: [0, -1, 0], box: [0.5 - width/2, 0, 0.5 - width/2, 0.5 + width/2, 0.5 - width/2, 0.5 + width/2]},
+            {side: [0, 1, 0], box: [0.5 - width/2, 0.5 + width/2, 0.5 - width/2, 0.5 + width/2, 1, 0.5 + width/2]},
+            {side: [0, 0, -1], box: [0.5 - width/2, 0.5 - width/2, 0, 0.5 + width/2, 0.5 + width/2, 0.5 - width/2]},
+            {side: [0, 0, 1], box: [0.5 - width/2, 0.5 - width/2, 0.5 + width/2, 0.5 + width/2, 0.5 + width/2, 1]},
+            {side: [-1, 0, 0], box: [0, 0.5 - width/2, 0.5 - width/2, 0.5 - width/2, 0.5 + width/2, 0.5 + width/2]},
+            {side: [1, 0, 0], box: [0.5 + width/2, 0.5 - width/2, 0.5 - width/2, 1, 0.5 + width/2, 0.5 + width/2]}
         ]
     }
 
@@ -50,14 +50,15 @@ class PipeRenderer {
                 }
             }
 
-            renderModel.addBox(box.box[0], box.box[1], box.box[2], box.box[3], box.box[4], box.box[5], texture.name, texture.data);
+            renderModel.addBox(box.box[0], box.box[1], box.box[2], box.box[3],
+                box.box[4], box.box[5], texture.name, texture.data);
             render.addEntry(renderModel).setCondition(condition);
         }
 
         // standart box
         const model = BlockRenderer.createModel();
-        const p0 = 0.5 - width / 2;
-        const p1 = 0.5 + width / 2;
+        const p0 = 0.5 - width/2;
+        const p1 = 0.5 + width/2;
         model.addBox(p0, p0, p0, p1, p1, p1, this.texture.block.name, this.texture.block.data);
         render.addEntry(model);
         return render;
