@@ -1,5 +1,8 @@
 /// <reference path="WoodenPipeStorageConnector.ts" />
 class WoodenPipeTileEntity {
+    constructor(protected renderer: PipeRenderer, protected texture: PipeTexture){
+
+    }
     // * it will be rewriten during runtime
     protected data: any = {}
 
@@ -27,12 +30,12 @@ class WoodenPipeTileEntity {
 
     // !TileEntity event
     public tick() {
-        Game.tipMessage("tick");
+        
     }
 
     // !TileEntity event
     public init() {
-        this.storageConnector = new WoodenPipeStorageConnector();
+        this.storageConnector = new WoodenPipeStorageConnector(this, this.renderer, this.texture);
         this.storageConnector.connectionSide = this.orientation = this.getConnectionSide();
         alert(this.orientation);
     }

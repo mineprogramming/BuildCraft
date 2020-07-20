@@ -15,6 +15,7 @@
         "no-empty": false,
         "no-string-literal": false,
         "radix": false,
+        "forin": false,
         "no-console": {
             "severity": "warning",
             "options": ["debug", "info", "log", "time", "timeEnd", "trace"]

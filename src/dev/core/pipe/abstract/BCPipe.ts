@@ -5,7 +5,7 @@ abstract class BCPipe {
     protected block: PipeBlock;
     protected connector: PipeConnector;
     protected texture: PipeTexture;
-    private renderer: PipeRenderer;
+    protected renderer: PipeRenderer;
 
     constructor(){
         this.block = new PipeBlock(this.material, this.transportType, this.pipeTexture);
