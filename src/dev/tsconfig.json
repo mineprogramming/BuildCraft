@@ -80,6 +80,7 @@
 		"core/pipe/item/stone/StonePipeConnector.ts",
 		"core/pipe/item/wooden/PipeWooden.ts",
 		"core/pipe/item/wooden/WoodenPipeConnector.ts",
+		"core/pipe/item/wooden/WoodenPipeStorageConnector.ts",
 		"core/pipe/item/wooden/WoodenPipeTileEntity.ts",
 		"item/gears.ts",
 		"item/wrench.ts"
