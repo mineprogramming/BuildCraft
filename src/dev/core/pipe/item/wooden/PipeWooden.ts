@@ -8,9 +8,7 @@ class PipeWooden extends BCTransportPipe {
         EnergyTileRegistry.addEnergyTypeForId(this.block.id, RF);
         Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords) => {
             const tile = World.getTileEntity(coords.x, coords.y, coords.z);
-            // !remove before release
-            // if(!tile) return;
-            tile.updateConnectionSide();
+            tile.storageConnector.renderConnections();
         });
     }
 

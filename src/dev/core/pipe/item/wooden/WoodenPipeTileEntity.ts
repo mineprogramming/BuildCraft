@@ -59,13 +59,14 @@ class WoodenPipeTileEntity {
         // * I think this code is poor, but maybe i fix it in future
         for (let t = 0; t < 12; t++) {
             const i = t % 6;
+
             if (findNext) {
                 if (this.orientation == t) findNext = false;
                 continue;
             }
+
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
-            const container = World.getContainer(relCoords.x, relCoords.y, relCoords.z);
-            if (container) return i;
+            if (this.storageConnector.canConnectTo(relCoords.x, relCoords.y, relCoords.z, i, 1)) return i;
         }
         // default value
         return null;

@@ -356,7 +356,7 @@ let StorageInterface = {
 		}
 		return slots;
 	},
-		
+
 	// use it in tick function of tile entity
 	// require storage interface for tile entity
 	checkHoppers: function(tile) {
