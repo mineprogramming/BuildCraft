@@ -1,11 +1,13 @@
 /// <reference path="WoodenPipeStorageConnector.ts" />
+/// <reference path="WoodenPipeItemEjector.ts" />
 class WoodenPipeTileEntity {
     constructor(protected renderer: PipeRenderer, protected texture: PipeTexture) { }
     // * it will be rewriten during runtime
     protected data: any = {}
 
     protected defaultValues: any = {// * it will be rewriten during runtime
-        connectionSide: null
+        connectionSide: null,
+        energy: 0
     }
 
     private storageConnector: WoodenPipeStorageConnector;
@@ -13,6 +15,8 @@ class WoodenPipeTileEntity {
     public x: number;
     public y: number;
     public z: number;
+
+    private ticksSincePull: number = 0;
 
     get orientation(): number {
         if (!this.data.connectionSide) {
@@ -28,6 +32,13 @@ class WoodenPipeTileEntity {
 
     // !TileEntity event
     public tick(): void {
+        /*
+        ? Oh, it looks like a client-server
+        if (container.getWorld().isRemote) {
+            return;
+        }
+        */
+        this.ticksSincePull++;
 
     }
 
@@ -38,14 +49,31 @@ class WoodenPipeTileEntity {
     }
 
     // !TileEntity event
-    public destroy(){
+    public destroy() {
         this.storageConnector.destroy();
     }
 
+    // !TileEntity event
     public click(id, count, data) {
         if (id != ItemID.bc_wrench) return false;
         this.updateConnectionSide(true);
         return true;
+    }
+
+    // !EnergyNet event
+    public energyReceive(type, amount, voltage): number {
+        const received = Math.min(amount, this.getMaxEnergyReceive());
+        this.data.energy += received;
+        Debug.m(`energy getted ${received}`);
+        return received;
+    }
+
+    public getMaxEnergyStored(): number {
+        return 2560;
+    }
+
+    public getMaxEnergyReceive(): number {
+        return 80;
     }
 
     public updateConnectionSide(findNext: boolean = false): void {
