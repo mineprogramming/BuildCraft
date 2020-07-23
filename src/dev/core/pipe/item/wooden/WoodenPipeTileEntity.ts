@@ -11,6 +11,7 @@ class WoodenPipeTileEntity {
     }
 
     private storageConnector: WoodenPipeStorageConnector;
+    private itemEjector: WoodenPipeItemEjector;
 
     public x: number;
     public y: number;
@@ -27,7 +28,7 @@ class WoodenPipeTileEntity {
 
     set orientation(value: number) {
         this.data.meta = value;
-        this.storageConnector.connectionSide = value;
+        this.itemEjector.connectionSide = value;
     }
 
     // !TileEntity event
@@ -45,6 +46,7 @@ class WoodenPipeTileEntity {
     // !TileEntity event
     public init(): void {
         this.storageConnector = new WoodenPipeStorageConnector(this, this.renderer, this.texture);
+        this.itemEjector = new WoodenPipeItemEjector();
         this.updateConnectionSide();
     }
 
@@ -74,6 +76,43 @@ class WoodenPipeTileEntity {
 
     public getMaxEnergyReceive(): number {
         return 80;
+    }
+
+    private shouldTick(): boolean {
+        if (this.ticksSincePull < 8) {
+            return false;
+        } else if (this.ticksSincePull < 16) {
+            // Check if we have just enough energy for the next stack.
+
+            if (this.data.connectionSide <= 5) {
+                // TODO write item getiing logic
+                /* EnumFacing side = EnumFacing.getFront(meta);
+                TileEntity tile = container.getTile(side);
+                IItemHandler handler = InvUtils.getItemHandler(tile, side.getOpposite());
+
+                if (handler != null) {
+                    int stackSize = 0;
+                    int maxItems = maxExtractable();
+                    int[] extracted = getExtractionTargets(handler, maxItems);
+                    if (extracted != null) {
+                        for (int s : extracted) {
+                            stackSize += handler.getStackInSlot(s).stackSize;
+                        }
+                    }
+
+                    stackSize = Math.min(maxItems, stackSize);
+
+                    if (battery.getEnergyStored() >= stackSize * 10) {
+                        return true;
+                    }
+                }*/
+            }
+        }
+        return this.ticksSincePull >= 16 && this.data.energy >= 10;
+    }
+
+    private maxExtractable(): number {
+        return this.data.energy / 10;
     }
 
     public updateConnectionSide(findNext: boolean = false): void {
