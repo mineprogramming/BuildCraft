@@ -41,12 +41,22 @@ class WoodenPipeTileEntity {
         */
         this.ticksSincePull++;
 
+        if (this.shouldTick()) {
+            /* if (transport.getNumberOfStacks() < PipeTransportItems.MAX_PIPE_STACKS) {
+                extractItems(maxExtractable());
+            }
+            */
+            this.data.energy = 0;
+            this.ticksSincePull = 0;
+            // speedMultiplier = 1.0F;
+
+        }
     }
 
     // !TileEntity event
     public init(): void {
         this.storageConnector = new WoodenPipeStorageConnector(this, this.renderer, this.texture);
-        this.itemEjector = new WoodenPipeItemEjector();
+        this.itemEjector = new WoodenPipeItemEjector(this.x, this.y, this.z);
         this.updateConnectionSide();
     }
 
