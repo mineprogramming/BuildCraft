@@ -19,16 +19,11 @@ class WoodenPipeTileEntity {
 
     private ticksSincePull: number = 0;
 
-    get orientation(): number {
-        if (!this.data.connectionSide) {
-            this.data.connectionSide = this.getConnectionSide();
-        }
-        return this.data.connectionSide;
-    }
-
-    set orientation(value: number) {
-        this.data.meta = value;
+    private changeOrientation(value: number) {
+        this.data.connectionSide = value;
+        this.storageConnector.connectionSide = value;
         this.itemEjector.connectionSide = value;
+        alert(`side updated ${value}`);
     }
 
     // !TileEntity event
@@ -69,6 +64,12 @@ class WoodenPipeTileEntity {
     public click(id, count, data) {
         if (id != ItemID.bc_wrench) return false;
         this.updateConnectionSide(true);
+        Debug.m(this.data.connectionSide);
+        var relCoords = World.getRelativeCoords(this.x, this.y, this.z, this.data.connectionSide);
+        var container = World.getContainer(relCoords.x, relCoords.y, relCoords.z);
+        // Debug.m(`type ${typeof()}`)
+        // this.itemEjector.getNumberOfStacks();
+        // Debug.m(this.x);
         return true;
     }
 
@@ -92,10 +93,9 @@ class WoodenPipeTileEntity {
         if (this.ticksSincePull < 8) {
             return false;
         } else if (this.ticksSincePull < 16) {
-            // Check if we have just enough energy for the next stack.
+            // !Check if we have just enough energy for the next stack.
 
             if (this.data.connectionSide <= 5) {
-                // TODO write item getiing logic
                 /* EnumFacing side = EnumFacing.getFront(meta);
                 TileEntity tile = container.getTile(side);
                 IItemHandler handler = InvUtils.getItemHandler(tile, side.getOpposite());
@@ -122,11 +122,14 @@ class WoodenPipeTileEntity {
     }
 
     private maxExtractable(): number {
-        return this.data.energy / 10;
+        return Math.floor(this.data.energy / 10);
     }
 
     public updateConnectionSide(findNext: boolean = false): void {
-        this.storageConnector.connectionSide = this.orientation = this.getConnectionSide(findNext);
+        Debug.m(this.data.connectionSide);
+        Debug.m(`update connection from ${this.data.connectionSide}  ${findNext}`);
+        this.changeOrientation(this.getConnectionSide(findNext));
+        Debug.m(`new ${this.data.connectionSide}`);
     }
 
     /** @param findNext - use true value if you want to rerotate pipe like a wrench */
@@ -138,7 +141,7 @@ class WoodenPipeTileEntity {
             const i = t % 6;
 
             if (findNext) {
-                if (this.orientation == t) findNext = false;
+                if (this.data.connectionSide == t) findNext = false;
                 continue;
             }
 
