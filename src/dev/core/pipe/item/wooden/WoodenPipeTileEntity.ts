@@ -23,7 +23,6 @@ class WoodenPipeTileEntity {
         this.data.connectionSide = value;
         this.storageConnector.connectionSide = value;
         this.itemEjector.connectionSide = value;
-        alert(`side updated ${value}`);
     }
 
     // !TileEntity event
@@ -39,7 +38,7 @@ class WoodenPipeTileEntity {
         if (this.shouldTick()) {
             /* if (transport.getNumberOfStacks() < PipeTransportItems.MAX_PIPE_STACKS) {
                 extractItems(maxExtractable());
-            }
+                }
             */
             this.data.energy = 0;
             this.ticksSincePull = 0;
@@ -64,12 +63,8 @@ class WoodenPipeTileEntity {
     public click(id, count, data) {
         if (id != ItemID.bc_wrench) return false;
         this.updateConnectionSide(true);
-        Debug.m(this.data.connectionSide);
-        var relCoords = World.getRelativeCoords(this.x, this.y, this.z, this.data.connectionSide);
-        var container = World.getContainer(relCoords.x, relCoords.y, relCoords.z);
-        // Debug.m(`type ${typeof()}`)
-        // this.itemEjector.getNumberOfStacks();
-        // Debug.m(this.x);
+        Debug.m(this.maxExtractable());
+        Debug.m(this.itemEjector.getExtractionTargetsCount(this.maxExtractable()));
         return true;
     }
 
@@ -77,8 +72,11 @@ class WoodenPipeTileEntity {
     public energyReceive(type, amount, voltage): number {
         const received = Math.min(amount, this.getMaxEnergyReceive());
         this.data.energy += received;
-        Debug.m(`energy getted ${received}`);
         return received;
+    }
+
+    public canConnectRedstoneEngine(): boolean {
+        return true
     }
 
     public getMaxEnergyStored(): number {
@@ -94,7 +92,6 @@ class WoodenPipeTileEntity {
             return false;
         } else if (this.ticksSincePull < 16) {
             // !Check if we have just enough energy for the next stack.
-
             if (this.data.connectionSide <= 5) {
                 /* EnumFacing side = EnumFacing.getFront(meta);
                 TileEntity tile = container.getTile(side);
@@ -126,10 +123,8 @@ class WoodenPipeTileEntity {
     }
 
     public updateConnectionSide(findNext: boolean = false): void {
-        Debug.m(this.data.connectionSide);
-        Debug.m(`update connection from ${this.data.connectionSide}  ${findNext}`);
-        this.changeOrientation(this.getConnectionSide(findNext));
-        Debug.m(`new ${this.data.connectionSide}`);
+        const side = this.getConnectionSide(findNext);
+        this.changeOrientation(side);
     }
 
     /** @param findNext - use true value if you want to rerotate pipe like a wrench */
@@ -141,12 +136,19 @@ class WoodenPipeTileEntity {
             const i = t % 6;
 
             if (findNext) {
-                if (this.data.connectionSide == t) findNext = false;
+
+                if (this.data.connectionSide == t) {
+                    findNext = false
+                }
+
                 continue;
             }
 
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
-            if (this.storageConnector.canConnectTo(relCoords.x, relCoords.y, relCoords.z, i, 1)) return i;
+
+            if (this.storageConnector.canConnectTo(relCoords.x, relCoords.y, relCoords.z, i, 1)) {
+                return i;
+            }
         }
         // default value
         return null;
