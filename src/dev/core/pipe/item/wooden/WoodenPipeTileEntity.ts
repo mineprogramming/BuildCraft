@@ -36,14 +36,20 @@ class WoodenPipeTileEntity {
         this.ticksSincePull++;
 
         if (this.shouldTick()) {
-            /* if (transport.getNumberOfStacks() < PipeTransportItems.MAX_PIPE_STACKS) {
-                extractItems(maxExtractable());
-                }
-            */
+            const maxExtractable = this.maxExtractable();
+            const targets = this.itemEjector.getExtractionTargetsCount(maxExtractable);
+            // ! DEBUG VALUE
+            const maxPipeStack = 16;
+
+            if (targets > 0) {
+                Debug.m(`extracted items ${ targets}`);
+                // ! EXTRACT
+                // this.itemEjector.extractItems(maxExtractable());
+            }
+
             this.data.energy = 0;
             this.ticksSincePull = 0;
             // speedMultiplier = 1.0F;
-
         }
     }
 
@@ -62,8 +68,8 @@ class WoodenPipeTileEntity {
     // !TileEntity event
     public click(id, count, data) {
         if (id != ItemID.bc_wrench) return false;
+
         this.updateConnectionSide(true);
-        Debug.m(this.maxExtractable());
         Debug.m(this.itemEjector.getExtractionTargetsCount(this.maxExtractable()));
         return true;
     }
@@ -93,26 +99,11 @@ class WoodenPipeTileEntity {
         } else if (this.ticksSincePull < 16) {
             // !Check if we have just enough energy for the next stack.
             if (this.data.connectionSide <= 5) {
-                /* EnumFacing side = EnumFacing.getFront(meta);
-                TileEntity tile = container.getTile(side);
-                IItemHandler handler = InvUtils.getItemHandler(tile, side.getOpposite());
+                const stackSize = this.itemEjector.getExtractionTargetsCount(this.maxExtractable());
 
-                if (handler != null) {
-                    int stackSize = 0;
-                    int maxItems = maxExtractable();
-                    int[] extracted = getExtractionTargets(handler, maxItems);
-                    if (extracted != null) {
-                        for (int s : extracted) {
-                            stackSize += handler.getStackInSlot(s).stackSize;
-                        }
-                    }
-
-                    stackSize = Math.min(maxItems, stackSize);
-
-                    if (battery.getEnergyStored() >= stackSize * 10) {
-                        return true;
-                    }
-                }*/
+                if (this.data.energy >= stackSize * 10) {
+                    return true;
+                }
             }
         }
         return this.ticksSincePull >= 16 && this.data.energy >= 10;
