@@ -6,10 +6,18 @@ class PipeWooden extends BCTransportPipe {
         super();
         TileEntity.registerPrototype(this.block.id, new WoodenPipeTileEntity(this.pipeRenderer, this.texture));
         EnergyTileRegistry.addEnergyTypeForId(this.block.id, RF);
+
         Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords) => {
             const tile = World.getTileEntity(coords.x, coords.y, coords.z);
             if (tile.storageConnector) {
                 tile.updateConnectionSide();
+            }
+        });
+
+        StorageInterface.createInterface(BlockID.pipeItemWooden, {
+            addItem(item, side, maxCount) {
+                // * just transports items to void
+                return item.count;
             }
         });
     }
