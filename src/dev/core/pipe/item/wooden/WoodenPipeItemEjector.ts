@@ -31,9 +31,9 @@ class WoodenPipeItemEjector {
     }
 
     public extractItems(count: number): void {
-        const pipeContainer = World.getContainer(this.x, this.y, this.z);
+        const pipeTile = World.getTileEntity(this.x, this.y, this.z);
         const side = World.getInverseBlockSide(this.side);
-        StorageInterface.extractItemsFromContainer(pipeContainer, this.container, side, count, true);
+        StorageInterface.extractItemsFromContainer(pipeTile, this.container.source, side, count, true);
     }
 
     public set connectionSide(value: number | null) {

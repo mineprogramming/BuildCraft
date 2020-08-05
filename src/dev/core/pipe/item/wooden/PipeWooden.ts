@@ -17,8 +17,9 @@ class PipeWooden extends BCTransportPipe {
         StorageInterface.createInterface(this.block.id, {
             addItem(item, side, maxCount) {
                 // * just transports items to void
-                Debug.m(`items getted ${item.count}`);
-                return item.count;
+                Debug.m(`items getted in addItem ${maxCount}`);
+                item.count -= maxCount;
+                return maxCount;
             }
         });
     }
