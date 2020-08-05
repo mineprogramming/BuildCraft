@@ -44,7 +44,7 @@ class WoodenPipeTileEntity {
             if (targets > 0) {
                 Debug.m(`extracted items ${ targets}`);
                 // ! EXTRACT
-                // this.itemEjector.extractItems(maxExtractable());
+                this.itemEjector.extractItems(this.maxExtractable());
             }
 
             this.data.energy = 0;

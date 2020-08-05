@@ -30,16 +30,10 @@ class WoodenPipeItemEjector {
         return count;
     }
 
-    public getContainerItems() {
-
-    }
-
-    public getNumberOfStacks() {
-
-    }
-
-    public injectItem() {
-
+    public extractItems(count: number): void {
+        const pipeContainer = World.getContainer(this.x, this.y, this.z);
+        const side = World.getInverseBlockSide(this.side);
+        StorageInterface.extractItemsFromContainer(pipeContainer, this.container, side, count, true);
     }
 
     public set connectionSide(value: number | null) {
