@@ -65,8 +65,6 @@
 		"core/pipe/components/PipeBlock.ts",
 		"core/pipe/components/PipeRenderer.ts",
 		"core/pipe/components/PipeTexture.ts",
-		"core/pipe/components/TravelerSet.ts",
-		"core/pipe/components/TravelingItem.ts",
 		"core/pipe/item/abstract",
 		"core/pipe/item/cobble",
 		"core/pipe/item/gold",

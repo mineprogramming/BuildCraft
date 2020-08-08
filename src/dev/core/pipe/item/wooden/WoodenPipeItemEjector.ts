@@ -1,7 +1,5 @@
-/// <reference path="../../components/TravelerSet.ts" />
 class WoodenPipeItemEjector {
     private side: number | null;
-    private items: TravelerSet = new TravelerSet(this);
     private container: { source, slots } | null;
     constructor(public readonly x: number, public readonly y: number, public readonly z: number) { }
 
