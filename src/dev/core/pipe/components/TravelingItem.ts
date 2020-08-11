@@ -5,11 +5,11 @@ type ItemSource = {
 }
 
 class TravelingItem {
-    //! its just a Updatable flag
+    // ! its just a Updatable flag
     public remove: boolean = false;
     public static saverId = Saver.registerObjectSaver("TravelingItemSaver", {
-        save: function(travelingItem) {
-            Debug.m(`im saved!`);
+        save(travelingItem) {
+            alert(`im saved!`);
             return {
                 coords: travelingItem.coords,
                 moveVector: travelingItem.moveVector,
@@ -18,35 +18,26 @@ class TravelingItem {
             }
         },
 
-        read: function(scope) {
-            Debug.m(`im readed!`);
-            const {x, y, z} = scope.coords;
-            const item = new TravelingItem(x, y, z, scope.item);
+        read(scope) {
+            alert(`im readed!`);
+            const item = new TravelingItem(scope.coords, scope.item);
             item.moveVector = scope.moveVector;
             item.moveSpeed = scope.moveSpeed;
-            Updatable.addUpdatable(item);
             return item
         }
     });
 
-    private coords: Vector;
     public moveVector: Vector;
     public moveSpeed: number = 0;
-    constructor(x: number, y: number, z: number, private item: ItemSource) {
-        this.coords = {
-            x: x,
-            y: y,
-            z: z
-        }
+    constructor(private coords: Vector, private item: ItemSource) {
         Saver.registerObject(this, TravelingItem.saverId);
         Updatable.addUpdatable(this);
-        Debug.m(`item created on coords`);
-        Debug.m(this.coords);
+        alert(`item created on coords ${item.id}`);
     }
 
     // * We need this to pass this["update"] existing
     public update = () => {
-        Debug.m(`update of ${this.item.id}`);
+        alert(`update of ${this.item.id}`);
         if (!this.isInsideBlock()) {
             this.drop();
             return;
@@ -62,14 +53,16 @@ class TravelingItem {
     }
 
     private isInsideBlock(): boolean {
+        const {x, y, z} = this.coords;
+        alert(`checking block on coords ${x} ${y} ${z}`);
         return World.getBlockID(this.coords.x, this.coords.y, this.coords.z) != 0;
     }
 
     private drop() {
-        Debug.m(`item was dropped`);
+        alert(`item was dropped`);
         this.remove = true;
     }
 }
 Callback.addCallback("ItemUse", (coords, item, block) => {
-    new TravelingItem(coords.x, coords.y, coords.z, item);
+    const travelItem = new TravelingItem(coords, item);
 });
