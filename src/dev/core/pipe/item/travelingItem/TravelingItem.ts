@@ -29,7 +29,13 @@ class TravelingItem {
 
     public moveVector: Vector;
     public moveSpeed: number = 0;
-    constructor(private coords: Vector, private item: ItemSource) {
+    private coords: Vector;
+    constructor(coords: Vector, private item: ItemSource) {
+        this.coords = {
+            x: coords.x,
+            y: coords.y,
+            z: coords.z
+        };
         Saver.registerObject(this, TravelingItem.saverId);
         Updatable.addUpdatable(this);
         alert(`item created on coords ${item.id}`);
@@ -37,6 +43,8 @@ class TravelingItem {
 
     // * We need this to pass this["update"] existing
     public update = () => {
+        if (World.getThreadTime() % 40 == 0) this.debug();
+
         alert(`update of ${this.item.id}`);
         if (!this.isInsideBlock()) {
             this.drop();
@@ -61,6 +69,10 @@ class TravelingItem {
     private drop() {
         alert(`item was dropped`);
         this.remove = true;
+    }
+
+    private debug() {
+        Debug.m(`${this.item.id} on coords ${JSON.stringify(this.coords)}`);
     }
 }
 Callback.addCallback("ItemUse", (coords, item, block) => {
