@@ -1,12 +1,13 @@
+/// <reference path="TravelingItemAnimation.ts" />
 type ItemSource = {
     id: number
     count: number
     data: number
 }
-
 class TravelingItem {
     // ! its just a Updatable flag
     public remove: boolean = false;
+    private readonly itemAnimation: TravelingItemAnimation;
     public static saverId = Saver.registerObjectSaver("TravelingItemSaver", {
         save(travelingItem) {
             alert(`im saved!`);
@@ -32,10 +33,12 @@ class TravelingItem {
     private coords: Vector;
     constructor(coords: Vector, private item: ItemSource) {
         this.coords = {
-            x: coords.x,
-            y: coords.y,
-            z: coords.z
+            x: Math.floor(coords.x),
+            y: Math.floor(coords.y),
+            z: Math.floor(coords.z)
         };
+        this.itemAnimation = new TravelingItemAnimation(this.coords, item.id);
+
         Saver.registerObject(this, TravelingItem.saverId);
         Updatable.addUpdatable(this);
         alert(`item created on coords ${item.id}`);
@@ -46,14 +49,14 @@ class TravelingItem {
         if (World.getThreadTime() % 40 == 0) this.debug();
 
         alert(`update of ${this.item.id}`);
-        if (!this.isInsideBlock()) {
+        /*if (!this.isInsideBlock()) {
             this.drop();
             return;
-        }
+        }*/
         this.move();
     }
 
-    private move() {
+    private move(): void {
         if (!(this.moveVector && this.moveSpeed)) return;
         this.coords.x += this.moveVector.x * this.moveSpeed;
         this.coords.y += this.moveVector.y * this.moveSpeed;
@@ -63,18 +66,31 @@ class TravelingItem {
     private isInsideBlock(): boolean {
         const {x, y, z} = this.coords;
         alert(`checking block on coords ${x} ${y} ${z}`);
-        return World.getBlockID(this.coords.x, this.coords.y, this.coords.z) != 0;
+        const isChunkLoaded = World.isChunkLoadedAt(x, y, z);
+        const blockID = World.getBlockID(this.coords.x, this.coords.y, this.coords.z)
+        return !isChunkLoaded || blockID != 0;
     }
 
-    private drop() {
+    private drop(): void {
         alert(`item was dropped`);
         this.remove = true;
     }
 
-    private debug() {
+    private debug(): void {
         Debug.m(`${this.item.id} on coords ${JSON.stringify(this.coords)}`);
     }
 }
 Callback.addCallback("ItemUse", (coords, item, block) => {
-    const travelItem = new TravelingItem(coords, item);
+    const crds = Entity.getPosition(Player.get());
+    const travelItem = new TravelingItem(crds, item);
+    /* const ani = new Animation.Item(coords.x, coords.y + 2, coords.z);
+    ani.describe({
+        id: item.id,
+        count: 1,
+        data: 0,
+        size: 10,
+        rotation: [0,0,0],
+        notRandomize: true
+   });
+   ani.load();*/
 });
