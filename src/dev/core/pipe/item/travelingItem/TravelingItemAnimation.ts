@@ -8,11 +8,11 @@ class TravelingItemAnimation {
     }
 
     private describe(numberId: number): void {
-        this.animation.describe({
+        this.animation.describeItem({
             id: numberId,
             count: 1,
             data: 0,
-            size: 100
+            size: 1
        });
     }
 

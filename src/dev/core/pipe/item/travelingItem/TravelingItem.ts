@@ -83,14 +83,4 @@ class TravelingItem {
 Callback.addCallback("ItemUse", (coords, item, block) => {
     const crds = Entity.getPosition(Player.get());
     const travelItem = new TravelingItem(crds, item);
-    /* const ani = new Animation.Item(coords.x, coords.y + 2, coords.z);
-    ani.describe({
-        id: item.id,
-        count: 1,
-        data: 0,
-        size: 10,
-        rotation: [0,0,0],
-        notRandomize: true
-   });
-   ani.load();*/
 });
