@@ -25,7 +25,7 @@ class TravelingItem {
             item.moveVector = scope.moveVector;
             item.moveSpeed = scope.moveSpeed;
             return item;
-        },
+        }
     });
 
     public moveVector: Vector;
