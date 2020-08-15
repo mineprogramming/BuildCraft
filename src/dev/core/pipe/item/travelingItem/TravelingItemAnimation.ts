@@ -2,9 +2,9 @@ class TravelingItemAnimation {
     private readonly animation: any;
     constructor(coords: Vector, id: number) {
         this.animation = new Animation.Item(
-            coords.x + 0.5,
-            coords.y + 0.5,
-            coords.z + 0.5
+            coords.x,
+            coords.y,
+            coords.z
         );
         this.describe(id);
         this.animation.load();
@@ -20,8 +20,8 @@ class TravelingItemAnimation {
         });
     }
 
-    public updateCoords(x: number, y: number, z: number): void {
-        this.animation.setPos(x, y, z);
+    public updateCoords(coords: Vector): void {
+        this.animation.setPos(coords.x, coords.y, coords.z);
     }
 
     public destroy(): void {

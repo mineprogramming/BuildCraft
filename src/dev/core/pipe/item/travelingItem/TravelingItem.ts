@@ -33,9 +33,9 @@ class TravelingItem {
     private coords: Vector;
     constructor(coords: Vector, private item: ItemSource) {
         this.coords = {
-            x: Math.floor(coords.x),
-            y: Math.floor(coords.y),
-            z: Math.floor(coords.z)
+            x: coords.x,
+            y: coords.y,
+            z: coords.z
         };
         this.itemAnimation = new TravelingItemAnimation(coords, item.id);
 
@@ -58,9 +58,11 @@ class TravelingItem {
 
     private move(): void {
         if (!(this.moveVector && this.moveSpeed)) return;
+        // if (World.getThreadTime() % 40 == 0) alert("moving");
         this.coords.x += this.moveVector.x * this.moveSpeed;
         this.coords.y += this.moveVector.y * this.moveSpeed;
         this.coords.z += this.moveVector.z * this.moveSpeed;
+        this.itemAnimation.updateCoords(this.coords);
     }
 
     private isInsideBlock(): boolean {
