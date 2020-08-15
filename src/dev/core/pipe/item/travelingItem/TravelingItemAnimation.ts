@@ -1,10 +1,14 @@
 class TravelingItemAnimation {
     private readonly animation: any;
     constructor(coords: Vector, id: number) {
-        this.animation = new Animation.Item(coords.x, coords.y + 1, coords.z);
+        this.animation = new Animation.Item(
+            coords.x + 0.5,
+            coords.y + 0.5,
+            coords.z + 0.5
+        );
         this.describe(id);
         this.animation.load();
-        alert(`animation loaded!`);
+        alert(`animation loaded for ${id}!`);
     }
 
     private describe(numberId: number): void {
@@ -12,11 +16,15 @@ class TravelingItemAnimation {
             id: numberId,
             count: 1,
             data: 0,
-            size: 1
-       });
+            size: 0.3,
+        });
     }
 
     public updateCoords(x: number, y: number, z: number): void {
         this.animation.setPos(x, y, z);
+    }
+
+    public destroy(): void {
+        this.animation.destroy();
     }
 }

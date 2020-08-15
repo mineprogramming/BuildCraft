@@ -1,9 +1,9 @@
 /// <reference path="TravelingItemAnimation.ts" />
 type ItemSource = {
-    id: number
-    count: number
-    data: number
-}
+    id: number;
+    count: number;
+    data: number;
+};
 class TravelingItem {
     // ! its just a Updatable flag
     public remove: boolean = false;
@@ -16,7 +16,7 @@ class TravelingItem {
                 moveVector: travelingItem.moveVector,
                 moveSpeed: travelingItem.moveSpeed,
                 item: travelingItem.item
-            }
+            };
         },
 
         read(scope) {
@@ -24,8 +24,8 @@ class TravelingItem {
             const item = new TravelingItem(scope.coords, scope.item);
             item.moveVector = scope.moveVector;
             item.moveSpeed = scope.moveSpeed;
-            return item
-        }
+            return item;
+        },
     });
 
     public moveVector: Vector;
@@ -37,24 +37,24 @@ class TravelingItem {
             y: Math.floor(coords.y),
             z: Math.floor(coords.z)
         };
-        this.itemAnimation = new TravelingItemAnimation(this.coords, item.id);
+        this.itemAnimation = new TravelingItemAnimation(coords, item.id);
 
         Saver.registerObject(this, TravelingItem.saverId);
         Updatable.addUpdatable(this);
-        alert(`item created on coords ${item.id}`);
+        alert(`item ${item.id} created`);
     }
 
     // * We need this to pass this["update"] existing
     public update = () => {
         if (World.getThreadTime() % 40 == 0) this.debug();
 
-        alert(`update of ${this.item.id}`);
-        /*if (!this.isInsideBlock()) {
-            this.drop();
+        // alert(`update of ${this.item.id}`);
+        if (!this.isInsideBlock()) {
+            this.destroy();
             return;
-        }*/
+        }
         this.move();
-    }
+    };
 
     private move(): void {
         if (!(this.moveVector && this.moveSpeed)) return;
@@ -64,23 +64,28 @@ class TravelingItem {
     }
 
     private isInsideBlock(): boolean {
-        const {x, y, z} = this.coords;
-        alert(`checking block on coords ${x} ${y} ${z}`);
+        const { x, y, z } = this.coords;
+        // alert(`checking block on coords ${x} ${y} ${z}`);
         const isChunkLoaded = World.isChunkLoadedAt(x, y, z);
-        const blockID = World.getBlockID(this.coords.x, this.coords.y, this.coords.z)
+        const blockID = World.getBlockID(
+            this.coords.x,
+            this.coords.y,
+            this.coords.z
+        );
         return !isChunkLoaded || blockID != 0;
+    }
+
+    private destroy(): void {
+        this.drop();
+        this.itemAnimation.destroy();
+        this.remove = true;
     }
 
     private drop(): void {
         alert(`item was dropped`);
-        this.remove = true;
     }
 
     private debug(): void {
         Debug.m(`${this.item.id} on coords ${JSON.stringify(this.coords)}`);
     }
 }
-Callback.addCallback("ItemUse", (coords, item, block) => {
-    const crds = Entity.getPosition(Player.get());
-    const travelItem = new TravelingItem(crds, item);
-});
