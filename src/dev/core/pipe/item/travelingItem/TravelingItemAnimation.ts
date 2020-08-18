@@ -1,21 +1,18 @@
 class TravelingItemAnimation {
     private readonly animation: any;
-    constructor(coords: Vector, id: number) {
-        this.animation = new Animation.Item(
-            coords.x,
-            coords.y,
-            coords.z
-        );
-        this.describe(id);
+    constructor(coords: Vector, item: ItemSource) {
+        this.animation = new Animation.Item(coords.x, coords.y, coords.z);
+        this.describe(item);
         this.animation.load();
-        alert(`animation loaded for ${id}!`);
+        alert(`animation loaded for ${item.id}!`);
     }
 
-    private describe(numberId: number): void {
+    private describe(item: ItemSource): void {
         this.animation.describeItem({
-            id: numberId,
-            count: 1,
-            data: 0,
+            id: item.id,
+            count: item.count,
+            data: item.data,
+            notRandomize: true,
             size: 0.3,
         });
     }

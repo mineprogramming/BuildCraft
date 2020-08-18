@@ -15,7 +15,7 @@ class TravelingItem {
                 coords: travelingItem.coords,
                 moveVector: travelingItem.moveVector,
                 moveSpeed: travelingItem.moveSpeed,
-                item: travelingItem.item
+                item: travelingItem.item,
             };
         },
 
@@ -25,7 +25,7 @@ class TravelingItem {
             item.moveVector = scope.moveVector;
             item.moveSpeed = scope.moveSpeed;
             return item;
-        }
+        },
     });
 
     public moveVector: Vector;
@@ -35,9 +35,9 @@ class TravelingItem {
         this.coords = {
             x: coords.x,
             y: coords.y,
-            z: coords.z
+            z: coords.z,
         };
-        this.itemAnimation = new TravelingItemAnimation(coords, item.id);
+        this.itemAnimation = new TravelingItemAnimation(coords, item);
 
         Saver.registerObject(this, TravelingItem.saverId);
         Updatable.addUpdatable(this);
@@ -84,6 +84,14 @@ class TravelingItem {
     }
 
     private drop(): void {
+        World.drop(
+            this.coords.x,
+            this.coords.y,
+            this.coords.z,
+            this.item.id,
+            this.item.count,
+            this.item.data
+        );
         alert(`item was dropped`);
     }
 
