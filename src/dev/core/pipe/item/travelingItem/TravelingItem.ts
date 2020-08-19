@@ -32,11 +32,7 @@ class TravelingItem {
     public moveSpeed: number = 0;
     private coords: Vector;
     constructor(coords: Vector, private item: ItemSource) {
-        this.coords = {
-            x: coords.x,
-            y: coords.y,
-            z: coords.z,
-        };
+        this.coords = this.coordsToFixed(coords);
         this.itemAnimation = new TravelingItemAnimation(coords, item);
 
         Saver.registerObject(this, TravelingItem.saverId);
@@ -59,10 +55,31 @@ class TravelingItem {
     private move(): void {
         if (!(this.moveVector && this.moveSpeed)) return;
         // if (World.getThreadTime() % 40 == 0) alert("moving");
-        this.coords.x += this.moveVector.x * this.moveSpeed;
-        this.coords.y += this.moveVector.y * this.moveSpeed;
-        this.coords.z += this.moveVector.z * this.moveSpeed;
+        const newCoords = {
+            x: this.coords.x + this.moveVector.x * this.moveSpeed,
+            y: this.coords.y + this.moveVector.y * this.moveSpeed,
+            z: this.coords.z + this.moveVector.z * this.moveSpeed
+        }
+        // this.coords.x += this.moveVector.x * this.moveSpeed;
+        // this.coords.y += this.moveVector.y * this.moveSpeed;
+        // this.coords.z += this.moveVector.z * this.moveSpeed;
+        this.coords = this.coordsToFixed(newCoords);
         this.itemAnimation.updateCoords(this.coords);
+    }
+
+    private coordsToFixed(coords: Vector): Vector {
+        return {
+            x: Math.floor(coords.x * 1000) / 1000,
+            y: Math.floor(coords.y * 1000) / 1000,
+            z: Math.floor(coords.z * 1000) / 1000,
+        }
+    }
+
+    private isInCoordsCenter(coords: Vector): boolean {
+        const isInCenterByX = coords.x % .5 == 0 && coords.x % 1 != 0;
+        const isInCenterByY = coords.y % .5 == 0 && coords.y % 1 != 0;
+        const isInCenterByZ = coords.z % .5 == 0 && coords.z % 1 != 0;
+        return isInCenterByX && isInCenterByY && isInCenterByZ;
     }
 
     private isInsideBlock(): boolean {
