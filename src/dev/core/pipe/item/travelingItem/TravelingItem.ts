@@ -1,4 +1,5 @@
 /// <reference path="TravelingItemAnimation.ts" />
+/// <reference path="../../components/PipeIdMap.ts" />
 type ItemSource = {
     id: number;
     count: number;
@@ -54,15 +55,12 @@ class TravelingItem {
 
     private move(): void {
         if (!(this.moveVector && this.moveSpeed)) return;
-        // if (World.getThreadTime() % 40 == 0) alert("moving");
+
         const newCoords = {
             x: this.coords.x + this.moveVector.x * this.moveSpeed,
             y: this.coords.y + this.moveVector.y * this.moveSpeed,
             z: this.coords.z + this.moveVector.z * this.moveSpeed
         }
-        // this.coords.x += this.moveVector.x * this.moveSpeed;
-        // this.coords.y += this.moveVector.y * this.moveSpeed;
-        // this.coords.z += this.moveVector.z * this.moveSpeed;
         this.coords = this.coordsToFixed(newCoords);
         this.itemAnimation.updateCoords(this.coords);
     }
@@ -73,6 +71,11 @@ class TravelingItem {
             y: Math.floor(coords.y * 1000) / 1000,
             z: Math.floor(coords.z * 1000) / 1000,
         }
+    }
+
+    private getBlockClass(): BCPipe | null{
+        const blockID = World.getBlockID(this.coords.x, this.coords.y, this.coords.z);
+        return PipeIdMap.getClassById(blockID);
     }
 
     private isInCoordsCenter(coords: Vector): boolean {

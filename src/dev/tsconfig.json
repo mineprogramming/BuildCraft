@@ -63,6 +63,7 @@
 		"core/pipe/abstract/BCPipe.ts",
 		"core/pipe/abstract/PipeConnector.ts",
 		"core/pipe/components/PipeBlock.ts",
+		"core/pipe/components/PipeIdMap.ts",
 		"core/pipe/components/PipeRenderer.ts",
 		"core/pipe/components/PipeTexture.ts",
 		"core/pipe/item/abstract",

@@ -1,5 +1,6 @@
 /// <reference path="../components/PipeBlock.ts" />
 /// <reference path="../components/PipeTexture.ts" />
+/// <reference path="../components/PipeIdMap.ts" />
 /// <reference path="PipeConnector.ts" />
 abstract class BCPipe {
     protected block: PipeBlock;
@@ -12,6 +13,7 @@ abstract class BCPipe {
         this.renderer = new PipeRenderer(this.pipeConnector, this.pipeTexture, this.renderGroups.main);
         this.registerBlockToGroup();
         this.renderer.enableRender(this.block.id, 0);
+        PipeIdMap.assignIdAsClass(this.block.id, this);
     }
 
     protected registerBlockToGroup(): void {
