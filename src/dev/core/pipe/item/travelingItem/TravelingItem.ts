@@ -51,7 +51,8 @@ class TravelingItem {
             return;
         }
         this.move();
-    };
+        this.checkMoveVectorChange();
+    }
 
     private move(): void {
         if (!(this.moveVector && this.moveSpeed)) return;
@@ -59,8 +60,8 @@ class TravelingItem {
         const newCoords = {
             x: this.coords.x + this.moveVector.x * this.moveSpeed,
             y: this.coords.y + this.moveVector.y * this.moveSpeed,
-            z: this.coords.z + this.moveVector.z * this.moveSpeed
-        }
+            z: this.coords.z + this.moveVector.z * this.moveSpeed,
+        };
         this.coords = this.coordsToFixed(newCoords);
         this.itemAnimation.updateCoords(this.coords);
     }
@@ -70,18 +71,34 @@ class TravelingItem {
             x: Math.floor(coords.x * 1000) / 1000,
             y: Math.floor(coords.y * 1000) / 1000,
             z: Math.floor(coords.z * 1000) / 1000,
-        }
+        };
     }
 
-    private getBlockClass(): BCPipe | null{
-        const blockID = World.getBlockID(this.coords.x, this.coords.y, this.coords.z);
+    private checkMoveVectorChange(): void {
+        if (!this.isInsideBlock()) return;
+
+        this.moveVector = this.findNewMoveVector();
+    }
+
+    private findNewMoveVector(): Vector {
+        const vctr = this.moveVector;
+        // TODO make this sht
+        return vctr;
+    }
+
+    private getBlockClass(): BCPipe | null {
+        const blockID = World.getBlockID(
+            this.coords.x,
+            this.coords.y,
+            this.coords.z
+        );
         return PipeIdMap.getClassById(blockID);
     }
 
     private isInCoordsCenter(coords: Vector): boolean {
-        const isInCenterByX = coords.x % .5 == 0 && coords.x % 1 != 0;
-        const isInCenterByY = coords.y % .5 == 0 && coords.y % 1 != 0;
-        const isInCenterByZ = coords.z % .5 == 0 && coords.z % 1 != 0;
+        const isInCenterByX = coords.x % 0.5 == 0 && coords.x % 1 != 0;
+        const isInCenterByY = coords.y % 0.5 == 0 && coords.y % 1 != 0;
+        const isInCenterByZ = coords.z % 0.5 == 0 && coords.z % 1 != 0;
         return isInCenterByX && isInCenterByY && isInCenterByZ;
     }
 
