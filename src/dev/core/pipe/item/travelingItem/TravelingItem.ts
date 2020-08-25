@@ -14,7 +14,8 @@ class TravelingItem {
             alert(`im saved!`);
             return {
                 coords: travelingItem.coords,
-                moveVector: travelingItem.moveVector,
+                // moveVector: travelingItem.moveVector,
+                moveIndex: travelingItem.moveIndex,
                 moveSpeed: travelingItem.moveSpeed,
                 item: travelingItem.item,
             };
@@ -23,13 +24,14 @@ class TravelingItem {
         read(scope) {
             alert(`im readed!`);
             const item = new TravelingItem(scope.coords, scope.item);
-            item.moveVector = scope.moveVector;
+            // item.moveVector = scope.moveVector;
             item.moveSpeed = scope.moveSpeed;
+            item.moveVectorIndex = scope.moveIndex
             return item;
         },
     });
 
-    public moveVector: Vector;
+    public moveVectorIndex: number = null;
     public moveSpeed: number = 0;
     private coords: Vector;
     constructor(coords: Vector, private item: ItemSource) {
@@ -50,18 +52,21 @@ class TravelingItem {
             this.destroy();
             return;
         }
+
         this.move();
         this.checkMoveVectorChange();
     }
 
     private move(): void {
-        if (!(this.moveVector && this.moveSpeed)) return;
+        const moveVector = this.getVectorBySide(this.moveVectorIndex);
+        if (this.moveSpeed <= 0 || this.moveVectorIndex == null) return;
 
         const newCoords = {
-            x: this.coords.x + this.moveVector.x * this.moveSpeed,
-            y: this.coords.y + this.moveVector.y * this.moveSpeed,
-            z: this.coords.z + this.moveVector.z * this.moveSpeed,
+            x: this.coords.x + moveVector.x * this.moveSpeed,
+            y: this.coords.y + moveVector.y * this.moveSpeed,
+            z: this.coords.z + moveVector.z * this.moveSpeed,
         };
+
         this.coords = this.coordsToFixed(newCoords);
         this.itemAnimation.updateCoords(this.coords);
     }
@@ -77,14 +82,33 @@ class TravelingItem {
     private checkMoveVectorChange(): void {
         if (!this.isInsideBlock()) return;
 
-        this.moveVector = this.findNewMoveVector();
+        this.moveVectorIndex = this.findNewMoveVector();
     }
 
-    private findNewMoveVector(): Vector {
-        const vctr = this.moveVector;
+    private findNewMoveVector(): number {
+        const vctr = this.moveVectorIndex;
         // TODO make this sht
         return vctr;
     }
+
+    // *Heh-heh cunning Nikolai won
+    private getVectorBySide(side: number): Vector {
+        return World.getRelativeCoords(0, 0, 0, side);
+    }
+
+    private getNearbyPipes(): {} {
+        const pipes = {};
+        for (let i = 0; i < 6; i++) {
+            const {x, y, z} = World.getRelativeCoords(this.coords.x, this.coords.y, this.coords.z, i);
+            const pipeID = World.getBlockID(x, y, z);
+            const cls = PipeIdMap.getClassById(pipeID);
+            if (i != this.moveVectorIndex && cls != null) {
+                pipes[i] = cls;
+            }
+        }
+        return pipes
+    }
+
 
     private getBlockClass(): BCPipe | null {
         const blockID = World.getBlockID(
