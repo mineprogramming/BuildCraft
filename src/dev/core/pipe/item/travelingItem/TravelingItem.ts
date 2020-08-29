@@ -18,6 +18,7 @@ class TravelingItem {
                 moveIndex: travelingItem.moveIndex,
                 moveSpeed: travelingItem.moveSpeed,
                 item: travelingItem.item,
+                timeBeforChange: travelingItem.timeBeforeVectorChange
             };
         },
 
@@ -26,7 +27,8 @@ class TravelingItem {
             const item = new TravelingItem(scope.coords, scope.item);
             // item.moveVector = scope.moveVector;
             item.moveSpeed = scope.moveSpeed;
-            item.moveVectorIndex = scope.moveIndex
+            item.moveVectorIndex = scope.moveIndex;
+            item.timeBeforeVectorChange = scope.timeBeforChange;
             return item;
         },
     });
@@ -34,6 +36,7 @@ class TravelingItem {
     public moveVectorIndex: number = null;
     public moveSpeed: number = 0;
     private coords: Vector;
+    private timeBeforeVectorChange = 40;
     constructor(coords: Vector, private item: ItemSource) {
         this.coords = this.coordsToFixed(coords);
         this.itemAnimation = new TravelingItemAnimation(coords, item);
@@ -69,6 +72,8 @@ class TravelingItem {
 
         this.coords = this.coordsToFixed(newCoords);
         this.itemAnimation.updateCoords(this.coords);
+
+        this.checkMoveVectorChange();
     }
 
     private coordsToFixed(coords: Vector): Vector {
@@ -80,15 +85,34 @@ class TravelingItem {
     }
 
     private checkMoveVectorChange(): void {
+        if (this.timeBeforeVectorChange > 0) {
+            this.timeBeforeVectorChange--;
+            return;
+        }
+
         if (!this.isInsideBlock()) return;
 
         this.moveVectorIndex = this.findNewMoveVector();
+        this.timeBeforeVectorChange = 40;
     }
 
+    // TODO make this sht
     private findNewMoveVector(): number {
-        const vctr = this.moveVectorIndex;
-        // TODO make this sht
+        Debug.m(`finding new Vector`);
+        let vctr = this.moveVectorIndex;
+        const nextPipes = this.getNearbyPipes();
+        const keys = Object.keys(nextPipes);
+
+        if (keys.length > 0) {
+            const keyIndex = this.random(keys.length);
+            vctr = parseInt(keys[keyIndex]);
+        }
+
         return vctr;
+    }
+
+    private random(max: number): number {
+        return Math.floor(Math.random() * max);
     }
 
     // *Heh-heh cunning Nikolai won
@@ -96,13 +120,14 @@ class TravelingItem {
         return World.getRelativeCoords(0, 0, 0, side);
     }
 
-    private getNearbyPipes(): {} {
+    private getNearbyPipes(): object {
         const pipes = {};
         for (let i = 0; i < 6; i++) {
             const {x, y, z} = World.getRelativeCoords(this.coords.x, this.coords.y, this.coords.z, i);
             const pipeID = World.getBlockID(x, y, z);
             const cls = PipeIdMap.getClassById(pipeID);
-            if (i != this.moveVectorIndex && cls != null) {
+            const backVectorIndex = World.getInverseBlockSide(this.moveVectorIndex);
+            if (i != backVectorIndex && cls != null) {
                 pipes[i] = cls;
             }
         }
