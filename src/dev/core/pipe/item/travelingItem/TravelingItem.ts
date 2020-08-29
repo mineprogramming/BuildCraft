@@ -28,7 +28,7 @@ class TravelingItem {
             // item.moveVector = scope.moveVector;
             item.moveSpeed = scope.moveSpeed;
             item.moveVectorIndex = scope.moveIndex;
-            item.timeBeforeVectorChange = scope.timeBeforChange;
+            item.timeBeforeContainerExit = scope.timeBeforChange;
             return item;
         },
     });
@@ -36,7 +36,7 @@ class TravelingItem {
     public moveVectorIndex: number = null;
     public moveSpeed: number = 0;
     private coords: Vector;
-    private timeBeforeVectorChange = 40;
+    private timeBeforeContainerExit = 40;
     constructor(coords: Vector, private item: ItemSource) {
         this.coords = this.coordsToFixed(coords);
         this.itemAnimation = new TravelingItemAnimation(coords, item);
@@ -48,16 +48,15 @@ class TravelingItem {
 
     // * We need this to pass this["update"] existing
     public update = () => {
-        if (World.getThreadTime() % 40 == 0) this.debug();
+        this.debug();
 
         // alert(`update of ${this.item.id}`);
-        if (!this.isInsideBlock()) {
+        if (!this.isInsidePipe() && this.timeBeforeContainerExit == 0) {
             this.destroy();
             return;
         }
 
         this.move();
-        this.checkMoveVectorChange();
     }
 
     private move(): void {
@@ -85,23 +84,23 @@ class TravelingItem {
     }
 
     private checkMoveVectorChange(): void {
-        if (this.timeBeforeVectorChange > 0) {
-            this.timeBeforeVectorChange--;
+        if (this.timeBeforeContainerExit > 0) {
+            this.timeBeforeContainerExit--;
             return;
         }
 
-        if (!this.isInsideBlock()) return;
-
-        this.moveVectorIndex = this.findNewMoveVector();
-        this.timeBeforeVectorChange = 40;
+        if (this.isInCoordsCenter(this.coords)){
+            this.moveVectorIndex = this.findNewMoveVector();
+        }
     }
 
-    // TODO make this sht
+    // TODO make this sht find containers
     private findNewMoveVector(): number {
         Debug.m(`finding new Vector`);
         let vctr = this.moveVectorIndex;
         const nextPipes = this.getNearbyPipes();
         const keys = Object.keys(nextPipes);
+        Debug.m(`finded nearby pipes ${keys.length}`);
 
         if (keys.length > 0) {
             const keyIndex = this.random(keys.length);
@@ -151,16 +150,10 @@ class TravelingItem {
         return isInCenterByX && isInCenterByY && isInCenterByZ;
     }
 
-    private isInsideBlock(): boolean {
+    private isInsidePipe(): boolean {
         const { x, y, z } = this.coords;
-        // alert(`checking block on coords ${x} ${y} ${z}`);
         const isChunkLoaded = World.isChunkLoadedAt(x, y, z);
-        const blockID = World.getBlockID(
-            this.coords.x,
-            this.coords.y,
-            this.coords.z
-        );
-        return !isChunkLoaded || blockID != 0;
+        return !isChunkLoaded || this.getBlockClass() != null;
     }
 
     private destroy(): void {
@@ -182,6 +175,7 @@ class TravelingItem {
     }
 
     private debug(): void {
-        Debug.m(`${this.item.id} on coords ${JSON.stringify(this.coords)}`);
+        const id = World.getBlockID(this.coords.x, this.coords.y, this.coords.z);
+        Game.tipMessage(`on coords ${JSON.stringify(this.coords)} is pipe ${PipeIdMap.getClassById(id)} block is ${id} in center ${this.isInCoordsCenter(this.coords)}`);
     }
 }
