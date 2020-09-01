@@ -1,4 +1,5 @@
 /// <reference path="TravelingItemAnimation.ts" />
+/// <reference path="TravelingItemMover.ts" />
 /// <reference path="../../components/PipeIdMap.ts" />
 type ItemSource = {
     id: number;
@@ -9,37 +10,33 @@ class TravelingItem {
     // ! its just a Updatable flag
     public remove: boolean = false;
     private readonly itemAnimation: TravelingItemAnimation;
+    private readonly itemMover: TravelingItemMover;
     public static saverId = Saver.registerObjectSaver("TravelingItemSaver", {
         save(travelingItem) {
             alert(`im saved!`);
+            // TODO test save values
             return {
                 coords: travelingItem.coords,
                 // moveVector: travelingItem.moveVector,
-                moveIndex: travelingItem.moveIndex,
-                moveSpeed: travelingItem.moveSpeed,
+                moveIndex: travelingItem.itemMover.MoveVectorIndex,
+                moveSpeed: travelingItem.itemMover.MoveSpeed,
                 item: travelingItem.item,
-                timeBeforChange: travelingItem.timeBeforeVectorChange
+                timeBeforeContainerExit: travelingItem.itemMover.TimeBeforeContainerExit,
             };
         },
 
         read(scope) {
             alert(`im readed!`);
-            const item = new TravelingItem(scope.coords, scope.item);
-            // item.moveVector = scope.moveVector;
-            item.moveSpeed = scope.moveSpeed;
-            item.moveVectorIndex = scope.moveIndex;
-            item.timeBeforeContainerExit = scope.timeBeforChange;
+            const item = new TravelingItem(scope.coords, scope.item, scope.moveSpeed, scope.moveIndex);
+            item.itemMover.TimeBeforeContainerExit = scope.timeBeforeContainerExit;
             return item;
         },
     });
 
-    public moveVectorIndex: number = null;
-    public moveSpeed: number = 0;
-    private coords: Vector;
-    private timeBeforeContainerExit = 40;
-    constructor(coords: Vector, private item: ItemSource) {
-        this.coords = this.coordsToFixed(coords);
-        this.itemAnimation = new TravelingItemAnimation(coords, item);
+    constructor(coords: Vector, private item: ItemSource, moveSpeed: number, moveVectorIndex: number) {
+        // this.coords = this.coordsToFixed(coords);
+        this.itemMover = new TravelingItemMover(coords, moveSpeed, moveVectorIndex);
+        this.itemAnimation = new TravelingItemAnimation(this.itemMover.Coords, item);
 
         Saver.registerObject(this, TravelingItem.saverId);
         Updatable.addUpdatable(this);
@@ -50,128 +47,26 @@ class TravelingItem {
     public update = () => {
         this.debug();
 
-        // alert(`update of ${this.item.id}`);
-        if (!this.isInsidePipe() && this.timeBeforeContainerExit == 0) {
+        if (!this.isInsidePipe() && this.itemMover.TimeBeforeContainerExit == 0) {
             this.destroy();
             return;
         }
 
-        this.move();
-    }
-
-    private move(): void {
-        const moveVector = this.getVectorBySide(this.moveVectorIndex);
-        if (this.moveSpeed <= 0 || this.moveVectorIndex == null) return;
-
-        const newCoords = {
-            x: this.coords.x + moveVector.x * this.moveSpeed,
-            y: this.coords.y + moveVector.y * this.moveSpeed,
-            z: this.coords.z + moveVector.z * this.moveSpeed,
-        };
-
-        this.coords = this.coordsToFixed(newCoords);
-        this.itemAnimation.updateCoords(this.coords);
-
-        this.checkMoveVectorChange();
-    }
-
-    private coordsToFixed(coords: Vector): Vector {
-        return {
-            x: Math.floor(coords.x * 100) / 100,
-            y: Math.floor(coords.y * 100) / 100,
-            z: Math.floor(coords.z * 100) / 100,
-        };
-    }
-
-    private checkMoveVectorChange(): void {
-        if (this.timeBeforeContainerExit > 0) {
-            this.timeBeforeContainerExit--;
-            return;
-        }
-
-        if (this.isInCoordsCenter(this.coords)){
-            this.moveVectorIndex = this.findNewMoveVector();
-        }
-    }
-
-    // TODO make this sht find containers
-    private findNewMoveVector(): number {
-        Debug.m(`finding new Vector`);
-        let vctr = this.moveVectorIndex;
-        const nextPipes = this.filterPaths(this.getRelativePaths());
-        const keys = Object.keys(nextPipes);
-        Debug.m(`finded nearby pipes ${keys.length}`);
-
-        if (keys.length > 0) {
-            const keyIndex = this.random(keys.length);
-            vctr = parseInt(keys[keyIndex]);
-        }
-
-        return vctr;
-    }
-
-    private random(max: number): number {
-        return Math.floor(Math.random() * max);
-    }
-
-    // *Heh-heh cunning Nikolai won
-    private getVectorBySide(side: number): Vector {
-        return World.getRelativeCoords(0, 0, 0, side);
-    }
-
-    /**
-     * @param {object} is returnable from getRelativePaths
-     */
-    private filterPaths(paths: object) : object {
-        // TODO check special pipes like a wooden or diamond
-        return paths;
-    }
-
-    /**
-     * @returns {object} which looks like {"sideIndex": pipeClass | container}
-     */
-    private getRelativePaths(): object {
-        const pipes = {};
-        for (let i = 0; i < 6; i++) {
-            const backVectorIndex = World.getInverseBlockSide(this.moveVectorIndex);
-            if (i != backVectorIndex) {
-                const {x, y, z} = World.getRelativeCoords(this.coords.x, this.coords.y, this.coords.z, i);
-                const pipeID = World.getBlockID(x, y, z);
-                const cls = PipeIdMap.getClassById(pipeID);
-                if (cls != null) {
-                    // TODO check pipes capatibility
-                    pipes[i] = cls;
-                    continue;
-                }
-
-                const container = World.getContainer(x, y, z);
-                if (container) {
-                    pipes[i] = container;
-                }
-            }
-        }
-        return pipes
-    }
-
+        this.itemMover.move();
+        this.itemAnimation.updateCoords(this.itemMover.Coords);
+    };
 
     private getBlockClass(): BCPipe | null {
         const blockID = World.getBlockID(
-            this.coords.x,
-            this.coords.y,
-            this.coords.z
+            this.itemMover.Coords.x,
+            this.itemMover.Coords.y,
+            this.itemMover.Coords.z
         );
         return PipeIdMap.getClassById(blockID);
     }
 
-    private isInCoordsCenter(coords: Vector): boolean {
-        const isInCenterByX = coords.x % 0.5 == 0 && coords.x % 1 != 0;
-        const isInCenterByY = coords.y % 0.5 == 0 && coords.y % 1 != 0;
-        const isInCenterByZ = coords.z % 0.5 == 0 && coords.z % 1 != 0;
-        return isInCenterByX && isInCenterByY && isInCenterByZ;
-    }
-
     private isInsidePipe(): boolean {
-        const { x, y, z } = this.coords;
+        const { x, y, z } = this.itemMover.Coords;
         const isChunkLoaded = World.isChunkLoadedAt(x, y, z);
         return !isChunkLoaded || this.getBlockClass() != null;
     }
@@ -184,9 +79,9 @@ class TravelingItem {
 
     private drop(): void {
         World.drop(
-            this.coords.x,
-            this.coords.y,
-            this.coords.z,
+            this.itemMover.Coords.x,
+            this.itemMover.Coords.y,
+            this.itemMover.Coords.z,
             this.item.id,
             this.item.count,
             this.item.data
@@ -195,7 +90,8 @@ class TravelingItem {
     }
 
     private debug(): void {
-        const id = World.getBlockID(this.coords.x, this.coords.y, this.coords.z);
-        Game.tipMessage(`on coords ${JSON.stringify(this.coords)} is pipe ${PipeIdMap.getClassById(id)} block is ${id} in center ${this.isInCoordsCenter(this.coords)}`);
+        const id = World.getBlockID(this.itemMover.Coords.x, this.itemMover.Coords.y, this.itemMover.Coords.z);
+        const cls = PipeIdMap.getClassById(id);
+        Game.tipMessage(`on coords ${JSON.stringify(this.itemMover.Coords)} is pipe ${cls} block is ${id}`);
     }
 }

@@ -82,6 +82,7 @@
 		"core/pipe/item/stone/StonePipeConnector.ts",
 		"core/pipe/item/travelingItem/TravelingItem.ts",
 		"core/pipe/item/travelingItem/TravelingItemAnimation.ts",
+		"core/pipe/item/travelingItem/TravelingItemMover.ts",
 		"core/pipe/item/wooden/PipeWooden.ts",
 		"core/pipe/item/wooden/WoodenPipeConnector.ts",
 		"core/pipe/item/wooden/WoodenPipeItemEjector.ts",

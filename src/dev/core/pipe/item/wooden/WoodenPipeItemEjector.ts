@@ -58,10 +58,10 @@ class WoodenPipeItemEjector {
             y: containerCoords.y + .5,
             z: containerCoords.z + .5
         };
-        const travelingItem = new TravelingItem(itemCoords, item);
+        const travelingItem = new TravelingItem(itemCoords, item, 1 / 50, World.getInverseBlockSide(this.connectionSide));
         // *DEBUG value is 1/50
-        travelingItem.moveSpeed = 1 / 50;
-        travelingItem.moveVectorIndex = World.getInverseBlockSide(this.connectionSide);
+        /* travelingItem.itemMover.MoveSpeed = ;
+        travelingItem.moveVectorIndex = World.getInverseBlockSide(this.connectionSide); */
     }
 
     private getItemMoveVector(containerCoords: Vector): Vector {
