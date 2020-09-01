@@ -70,6 +70,7 @@
 		"core/pipe/item/cobble",
 		"core/pipe/item/gold",
 		"core/pipe/item/ItemPipes.ts",
+		"core/pipe/item/ItemPipeSpeed.ts",
 		"core/pipe/item/stone",
 		"core/pipe/item/travelingItem",
 		"core/pipe/item/wooden",

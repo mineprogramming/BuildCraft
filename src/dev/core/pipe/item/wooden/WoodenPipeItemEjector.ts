@@ -1,4 +1,5 @@
 /// <reference path="../travelingItem/TravelingItem.ts" />
+/// <reference path="../ItemPipeSpeed.ts" />
 class WoodenPipeItemEjector {
     private side: number | null;
     private container: { source; slots } | null;
@@ -58,10 +59,8 @@ class WoodenPipeItemEjector {
             y: containerCoords.y + .5,
             z: containerCoords.z + .5
         };
-        const travelingItem = new TravelingItem(itemCoords, item, 1 / 50, World.getInverseBlockSide(this.connectionSide));
-        // *DEBUG value is 1/50
-        /* travelingItem.itemMover.MoveSpeed = ;
-        travelingItem.moveVectorIndex = World.getInverseBlockSide(this.connectionSide); */
+        const vectorIndex = World.getInverseBlockSide(this.connectionSide)
+        const travelingItem = new TravelingItem(itemCoords, item, ItemPipeSpeed.DEBUG, vectorIndex);
     }
 
     private getItemMoveVector(containerCoords: Vector): Vector {
