@@ -77,6 +77,8 @@ class WoodenPipeItemEjector {
         let itemData = null;
         let gettedCount = 0;
 
+        // TODO Check troubles witch extra data and item count with extra
+
         for (const i of containerData.slots) {
             const slot = containerData.source.getSlot(i);
             if (slot.id == 0) continue;
@@ -98,7 +100,8 @@ class WoodenPipeItemEjector {
         return {
             id: itemID,
             count: gettedCount,
-            data: itemData
+            data: itemData,
+            extra: null
         }
     }
 }

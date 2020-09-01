@@ -1,13 +1,13 @@
 class TravelingItemAnimation {
     private readonly animation: any;
-    constructor(coords: Vector, item: ItemSource) {
+    constructor(coords: Vector, item: ItemInstance) {
         this.animation = new Animation.Item(coords.x, coords.y, coords.z);
         this.describe(item);
         this.animation.load();
         alert(`animation loaded for ${item.id}!`);
     }
 
-    private describe(item: ItemSource): void {
+    private describe(item: ItemInstance): void {
         this.animation.describeItem({
             id: item.id,
             count: item.count,

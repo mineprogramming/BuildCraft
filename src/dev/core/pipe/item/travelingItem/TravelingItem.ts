@@ -1,11 +1,6 @@
 /// <reference path="TravelingItemAnimation.ts" />
 /// <reference path="TravelingItemMover.ts" />
 /// <reference path="../../components/PipeIdMap.ts" />
-type ItemSource = {
-    id: number;
-    count: number;
-    data: number;
-};
 class TravelingItem {
     // ! its just a Updatable flag
     public remove: boolean = false;
@@ -33,7 +28,7 @@ class TravelingItem {
         },
     });
 
-    constructor(coords: Vector, private item: ItemSource, moveSpeed: number, moveVectorIndex: number) {
+    constructor(coords: Vector, private item: ItemInstance, moveSpeed: number, moveVectorIndex: number) {
         // this.coords = this.coordsToFixed(coords);
         this.itemMover = new TravelingItemMover(coords, moveSpeed, moveVectorIndex);
         this.itemAnimation = new TravelingItemAnimation(this.itemMover.Coords, item);
@@ -47,9 +42,19 @@ class TravelingItem {
     public update = () => {
         this.debug();
 
-        if (!this.isInsidePipe() && this.itemMover.TimeBeforeContainerExit == 0) {
-            this.destroy();
-            return;
+        if (this.itemMover.TimeBeforeContainerExit == 0) {
+            const {x, y, z} = this.itemMover.Coords;
+            const container = World.getContainer(x, y, z);
+
+            // TODO refact it
+            if (container != null) {
+                StorageInterface.putItemToContainer(this.item, container, this.itemMover.MoveVectorIndex, this.item.count);
+                this.destroy();
+                return;
+            } else if (!this.isInsidePipe()) {
+                this.destroy(true);
+                return;
+            }
         }
 
         this.itemMover.move();
@@ -71,8 +76,8 @@ class TravelingItem {
         return !isChunkLoaded || this.getBlockClass() != null;
     }
 
-    private destroy(): void {
-        this.drop();
+    private destroy(drop: boolean = false): void {
+        if (drop) this.drop();
         this.itemAnimation.destroy();
         this.remove = true;
     }

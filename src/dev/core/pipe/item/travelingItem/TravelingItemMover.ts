@@ -50,7 +50,6 @@ class TravelingItemMover {
         };
 
         this.coords = this.coordsToFixed(newCoords);
-        // this.itemAnimation.updateCoords(this.coords);
 
         this.checkMoveVectorChange();
     }
@@ -125,7 +124,7 @@ class TravelingItemMover {
         return World.getRelativeCoords(0, 0, 0, side);
     }
 
-    private isInCoordsCenter(coords: Vector): boolean {
+    public isInCoordsCenter(coords: Vector): boolean {
         const isInCenterByX = coords.x % 0.5 == 0 && coords.x % 1 != 0;
         const isInCenterByY = coords.y % 0.5 == 0 && coords.y % 1 != 0;
         const isInCenterByZ = coords.z % 0.5 == 0 && coords.z % 1 != 0;
