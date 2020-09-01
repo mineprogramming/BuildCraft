@@ -60,7 +60,7 @@ class WoodenPipeItemEjector {
         };
         const travelingItem = new TravelingItem(itemCoords, item);
         // *DEBUG value is 1/50
-        travelingItem.moveSpeed = 1/50;
+        travelingItem.moveSpeed = 1 / 50;
         travelingItem.moveVectorIndex = World.getInverseBlockSide(this.connectionSide);
     }
 

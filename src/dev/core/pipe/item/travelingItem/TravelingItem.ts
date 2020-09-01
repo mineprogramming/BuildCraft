@@ -77,9 +77,9 @@ class TravelingItem {
 
     private coordsToFixed(coords: Vector): Vector {
         return {
-            x: Math.floor(coords.x * 1000) / 1000,
-            y: Math.floor(coords.y * 1000) / 1000,
-            z: Math.floor(coords.z * 1000) / 1000,
+            x: Math.floor(coords.x * 100) / 100,
+            y: Math.floor(coords.y * 100) / 100,
+            z: Math.floor(coords.z * 100) / 100,
         };
     }
 
@@ -98,7 +98,7 @@ class TravelingItem {
     private findNewMoveVector(): number {
         Debug.m(`finding new Vector`);
         let vctr = this.moveVectorIndex;
-        const nextPipes = this.getNearbyPipes();
+        const nextPipes = this.filterPaths(this.getRelativePaths());
         const keys = Object.keys(nextPipes);
         Debug.m(`finded nearby pipes ${keys.length}`);
 
@@ -119,15 +119,35 @@ class TravelingItem {
         return World.getRelativeCoords(0, 0, 0, side);
     }
 
-    private getNearbyPipes(): object {
+    /**
+     * @param {object} is returnable from getRelativePaths
+     */
+    private filterPaths(paths: object) : object {
+        // TODO check special pipes like a wooden or diamond
+        return paths;
+    }
+
+    /**
+     * @returns {object} which looks like {"sideIndex": pipeClass | container}
+     */
+    private getRelativePaths(): object {
         const pipes = {};
         for (let i = 0; i < 6; i++) {
-            const {x, y, z} = World.getRelativeCoords(this.coords.x, this.coords.y, this.coords.z, i);
-            const pipeID = World.getBlockID(x, y, z);
-            const cls = PipeIdMap.getClassById(pipeID);
             const backVectorIndex = World.getInverseBlockSide(this.moveVectorIndex);
-            if (i != backVectorIndex && cls != null) {
-                pipes[i] = cls;
+            if (i != backVectorIndex) {
+                const {x, y, z} = World.getRelativeCoords(this.coords.x, this.coords.y, this.coords.z, i);
+                const pipeID = World.getBlockID(x, y, z);
+                const cls = PipeIdMap.getClassById(pipeID);
+                if (cls != null) {
+                    // TODO check pipes capatibility
+                    pipes[i] = cls;
+                    continue;
+                }
+
+                const container = World.getContainer(x, y, z);
+                if (container) {
+                    pipes[i] = container;
+                }
             }
         }
         return pipes
