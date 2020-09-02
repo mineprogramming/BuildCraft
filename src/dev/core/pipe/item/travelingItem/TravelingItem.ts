@@ -24,7 +24,7 @@ class TravelingItem {
     });
 
     constructor(coords: Vector, private item: ItemInstance, moveSpeed: number, moveVectorIndex: number) {
-        this.itemMover = new TravelingItemMover(coords, moveSpeed, moveVectorIndex);
+        this.itemMover = new TravelingItemMover(coords, moveSpeed, moveVectorIndex, this.item);
         this.itemAnimation = new TravelingItemAnimation(this.itemMover.Coords, item);
 
         Saver.registerObject(this, TravelingItem.saverId);
@@ -60,19 +60,15 @@ class TravelingItem {
     }
 
     private drop(): void {
-        World.drop(
-            this.itemMover.Coords.x,
-            this.itemMover.Coords.y,
-            this.itemMover.Coords.z,
-            this.item.id,
-            this.item.count,
-            this.item.data
-        );
+        const {x, y, z} = this.itemMover.Coords;
+        const {id, count, data} = this.item;
+        World.drop(x, y, z, id, count, data);
         alert(`item was dropped`);
     }
 
     private debug(): void {
-        const id = World.getBlockID(this.itemMover.Coords.x, this.itemMover.Coords.y, this.itemMover.Coords.z);
+        const {x, y, z} = this.itemMover.Coords;
+        const id = World.getBlockID(x, y, z);
         const cls = PipeIdMap.getClassById(id);
         Game.tipMessage(`on coords ${JSON.stringify(this.itemMover.Coords)} is pipe ${cls} block is ${id}`);
     }

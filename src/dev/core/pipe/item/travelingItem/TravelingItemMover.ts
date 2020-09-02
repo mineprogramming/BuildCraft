@@ -2,7 +2,7 @@ class TravelingItemMover {
     private coords: Vector;
     private timeBeforeContainerExit = 40;
 
-    constructor(initialCoords: Vector, private moveSpeed: number, private moveVectorIndex: number) {
+    constructor(initialCoords: Vector, private moveSpeed: number, private moveVectorIndex: number, private item: ItemInstance) {
         this.coords = this.coordsToFixed(initialCoords);
     }
 
@@ -92,7 +92,7 @@ class TravelingItemMover {
         for (let i = 0; i < 6; i++) {
             const backVectorIndex = World.getInverseBlockSide(this.moveVectorIndex);
             if (i != backVectorIndex) {
-                const {x, y, z} = World.getRelativeCoords(this.coords.x, this.coords.y, this.coords.z, i);
+                const {x, y, z} = World.getRelativeCoords(this.Coords.x, this.Coords.y, this.Coords.z, i);
                 const pipeID = World.getBlockID(x, y, z);
                 const relativePipeClass = PipeIdMap.getClassById(pipeID);
                 const currentConnector = this.getClassOfCurrentPipe().pipeConnector;
@@ -114,16 +114,26 @@ class TravelingItemMover {
      * @param {object} is returnable from getRelativePaths
      */
     private filterPaths(paths: object): object {
-        // TODO check special pipes with TileEntity like a wooden or diamond
+        const {x, y, z} = this.Coords;
+        const tileEntity = World.getTileEntity(x, y, z);
+
+        if (tileEntity && tileEntity.canItemGoFromSide) {
+            const keys = Object.keys(paths);
+            for (const t of keys) {
+                const index = keys[t];
+                // ? canItemGoToSide(item: ItemInstance, index: number): boolean
+                if (!tileEntity.canItemGoToSide(this.item, index)) {
+                    delete paths[index];
+                }
+            }
+        }
+
         return paths;
     }
 
     public getClassOfCurrentPipe(): BCPipe | null {
-        const blockID = World.getBlockID(
-            this.Coords.x,
-            this.Coords.y,
-            this.Coords.z
-        );
+        const {x, y, z} = this.Coords;
+        const blockID = World.getBlockID(x, y, z);
         return PipeIdMap.getClassById(blockID);
     }
 
