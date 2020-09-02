@@ -69,6 +69,7 @@
 		"core/pipe/item/abstract",
 		"core/pipe/item/cobble",
 		"core/pipe/item/gold",
+		"core/pipe/item/ItemMachines.ts",
 		"core/pipe/item/ItemPipes.ts",
 		"core/pipe/item/ItemPipeSpeed.ts",
 		"core/pipe/item/stone",

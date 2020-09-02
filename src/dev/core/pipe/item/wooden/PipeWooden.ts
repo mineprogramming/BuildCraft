@@ -28,7 +28,7 @@ class PipeWooden extends BCTransportPipe {
         return "wood"
     }
 
-    protected get pipeConnector(): PipeConnector {
+    public get pipeConnector(): PipeConnector {
         if (!this.connector) this.connector = new WoodenPipeConnector();
         return this.connector;
     }

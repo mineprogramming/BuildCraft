@@ -5,7 +5,7 @@ class PipeCobble extends BCTransportPipe {
         return "cobble"
     }
 
-    protected get pipeConnector(): PipeConnector {
+    public get pipeConnector(): PipeConnector {
         if(!this.connector) this.connector = new CobblePipeConnector();
         return this.connector;
     }

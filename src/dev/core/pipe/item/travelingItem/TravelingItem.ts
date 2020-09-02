@@ -61,19 +61,12 @@ class TravelingItem {
         this.itemAnimation.updateCoords(this.itemMover.Coords);
     };
 
-    private getBlockClass(): BCPipe | null {
-        const blockID = World.getBlockID(
-            this.itemMover.Coords.x,
-            this.itemMover.Coords.y,
-            this.itemMover.Coords.z
-        );
-        return PipeIdMap.getClassById(blockID);
-    }
+
 
     private isInsidePipe(): boolean {
         const { x, y, z } = this.itemMover.Coords;
         const isChunkLoaded = World.isChunkLoadedAt(x, y, z);
-        return !isChunkLoaded || this.getBlockClass() != null;
+        return !isChunkLoaded || this.itemMover.getClassOfCurrentPipe() != null;
     }
 
     private destroy(drop: boolean = false): void {

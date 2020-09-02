@@ -27,7 +27,7 @@ abstract class BCPipe {
         return null
     }
 
-    protected get pipeConnector(): PipeConnector {
+    public get pipeConnector(): PipeConnector {
         alert("BCPipeConnector");
         return null;
     }

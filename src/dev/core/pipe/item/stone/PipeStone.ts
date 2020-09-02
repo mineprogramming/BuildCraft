@@ -5,7 +5,7 @@ class PipeStone extends BCTransportPipe {
         return "stone"
     }
 
-    protected get pipeConnector(): PipeConnector {
+    public get pipeConnector(): PipeConnector {
         if(!this.connector) this.connector = new StonePipeConnector();
         return this.connector;
     }

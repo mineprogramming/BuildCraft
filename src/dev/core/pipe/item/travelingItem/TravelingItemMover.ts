@@ -91,10 +91,11 @@ class TravelingItemMover {
             if (i != backVectorIndex) {
                 const {x, y, z} = World.getRelativeCoords(this.coords.x, this.coords.y, this.coords.z, i);
                 const pipeID = World.getBlockID(x, y, z);
-                const cls = PipeIdMap.getClassById(pipeID);
-                if (cls != null) {
+                const relativePipeClass = PipeIdMap.getClassById(pipeID);
+                const currentPipeClass = this.getClassOfCurrentPipe();
+                if (relativePipeClass != null) {
                     // TODO check pipes capatibility
-                    pipes[i] = cls;
+                    pipes[i] = relativePipeClass;
                     continue;
                 }
 
@@ -111,8 +112,17 @@ class TravelingItemMover {
      * @param {object} is returnable from getRelativePaths
      */
     private filterPaths(paths: object): object {
-        // TODO check special pipes like a wooden or diamond
+        // TODO check special pipes with TileEntity like a wooden or diamond
         return paths;
+    }
+
+    public getClassOfCurrentPipe(): BCPipe | null {
+        const blockID = World.getBlockID(
+            this.Coords.x,
+            this.Coords.y,
+            this.Coords.z
+        );
+        return PipeIdMap.getClassById(blockID);
     }
 
     private random(max: number): number {
