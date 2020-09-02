@@ -8,8 +8,17 @@ abstract class PipeConnector {
     abstract canConnectToGroup(groupName: string): boolean;
     abstract getConnectionRules(): ConnectionRule[];
 
-    public canConnectToPipe(targetConnector: PipeConnector): boolean {
-        const rules = targetConnector.getConnectionRules();
+    public canConnectToPipe(target: BCPipe): boolean {
+        const targetGroups = target.renderGroups;
+        for (const rule of this.getConnectionRules()) {
+            if (rule.name == targetGroups.main.name) {
+                if (rule.exclude) return false;
+            }
+            const secondary = targetGroups.addition;
+            if (secondary && rule.name == secondary.name) {
+                if (rule.exclude) return false;
+            }
+        }
         return true;
     }
 }

@@ -6,7 +6,7 @@ class BCTransportPipe extends BCPipe {
         return this.connector;
     }
 
-    protected get renderGroups(): {main: ICRenderGroup, addition?: ICRenderGroup} {
+    public get renderGroups(): {main: ICRenderGroup, addition?: ICRenderGroup} {
         return {
             main: ICRender.getGroup("BCTransportPipe")
         };

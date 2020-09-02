@@ -10,7 +10,7 @@ class PipeCobble extends BCTransportPipe {
         return this.connector;
     }
 
-    protected get renderGroups(): {main: ICRenderGroup, addition?: ICRenderGroup} {
+    public get renderGroups(): {main: ICRenderGroup, addition?: ICRenderGroup} {
         return {
             main: ICRender.getGroup("BCTransportPipe"),
             addition: ICRender.getGroup("BCPipeCobble")

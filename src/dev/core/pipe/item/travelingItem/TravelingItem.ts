@@ -29,7 +29,6 @@ class TravelingItem {
     });
 
     constructor(coords: Vector, private item: ItemInstance, moveSpeed: number, moveVectorIndex: number) {
-        // this.coords = this.coordsToFixed(coords);
         this.itemMover = new TravelingItemMover(coords, moveSpeed, moveVectorIndex);
         this.itemAnimation = new TravelingItemAnimation(this.itemMover.Coords, item);
 

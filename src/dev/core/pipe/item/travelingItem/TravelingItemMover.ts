@@ -65,7 +65,6 @@ class TravelingItemMover {
         }
     }
 
-    // TODO make this sht find containers
     private findNewMoveVector(): number {
         // Debug.m(`finding new Vector`);
         let vctr = this.moveVectorIndex;
@@ -92,9 +91,8 @@ class TravelingItemMover {
                 const {x, y, z} = World.getRelativeCoords(this.coords.x, this.coords.y, this.coords.z, i);
                 const pipeID = World.getBlockID(x, y, z);
                 const relativePipeClass = PipeIdMap.getClassById(pipeID);
-                const currentPipeClass = this.getClassOfCurrentPipe();
-                if (relativePipeClass != null) {
-                    // TODO check pipes capatibility
+                const currentConnector = this.getClassOfCurrentPipe().pipeConnector;
+                if (relativePipeClass != null && currentConnector.canConnectToPipe(relativePipeClass)) {
                     pipes[i] = relativePipeClass;
                     continue;
                 }
