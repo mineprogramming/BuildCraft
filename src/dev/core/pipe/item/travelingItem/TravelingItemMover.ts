@@ -1,6 +1,4 @@
 class TravelingItemMover {
-    // public moveVectorIndex: number = null;
-    // public moveSpeed: number = 0;
     private coords: Vector;
     private timeBeforeContainerExit = 40;
 
@@ -21,7 +19,7 @@ class TravelingItemMover {
     } */
 
     public get MoveVectorIndex(): number {
-        return this.moveSpeed
+        return this.moveVectorIndex
     }
 
     /* public set MoveVectorIndex(index: number) {
@@ -60,9 +58,15 @@ class TravelingItemMover {
             return;
         }
 
-        if (this.isInCoordsCenter(this.coords)) {
+        if (this.isInCoordsCenter(this.coords) && this.isInsidePipe()) {
             this.moveVectorIndex = this.findNewMoveVector();
         }
+    }
+
+    public isInsidePipe(): boolean {
+        const { x, y, z } = this.Coords;
+        const isChunkLoaded = World.isChunkLoadedAt(x, y, z);
+        return !isChunkLoaded || this.getClassOfCurrentPipe() != null;
     }
 
     private findNewMoveVector(): number {

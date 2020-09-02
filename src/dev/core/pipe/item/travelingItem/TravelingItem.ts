@@ -7,12 +7,9 @@ class TravelingItem {
     private readonly itemAnimation: TravelingItemAnimation;
     private readonly itemMover: TravelingItemMover;
     public static saverId = Saver.registerObjectSaver("TravelingItemSaver", {
-        save(travelingItem) {
-            alert(`im saved!`);
-            // TODO test save values
+        save(travelingItem: TravelingItem) {
             return {
-                coords: travelingItem.coords,
-                // moveVector: travelingItem.moveVector,
+                coords: travelingItem.itemMover.Coords,
                 moveIndex: travelingItem.itemMover.MoveVectorIndex,
                 moveSpeed: travelingItem.itemMover.MoveSpeed,
                 item: travelingItem.item,
@@ -21,11 +18,9 @@ class TravelingItem {
         },
 
         read(scope) {
-            alert(`im readed!`);
             const item = new TravelingItem(scope.coords, scope.item, scope.moveSpeed, scope.moveIndex);
             item.itemMover.TimeBeforeContainerExit = scope.timeBeforeContainerExit;
-            return item;
-        },
+        }
     });
 
     constructor(coords: Vector, private item: ItemInstance, moveSpeed: number, moveVectorIndex: number) {
@@ -34,7 +29,6 @@ class TravelingItem {
 
         Saver.registerObject(this, TravelingItem.saverId);
         Updatable.addUpdatable(this);
-        alert(`item ${item.id} created`);
     }
 
     // * We need this to pass this["update"] existing
@@ -45,12 +39,11 @@ class TravelingItem {
             const {x, y, z} = this.itemMover.Coords;
             const container = World.getContainer(x, y, z);
 
-            // TODO refact it
             if (container != null) {
                 StorageInterface.putItemToContainer(this.item, container, this.itemMover.MoveVectorIndex, this.item.count);
                 this.destroy();
                 return;
-            } else if (!this.isInsidePipe()) {
+            } else if (!this.itemMover.isInsidePipe()) {
                 this.destroy(true);
                 return;
             }
@@ -59,14 +52,6 @@ class TravelingItem {
         this.itemMover.move();
         this.itemAnimation.updateCoords(this.itemMover.Coords);
     };
-
-
-
-    private isInsidePipe(): boolean {
-        const { x, y, z } = this.itemMover.Coords;
-        const isChunkLoaded = World.isChunkLoadedAt(x, y, z);
-        return !isChunkLoaded || this.itemMover.getClassOfCurrentPipe() != null;
-    }
 
     private destroy(drop: boolean = false): void {
         if (drop) this.drop();
