@@ -10,7 +10,7 @@ class TravelingItemAnimation {
     private describe(item: ItemInstance): void {
         this.animation.describeItem({
             id: item.id,
-            count: item.count,
+            count: 1,
             data: item.data,
             notRandomize: true,
             size: 0.3,
