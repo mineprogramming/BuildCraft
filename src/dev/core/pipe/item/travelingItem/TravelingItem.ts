@@ -63,13 +63,12 @@ class TravelingItem {
         const {x, y, z} = this.itemMover.Coords;
         const {id, count, data} = this.item;
         World.drop(x, y, z, id, count, data);
-        alert(`item was dropped`);
     }
 
     private debug(): void {
         const {x, y, z} = this.itemMover.Coords;
         const id = World.getBlockID(x, y, z);
         const cls = PipeIdMap.getClassById(id);
-        Game.tipMessage(`on coords ${JSON.stringify(this.itemMover.Coords)} is pipe ${cls} block is ${id}`);
+        Game.tipMessage(`on coords ${JSON.stringify(this.itemMover.Coords)} index ${this.itemMover.MoveVectorIndex} block is ${id}`);
     }
 }

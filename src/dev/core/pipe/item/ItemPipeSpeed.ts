@@ -1,4 +1,4 @@
 // Speed in blocks per tick
 enum ItemPipeSpeed {
-    DEBUG = 1 / 50
+    DEBUG = 0.01
 }

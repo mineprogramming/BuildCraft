@@ -54,22 +54,23 @@ class WoodenPipeItemEjector {
     public extractItems(count: number): void {
         const item = this.getExtractionPack(this.container, count);
         const containerCoords = World.getRelativeCoords(this.x, this.y, this.z, this.connectionSide);
-        const itemCoords = {
-            x: containerCoords.x + .5,
-            y: containerCoords.y + .5,
-            z: containerCoords.z + .5
-        };
-        const vectorIndex = World.getInverseBlockSide(this.connectionSide)
-        const travelingItem = new TravelingItem(itemCoords, item, ItemPipeSpeed.DEBUG, vectorIndex);
-    }
+        const vectorIndex = World.getInverseBlockSide(this.connectionSide);
+        const offsetVector = World.getRelativeCoords(0, 0, 0, vectorIndex);
 
-    private getItemMoveVector(containerCoords: Vector): Vector {
-        const vector = {
-            x: this.x - containerCoords.x,
-            y: this.y - containerCoords.y,
-            z: this.z - containerCoords.z
-        }
-        return vector
+        // ? should I add offsetDistance to config?
+        const offsetDistance = .3;
+        /*
+            If you want to create items not on source block center
+            change "offsetDistance" in extractItems(count: number)
+            and "timeBeforeContainerExit" in TravelingItemMover
+        */
+
+        const itemCoords = {
+            x: containerCoords.x + .5 + offsetDistance * offsetVector.x,
+            y: containerCoords.y + .5 + offsetDistance * offsetVector.y,
+            z: containerCoords.z + .5 + offsetDistance * offsetVector.z
+        };
+        const travelingItem = new TravelingItem(itemCoords, item, ItemPipeSpeed.DEBUG, vectorIndex);
     }
 
     public getExtractionPack(containerData: { source; slots }, count: number) {
@@ -77,7 +78,7 @@ class WoodenPipeItemEjector {
         let itemData = null;
         let gettedCount = 0;
 
-        // TODO Check troubles witch extra data and item count with extra
+        // TODO Check troubles with extra data and item count with extra
 
         for (const i of containerData.slots) {
             const slot = containerData.source.getSlot(i);

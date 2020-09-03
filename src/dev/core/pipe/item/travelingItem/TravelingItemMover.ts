@@ -14,24 +14,16 @@ class TravelingItemMover {
         return this.moveSpeed
     }
 
-    /* public set MoveSpeed(speed: number) {
-        if (speed > 0) this.moveSpeed = speed;
-    } */
-
     public get MoveVectorIndex(): number {
         return this.moveVectorIndex
     }
-
-    /* public set MoveVectorIndex(index: number) {
-        if (index > 0 && index < 6) this.moveVectorIndex = index;
-    } */
 
     public get TimeBeforeContainerExit(): number {
         return this.timeBeforeContainerExit;
     }
 
     /*
-      *  For "Saver.registerObjectSaver" use only
+     * For "Saver.registerObjectSaver" use only
      */
     public set TimeBeforeContainerExit(time: number) {
         if (time > 0) this.timeBeforeContainerExit = time;
@@ -58,23 +50,17 @@ class TravelingItemMover {
             return;
         }
 
-        if (this.isInCoordsCenter(this.coords) && this.isInsidePipe()) {
+        const { x, y, z } = this.Coords;
+        if (this.isInCoordsCenter(this.coords) && World.isChunkLoadedAt(x, y, z)) {
+            Debug.m(`finded ${this.findNewMoveVector()}`);
             this.moveVectorIndex = this.findNewMoveVector();
         }
     }
 
-    public isInsidePipe(): boolean {
-        const { x, y, z } = this.Coords;
-        const isChunkLoaded = World.isChunkLoadedAt(x, y, z);
-        return !isChunkLoaded || this.getClassOfCurrentPipe() != null;
-    }
-
     private findNewMoveVector(): number {
-        // Debug.m(`finding new Vector`);
         let vctr = this.moveVectorIndex;
         const nextPipes = this.filterPaths(this.getRelativePaths());
         const keys = Object.keys(nextPipes);
-        // Debug.m(`finded nearby pipes ${keys.length}`);
 
         if (keys.length > 0) {
             const keyIndex = this.random(keys.length);
@@ -137,6 +123,12 @@ class TravelingItemMover {
         return PipeIdMap.getClassById(blockID);
     }
 
+    public isInsidePipe(): boolean {
+        const { x, y, z } = this.Coords;
+        const isChunkLoaded = World.isChunkLoadedAt(x, y, z);
+        return !isChunkLoaded || this.getClassOfCurrentPipe() != null;
+    }
+
     private random(max: number): number {
         return Math.floor(Math.random() * max);
     }
@@ -155,9 +147,9 @@ class TravelingItemMover {
 
     private coordsToFixed(coords: Vector): Vector {
         return {
-            x: Math.floor(coords.x * 100) / 100,
-            y: Math.floor(coords.y * 100) / 100,
-            z: Math.floor(coords.z * 100) / 100,
+            x: Math.round(coords.x * 100) / 100,
+            y: Math.round(coords.y * 100) / 100,
+            z: Math.round(coords.z * 100) / 100,
         };
     }
 }
