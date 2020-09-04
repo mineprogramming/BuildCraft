@@ -29,6 +29,15 @@ class TravelingItemMover {
         if (time > 0) this.timeBeforeContainerExit = time;
     }
 
+    public get AbsoluteCoords(): Vector {
+        const { x, y, z } = this.Coords;
+        return {
+            x: Math.floor(x),
+            y: Math.floor(y),
+            z: Math.floor(z)
+        }
+    }
+
     public move(): void {
         const moveVector = this.getVectorBySide(this.moveVectorIndex);
         if (this.moveSpeed <= 0 || this.moveVectorIndex == null) return;
@@ -41,7 +50,7 @@ class TravelingItemMover {
 
         this.coords = this.coordsToFixed(newCoords);
 
-        this.checkMoveVectorChange();
+        // this.checkMoveVectorChange();
     }
 
     private checkMoveVectorChange(): void {
@@ -49,25 +58,22 @@ class TravelingItemMover {
             this.timeBeforeContainerExit--;
             return;
         }
-
-        const { x, y, z } = this.Coords;
-        if (this.isInCoordsCenter(this.coords) && World.isChunkLoadedAt(x, y, z)) {
-            Debug.m(`finded ${this.findNewMoveVector()}`);
-            this.moveVectorIndex = this.findNewMoveVector();
+        if (this.isInCoordsCenter()) {
+            this.findNewMoveVector();
         }
     }
 
-    private findNewMoveVector(): number {
-        let vctr = this.moveVectorIndex;
+    public findNewMoveVector(): boolean {
         const nextPipes = this.filterPaths(this.getRelativePaths());
         const keys = Object.keys(nextPipes);
 
         if (keys.length > 0) {
             const keyIndex = this.random(keys.length);
-            vctr = parseInt(keys[keyIndex]);
+            this.moveVectorIndex = parseInt(keys[keyIndex]);
+            return true;
         }
 
-        return vctr;
+        return false;
     }
 
     /**
@@ -78,7 +84,10 @@ class TravelingItemMover {
         for (let i = 0; i < 6; i++) {
             const backVectorIndex = World.getInverseBlockSide(this.moveVectorIndex);
             if (i != backVectorIndex) {
-                const {x, y, z} = World.getRelativeCoords(this.Coords.x, this.Coords.y, this.Coords.z, i);
+                const curX = Math.floor(this.Coords.x);
+                const curY = Math.floor(this.Coords.y);
+                const curZ = Math.floor(this.Coords.z);
+                const {x, y, z} = World.getRelativeCoords(curX, curY, curZ, i);
                 const pipeID = World.getBlockID(x, y, z);
                 const relativePipeClass = PipeIdMap.getClassById(pipeID);
                 const currentConnector = this.getClassOfCurrentPipe().pipeConnector;
@@ -88,12 +97,22 @@ class TravelingItemMover {
                 }
 
                 const container = World.getContainer(x, y, z);
-                if (container) {
+                if (container != null && this.isValidContainer(container)) {
                     pipes[i] = container;
                 }
             }
         }
         return pipes;
+    }
+
+    public isValidContainer(container): boolean {
+        const slots = StorageInterface.getContainerSlots(container, 1, 0);
+        let trueSlotsLength = slots.length;
+        if (trueSlotsLength > 0 && typeof(slots[0]) == "string") {
+            // ! tileEntity container contain jsonSaverId in slots[0]
+            trueSlotsLength -= 1;
+        }
+        return trueSlotsLength > 0;
     }
 
     /**
@@ -118,7 +137,10 @@ class TravelingItemMover {
     }
 
     public getClassOfCurrentPipe(): BCPipe | null {
-        const {x, y, z} = this.Coords;
+        const x = Math.floor(this.Coords.x);
+        const y = Math.floor(this.Coords.y);
+        const z = Math.floor(this.Coords.z);
+
         const blockID = World.getBlockID(x, y, z);
         return PipeIdMap.getClassById(blockID);
     }
@@ -134,11 +156,12 @@ class TravelingItemMover {
     }
 
     // *Heh-heh cunning Nikolai won
-    private getVectorBySide(side: number): Vector {
+    public getVectorBySide(side: number): Vector {
         return World.getRelativeCoords(0, 0, 0, side);
     }
 
-    public isInCoordsCenter(coords: Vector): boolean {
+    public isInCoordsCenter(): boolean {
+        const coords = this.Coords;
         const isInCenterByX = coords.x % 0.5 == 0 && coords.x % 1 != 0;
         const isInCenterByY = coords.y % 0.5 == 0 && coords.y % 1 != 0;
         const isInCenterByZ = coords.z % 0.5 == 0 && coords.z % 1 != 0;

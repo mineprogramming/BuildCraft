@@ -33,17 +33,18 @@ class TravelingItem {
 
     // * We need this to pass this["update"] existing
     public update = () => {
+        const { x, y, z } = this.itemMover.AbsoluteCoords;
+        if (!World.isChunkLoadedAt(x, y, z)) return;
+
         this.debug();
 
-        if (this.itemMover.TimeBeforeContainerExit == 0) {
-            const {x, y, z} = this.itemMover.Coords;
+        if (this.itemMover.isInCoordsCenter()) {
             const container = World.getContainer(x, y, z);
-
-            if (container != null) {
+            if (container != null && this.itemMover.isValidContainer(container)) {
                 StorageInterface.putItemToContainer(this.item, container, this.itemMover.MoveVectorIndex, this.item.count);
                 this.destroy();
                 return;
-            } else if (!this.itemMover.isInsidePipe()) {
+            } else if (!this.itemMover.findNewMoveVector()) {
                 this.destroy(true);
                 return;
             }
@@ -61,12 +62,16 @@ class TravelingItem {
 
     private drop(): void {
         const {x, y, z} = this.itemMover.Coords;
+        const vel = this.itemMover.getVectorBySide(this.itemMover.MoveVectorIndex);
         const {id, count, data} = this.item;
-        World.drop(x, y, z, id, count, data);
+        const entity = World.drop(x, y, z, id, count, data);
+        Entity.addVelocity(entity, vel.x, vel.y, vel.z);
     }
 
     private debug(): void {
-        const {x, y, z} = this.itemMover.Coords;
+        const x = Math.floor(this.itemMover.Coords.x);
+        const y = Math.floor(this.itemMover.Coords.y);
+        const z = Math.floor(this.itemMover.Coords.z);
         const id = World.getBlockID(x, y, z);
         const cls = PipeIdMap.getClassById(id);
         Game.tipMessage(`on coords ${JSON.stringify(this.itemMover.Coords)} index ${this.itemMover.MoveVectorIndex} block is ${id}`);
