@@ -4,7 +4,6 @@ class TravelingItemAnimation {
         this.animation = new Animation.Item(coords.x, coords.y, coords.z);
         this.describe(item);
         this.animation.load();
-        alert(`animation loaded for ${item.id}!`);
     }
 
     private describe(item: ItemInstance): void {

@@ -1,32 +1,25 @@
 class TravelingItemMover {
     private coords: Vector;
-    private timeBeforeContainerExit = 40;
 
-    constructor(initialCoords: Vector, private moveSpeed: number, private moveVectorIndex: number, private item: ItemInstance) {
+    constructor(
+        initialCoords: Vector,
+        private moveSpeed: number,
+        private moveVectorIndex: number,
+        private item: ItemInstance
+    ) {
         this.coords = this.coordsToFixed(initialCoords);
     }
 
     public get Coords(): Vector {
-        return this.coords
+        return this.coords;
     }
 
     public get MoveSpeed(): number {
-        return this.moveSpeed
+        return this.moveSpeed;
     }
 
     public get MoveVectorIndex(): number {
-        return this.moveVectorIndex
-    }
-
-    public get TimeBeforeContainerExit(): number {
-        return this.timeBeforeContainerExit;
-    }
-
-    /*
-     * For "Saver.registerObjectSaver" use only
-     */
-    public set TimeBeforeContainerExit(time: number) {
-        if (time > 0) this.timeBeforeContainerExit = time;
+        return this.moveVectorIndex;
     }
 
     public get AbsoluteCoords(): Vector {
@@ -34,8 +27,8 @@ class TravelingItemMover {
         return {
             x: Math.floor(x),
             y: Math.floor(y),
-            z: Math.floor(z)
-        }
+            z: Math.floor(z),
+        };
     }
 
     public move(): void {
@@ -49,18 +42,6 @@ class TravelingItemMover {
         };
 
         this.coords = this.coordsToFixed(newCoords);
-
-        // this.checkMoveVectorChange();
-    }
-
-    private checkMoveVectorChange(): void {
-        if (this.timeBeforeContainerExit > 0) {
-            this.timeBeforeContainerExit--;
-            return;
-        }
-        if (this.isInCoordsCenter()) {
-            this.findNewMoveVector();
-        }
     }
 
     public findNewMoveVector(): boolean {
@@ -87,10 +68,11 @@ class TravelingItemMover {
                 const curX = Math.floor(this.Coords.x);
                 const curY = Math.floor(this.Coords.y);
                 const curZ = Math.floor(this.Coords.z);
-                const {x, y, z} = World.getRelativeCoords(curX, curY, curZ, i);
+                const { x, y, z } = World.getRelativeCoords(curX, curY, curZ, i);
                 const pipeID = World.getBlockID(x, y, z);
                 const relativePipeClass = PipeIdMap.getClassById(pipeID);
                 const currentConnector = this.getClassOfCurrentPipe().pipeConnector;
+
                 if (relativePipeClass != null && currentConnector.canConnectToPipe(relativePipeClass)) {
                     pipes[i] = relativePipeClass;
                     continue;
@@ -108,7 +90,7 @@ class TravelingItemMover {
     public isValidContainer(container): boolean {
         const slots = StorageInterface.getContainerSlots(container, 1, 0);
         let trueSlotsLength = slots.length;
-        if (trueSlotsLength > 0 && typeof(slots[0]) == "string") {
+        if (trueSlotsLength > 0 && typeof slots[0] == "string") {
             // ! tileEntity container contain jsonSaverId in slots[0]
             trueSlotsLength -= 1;
         }
@@ -119,9 +101,8 @@ class TravelingItemMover {
      * @param {object} is returnable from getRelativePaths
      */
     private filterPaths(paths: object): object {
-        const {x, y, z} = this.Coords;
+        const { x, y, z } = this.Coords;
         const tileEntity = World.getTileEntity(x, y, z);
-
         if (tileEntity && tileEntity.canItemGoFromSide) {
             const keys = Object.keys(paths);
             for (const t of keys) {
@@ -132,15 +113,11 @@ class TravelingItemMover {
                 }
             }
         }
-
         return paths;
     }
 
     public getClassOfCurrentPipe(): BCPipe | null {
-        const x = Math.floor(this.Coords.x);
-        const y = Math.floor(this.Coords.y);
-        const z = Math.floor(this.Coords.z);
-
+        const {x, y, z} = this.AbsoluteCoords;
         const blockID = World.getBlockID(x, y, z);
         return PipeIdMap.getClassById(blockID);
     }
