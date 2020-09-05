@@ -42,14 +42,12 @@ class WoodenPipeTileEntity {
             const maxPipeStack = 16;
 
             if (targets > 0) {
-                Debug.m(`extracted items ${ targets}`);
-                // ! EXTRACT
+                // * EXTRACT
                 this.itemEjector.extractItems(this.maxExtractable());
             }
 
             this.data.energy = 0;
             this.ticksSincePull = 0;
-            // speedMultiplier = 1.0F;
         }
     }
 
@@ -70,7 +68,6 @@ class WoodenPipeTileEntity {
         if (id != ItemID.bc_wrench) return false;
 
         this.updateConnectionSide(true);
-        Debug.m(this.itemEjector.getExtractionTargetsCount(this.maxExtractable()));
         return true;
     }
 

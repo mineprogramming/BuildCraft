@@ -2,7 +2,7 @@
 /// <reference path="../ItemPipeSpeed.ts" />
 class WoodenPipeItemEjector {
     private side: number | null;
-    private container: { source; slots } | null;
+    private containerData: { source; slots } | null;
     constructor(
         public readonly x: number,
         public readonly y: number,
@@ -14,7 +14,7 @@ class WoodenPipeItemEjector {
         const coords = World.getRelativeCoords(this.x, this.y, this.z, this.connectionSide);
         const sourceContainer = World.getContainer(coords.x, coords.y, coords.z);
         const containerSide = World.getInverseBlockSide(value);
-        this.container = {
+        this.containerData = {
             source: sourceContainer,
             slots: StorageInterface.getContainerSlots(sourceContainer, 1, containerSide),
         };
@@ -25,14 +25,14 @@ class WoodenPipeItemEjector {
     }
 
     public getExtractionTargetsCount(maxItems: number): number {
-        if (!this.container) return -1;
+        if (!this.containerData) return -1;
 
         let id = 0;
         let data = null;
         let count = 0;
 
-        for (const i of this.container.slots) {
-            const slot = this.container.source.getSlot(i);
+        for (const i of this.containerData.slots) {
+            const slot = this.containerData.source.getSlot(i);
 
             if (slot.id == 0) continue;
 
@@ -52,7 +52,7 @@ class WoodenPipeItemEjector {
     }
 
     public extractItems(count: number): void {
-        const item = this.getExtractionPack(this.container, count);
+        const item = this.getExtractionPack(this.containerData, count);
         const containerCoords = World.getRelativeCoords(this.x, this.y, this.z, this.connectionSide);
         const vectorIndex = World.getInverseBlockSide(this.connectionSide);
         const offsetVector = World.getRelativeCoords(0, 0, 0, vectorIndex);
@@ -73,36 +73,28 @@ class WoodenPipeItemEjector {
         const travelingItem = new TravelingItem(itemCoords, item, ItemPipeSpeed.DEBUG, vectorIndex);
     }
 
-    public getExtractionPack(containerData: { source; slots }, count: number) {
-        let itemID = 0;
-        let itemData = null;
-        let gettedCount = 0;
+    public getExtractionPack(containerData: { source; slots }, count: number): ItemInstance {
+        const gettedItem = {
+            id: 0,
+            count: 0,
+            data: null,
+            extra: null
+        };
 
-        // TODO Check troubles with extra data and item count with extra
+        const { source, slots } = containerData;
 
-        for (const i of containerData.slots) {
-            const slot = containerData.source.getSlot(i);
+        for (const i of slots) {
+            const slot = source.getSlot(i);
             if (slot.id == 0) continue;
 
-            if (itemID == 0 && slot.id != 0) {
-                itemID = slot.id;
-                itemData = slot.data;
-            }
+            if (gettedItem.extra != null) break;
 
-            if (itemID == slot.id && gettedCount < count) {
-                const add = Math.min(slot.count, count - gettedCount);
-                containerData.source.setSlot(i, slot.id, slot.count - add, slot.data);
-                gettedCount += add;
-            }
-
-            if (gettedCount == count) break;
+            const needToAdd = count - gettedItem.count;
+            if (needToAdd > 0) {
+                StorageInterface.addItemToSlot(slot, gettedItem, needToAdd);
+                source.setSlot(i, slot.id, slot.count, slot.data, slot.extra);
+            } else break;
         }
-
-        return {
-            id: itemID,
-            count: gettedCount,
-            data: itemData,
-            extra: null
-        }
+        return gettedItem;
     }
 }
