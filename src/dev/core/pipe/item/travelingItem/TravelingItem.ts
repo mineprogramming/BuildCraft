@@ -43,6 +43,12 @@ class TravelingItem {
     public update = () => {
         const { x, y, z } = this.itemMover.AbsoluteCoords;
         if (!World.isChunkLoadedAt(x, y, z)) return;
+        /*
+         * checking for block destroy
+         * I think this way is more convenient than array of travelingItems
+         * and DestroyBlock check
+         */
+        if (World.getBlockID(x, y, z) == 0) this.destroy(true);
 
         if (this.itemMover.isInCoordsCenter()) {
             const container = World.getContainer(x, y, z);
