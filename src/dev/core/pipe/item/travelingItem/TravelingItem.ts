@@ -68,10 +68,11 @@ class TravelingItem {
 
     private drop(): void {
         const { x, y, z } = this.itemMover.Coords;
+        const speed = this.itemMover.MoveSpeed * 25;
         const velVec = this.itemMover.getVectorBySide(this.itemMover.MoveVectorIndex);
         const { id, count, data } = this.item;
         const entity = World.drop(x, y, z, id, count, data);
-        Entity.addVelocity(entity, velVec.x / 5, velVec.y / 5, velVec.z / 5);
+        Entity.addVelocity(entity, velVec.x * speed, velVec.y * speed, velVec.z * speed);
     }
 
     private debug(): void {
