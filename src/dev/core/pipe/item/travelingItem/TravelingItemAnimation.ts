@@ -1,9 +1,11 @@
 class TravelingItemAnimation {
     private readonly animation: any;
+    private readonly randomOffset = Math.random() / 100;
     constructor(coords: Vector, item: ItemInstance) {
         this.animation = new Animation.Item(coords.x, coords.y, coords.z);
         this.describe(item);
         this.animation.load();
+        this.animation.setInterpolationEnabled(true);
     }
 
     private describe(item: ItemInstance): void {
@@ -17,7 +19,11 @@ class TravelingItemAnimation {
     }
 
     public updateCoords(coords: Vector): void {
-        this.animation.setPos(coords.x, coords.y, coords.z);
+        // removing visual collisions
+        const x = coords.x + this.randomOffset;
+        const y = coords.y + this.randomOffset;
+        const z = coords.z + this.randomOffset;
+        this.animation.setPos(x, y, z);
     }
 
     public destroy(): void {
