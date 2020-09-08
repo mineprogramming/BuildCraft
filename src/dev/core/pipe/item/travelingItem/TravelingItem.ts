@@ -12,6 +12,9 @@ class TravelingItem {
                 coords: travelingItem.itemMover.Coords,
                 moveIndex: travelingItem.itemMover.MoveVectorIndex,
                 moveSpeed: travelingItem.itemMover.MoveSpeed,
+                targetSpeed: travelingItem.itemMover.PipeSpeed.Target,
+                deltaSpeed: travelingItem.itemMover.PipeSpeed.Delta,
+                timeToDest: travelingItem.itemMover.TimeToDest,
                 item: travelingItem.item,
             };
         },
@@ -20,19 +23,21 @@ class TravelingItem {
             const item = new TravelingItem(
                 scope.coords,
                 scope.item,
-                scope.moveSpeed,
-                scope.moveIndex
+                scope.moveIndex,
+                new PipeSpeed(scope.targetSpeed, scope.deltaSpeed),
+                scope.timeToDest
             );
-        },
+        }
     });
 
     constructor(
         coords: Vector,
         private item: ItemInstance,
-        moveSpeed: number,
-        moveVectorIndex: number
+        moveVectorIndex: number,
+        pipeSpeed: PipeSpeed = BCPipe.StandartPipeSpeed,
+        timeToDest: number = 0
     ) {
-        this.itemMover = new TravelingItemMover(coords, moveSpeed, moveVectorIndex, this.item);
+        this.itemMover = new TravelingItemMover(coords, moveVectorIndex, this.item, pipeSpeed);
         this.itemAnimation = new TravelingItemAnimation(this.itemMover.Coords, item);
 
         Saver.registerObject(this, TravelingItem.saverId);
@@ -48,9 +53,12 @@ class TravelingItem {
          * I think this way is more convenient than array of travelingItems
          * and DestroyBlock check
          */
-        if (World.getBlockID(x, y, z) == 0) this.destroy(true);
+        if (World.getBlockID(x, y, z) == 0) {
+            this.destroy(true);
+            return;
+        }
 
-        if (this.itemMover.isInCoordsCenter()) {
+        if (this.itemMover.TimeToDest <= 0) {
             const container = World.getContainer(x, y, z);
             if (container != null && this.itemMover.isValidContainer(container)) {
                 StorageInterface.putItemToContainer(this.item, container, this.itemMover.MoveVectorIndex, this.item.count);

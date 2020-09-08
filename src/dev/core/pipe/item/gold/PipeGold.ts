@@ -1,5 +1,9 @@
 /// <reference path="../abstract/BCTransportPipe.ts" />
 class PipeGold extends BCTransportPipe {
+    constructor () {
+        super();
+        this.pipeSpeed = new PipeSpeed(0.25, 0.07);
+    }
     public get material(): string {
         return "gold"
     }

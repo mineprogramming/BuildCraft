@@ -1,17 +1,34 @@
+/// <reference path="../../PipeSpeed.ts" />
 class TravelingItemMover {
     private coords: Vector;
+    private moveSpeed: number;
 
     constructor(
         initialCoords: Vector,
-        private moveSpeed: number,
         private moveVectorIndex: number,
-        private item: ItemInstance
+        private item: ItemInstance,
+        private pipeSpeed: PipeSpeed = BCPipe.StandartPipeSpeed,
+        private timeToDest: number = 0
     ) {
         this.coords = this.coordsToFixed(initialCoords);
+        this.moveSpeed = this.pipeSpeed.Target;
+        this.updateTimeToDest();
     }
 
     public get Coords(): Vector {
         return this.coords;
+    }
+
+    public get PipeSpeed(): PipeSpeed {
+        return this.pipeSpeed;
+    }
+
+    public set PipeSpeed(speed: PipeSpeed) {
+        this.pipeSpeed = speed;
+    }
+
+    public get TimeToDest(): number {
+        return this.timeToDest;
     }
 
     public get MoveSpeed(): number {
@@ -42,6 +59,8 @@ class TravelingItemMover {
         };
 
         this.coords = this.coordsToFixed(newCoords);
+
+        this.timeToDest--;
     }
 
     public findNewMoveVector(): boolean {
@@ -51,10 +70,53 @@ class TravelingItemMover {
         if (keys.length > 0) {
             const keyIndex = this.random(keys.length);
             this.moveVectorIndex = parseInt(keys[keyIndex]);
+            this.fitCoordsToCenter();
+            this.updateMoveSpeed();
+            this.updateTimeToDest();
             return true;
         }
 
         return false;
+    }
+
+    private updateTimeToDest(): void {
+        // Debug.m(`updating time to dest`);
+        const add = this.getVectorBySide(this.MoveVectorIndex);
+        const targetCoords = {
+            x: this.AbsoluteCoords.x + add.x + .5,
+            y: this.AbsoluteCoords.y + add.y + .5,
+            z: this.AbsoluteCoords.z + add.z + .5
+        };
+        // Debug.m(`targetCoords ${JSON.stringify(targetCoords)}`);
+        let travelDistance: number;
+        switch (this.MoveVectorIndex) {
+            case 0:
+            case 1:
+                travelDistance = targetCoords.y - this.Coords.y
+                break;
+            case 2:
+            case 3:
+                travelDistance = targetCoords.z - this.Coords.z
+                break;
+            case 4:
+            case 5:
+                travelDistance = targetCoords.x - this.Coords.x
+                break;
+        }
+        const travelTime = Math.floor(Math.abs(travelDistance) / this.MoveSpeed);
+        // Debug.m(`calculated time ${travelTime} for distance ${travelDistance}`);
+        this.timeToDest = travelTime;
+    }
+
+    public updateMoveSpeed(): void {
+        // update pipeSpeed
+        this.pipeSpeed = this.getClassOfCurrentPipe().PipeSpeed;
+
+        if (this.MoveSpeed < this.PipeSpeed.Target) {
+            this.moveSpeed += this.PipeSpeed.Delta;
+        } else if (this.MoveSpeed > this.PipeSpeed.Target){
+            this.moveSpeed -= this.PipeSpeed.Delta;
+        }
     }
 
     /**
@@ -114,6 +176,15 @@ class TravelingItemMover {
             }
         }
         return paths;
+    }
+
+    private fitCoordsToCenter(): void {
+        const absCoords = this.AbsoluteCoords;
+        this.coords = {
+            x: absCoords.x + .5,
+            y: absCoords.y + .5,
+            z: absCoords.z + .5
+        };
     }
 
     public getClassOfCurrentPipe(): BCPipe | null {

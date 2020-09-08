@@ -1,12 +1,15 @@
 /// <reference path="../components/PipeBlock.ts" />
 /// <reference path="../components/PipeTexture.ts" />
 /// <reference path="../components/PipeIdMap.ts" />
+/// <reference path="../PipeSpeed.ts" />
 /// <reference path="PipeConnector.ts" />
 abstract class BCPipe {
     protected block: PipeBlock;
     protected connector: PipeConnector;
     protected texture: PipeTexture;
     protected renderer: PipeRenderer;
+    protected pipeSpeed: PipeSpeed = BCPipe.StandartPipeSpeed;
+    protected static standartSpeed: PipeSpeed = new PipeSpeed(0.01, 0.02);
 
     constructor(){
         this.block = new PipeBlock(this.material, this.transportType, this.pipeTexture);
@@ -53,5 +56,13 @@ abstract class BCPipe {
 
     public get transportType(): string {
         return null
+    }
+
+    public get PipeSpeed(): PipeSpeed {
+        return this.pipeSpeed;
+    }
+
+    public static get StandartPipeSpeed(): PipeSpeed {
+        return this.standartSpeed;
     }
 }

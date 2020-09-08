@@ -1,5 +1,4 @@
 /// <reference path="../travelingItem/TravelingItem.ts" />
-/// <reference path="../ItemPipeSpeed.ts" />
 class WoodenPipeItemEjector {
     private side: number | null;
     private containerData: { source; slots } | null;
@@ -70,7 +69,7 @@ class WoodenPipeItemEjector {
             y: containerCoords.y + .5 + offsetDistance * offsetVector.y,
             z: containerCoords.z + .5 + offsetDistance * offsetVector.z
         };
-        const travelingItem = new TravelingItem(itemCoords, item, ItemPipeSpeed.DEBUG, vectorIndex);
+        const travelingItem = new TravelingItem(itemCoords, item, vectorIndex);
     }
 
     public getExtractionPack(containerData: { source; slots }, count: number): ItemInstance {
