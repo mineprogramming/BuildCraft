@@ -80,15 +80,14 @@ class TravelingItemMover {
     }
 
     private updateTimeToDest(): void {
-        // Debug.m(`updating time to dest`);
         const add = this.getVectorBySide(this.MoveVectorIndex);
         const targetCoords = {
             x: this.AbsoluteCoords.x + add.x + .5,
             y: this.AbsoluteCoords.y + add.y + .5,
             z: this.AbsoluteCoords.z + add.z + .5
         };
-        // Debug.m(`targetCoords ${JSON.stringify(targetCoords)}`);
         let travelDistance: number;
+
         switch (this.MoveVectorIndex) {
             case 0:
             case 1:
@@ -103,8 +102,8 @@ class TravelingItemMover {
                 travelDistance = targetCoords.x - this.Coords.x
                 break;
         }
+
         const travelTime = Math.floor(Math.abs(travelDistance) / this.MoveSpeed);
-        // Debug.m(`calculated time ${travelTime} for distance ${travelDistance}`);
         this.timeToDest = travelTime;
     }
 

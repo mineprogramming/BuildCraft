@@ -57,7 +57,7 @@ class WoodenPipeItemEjector {
         const offsetVector = World.getRelativeCoords(0, 0, 0, vectorIndex);
 
         // ? should I add offsetDistance to config?
-        const offsetDistance = .3;
+        const offsetDistance = __config__.getNumber("travelingItem_offset_distance") || .01;
         /*
             If you want to create items not on source block center
             change "offsetDistance" in extractItems(count: number)

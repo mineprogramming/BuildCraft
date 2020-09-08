@@ -37,7 +37,7 @@ class TravelingItem {
         pipeSpeed: PipeSpeed = BCPipe.StandartPipeSpeed,
         timeToDest: number = 0
     ) {
-        this.itemMover = new TravelingItemMover(coords, moveVectorIndex, this.item, pipeSpeed);
+        this.itemMover = new TravelingItemMover(coords, moveVectorIndex, this.item, pipeSpeed, timeToDest);
         this.itemAnimation = new TravelingItemAnimation(this.itemMover.Coords, item);
 
         Saver.registerObject(this, TravelingItem.saverId);
@@ -82,21 +82,11 @@ class TravelingItem {
 
     private drop(): void {
         const { x, y, z } = this.itemMover.Coords;
-        const speed = this.itemMover.MoveSpeed * 25;
-        const velVec = this.itemMover.getVectorBySide(this.itemMover.MoveVectorIndex);
         const { id, count, data } = this.item;
         const entity = World.drop(x, y, z, id, count, data);
-        Entity.addVelocity(entity, velVec.x * speed, velVec.y * speed, velVec.z * speed);
-    }
 
-    private debug(): void {
-        const x = Math.floor(this.itemMover.Coords.x);
-        const y = Math.floor(this.itemMover.Coords.y);
-        const z = Math.floor(this.itemMover.Coords.z);
-        const id = World.getBlockID(x, y, z);
-        Game.tipMessage(
-            `on coords ${JSON.stringify(this.itemMover.Coords)}
-            index ${this.itemMover.MoveVectorIndex} block is ${id}`
-        );
+        const speed = .25;
+        const velVec = this.itemMover.getVectorBySide(this.itemMover.MoveVectorIndex);
+        Entity.addVelocity(entity, velVec.x * speed, velVec.y * speed, velVec.z * speed);
     }
 }

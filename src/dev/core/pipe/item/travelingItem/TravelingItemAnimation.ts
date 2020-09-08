@@ -5,7 +5,8 @@ class TravelingItemAnimation {
         this.animation = new Animation.Item(coords.x, coords.y, coords.z);
         this.describe(item);
         this.animation.load();
-        this.animation.setInterpolationEnabled(true);
+        const isInterpolationEnabled = __config__.getBool("item_movement_interpolation");
+        this.animation.setInterpolationEnabled(isInterpolationEnabled);
     }
 
     private describe(item: ItemInstance): void {
