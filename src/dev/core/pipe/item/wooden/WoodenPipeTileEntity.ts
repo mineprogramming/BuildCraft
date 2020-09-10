@@ -98,7 +98,7 @@ class WoodenPipeTileEntity {
             if (this.data.connectionSide <= 5) {
                 const stackSize = this.itemEjector.getExtractionTargetsCount(this.maxExtractable());
 
-                if (this.data.energy >= stackSize * 10) {
+                if (stackSize > 0 && this.data.energy >= stackSize * 10) {
                     return true;
                 }
             }

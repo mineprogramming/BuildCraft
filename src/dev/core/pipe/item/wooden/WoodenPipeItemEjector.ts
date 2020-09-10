@@ -10,13 +10,17 @@ class WoodenPipeItemEjector {
 
     public set connectionSide(value: number | null) {
         this.side = value;
-        const coords = World.getRelativeCoords(this.x, this.y, this.z, this.connectionSide);
-        const sourceContainer = World.getContainer(coords.x, coords.y, coords.z);
-        const containerSide = World.getInverseBlockSide(value);
-        this.containerData = {
-            source: sourceContainer,
-            slots: StorageInterface.getContainerSlots(sourceContainer, 1, containerSide),
-        };
+        if (value != null) {
+            const coords = World.getRelativeCoords(this.x, this.y, this.z, this.connectionSide);
+            const sourceContainer = World.getContainer(coords.x, coords.y, coords.z);
+            const containerSide = World.getInverseBlockSide(value);
+            this.containerData = {
+                source: sourceContainer,
+                slots: StorageInterface.getContainerSlots(sourceContainer, 1, containerSide),
+            };
+        } else {
+            this.containerData = null;
+        }
     }
 
     public get connectionSide(): number | null {
