@@ -73,7 +73,9 @@ class WoodenPipeTileEntity {
 
     // !EnergyNet event
     public energyReceive(type, amount, voltage): number {
-        const received = Math.min(amount, this.getMaxEnergyReceive());
+        const storage = this.getMaxEnergyStored();
+        const readyToReceive = Math.min(storage - amount, this.getMaxEnergyReceive());
+        const received = Math.min(readyToReceive, amount);
         this.data.energy += received;
         return received;
     }
