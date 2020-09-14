@@ -100,6 +100,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         }*/
 
         this.updateHeat();
+        this.getEnergyStage();
 
         if (this.getEnergyStage() === EngineHeat.OVERHEAT){
             this.data.energy = Math.max(this.data.energy - 50, 0);
@@ -193,14 +194,13 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
             }
 
             this.pumping = true;
-
             const oppositeSide = World.getInverseBlockSide(this.orientation);
 
             if (tile.isEngine) {
                 const neededRF = tile.receiveEnergyFromEngine(oppositeSide, extracted, false);
                 this.extractEnergy(neededRF, true);
             } else if (tile.canReceiveEnergy(oppositeSide, "RF")) {
-                const neededRF = tile.energyReceive("RF", this.data.energy, this.data.energy);
+                const neededRF = tile.energyReceive("RF", extracted, this.data.energy);
                 this.extractEnergy(neededRF, true);
             }
         }
@@ -212,11 +212,13 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
         const oppositeSide = World.getInverseBlockSide(this.orientation);
 
+        const canExtract = Math.min(this.getCurrentOutputLimit(), this.data.energy);
+
         if (tile.isEngine) {
-            const maxEnergy = tile.receiveEnergyFromEngine(oppositeSide, this.data.energy, true);
+            const maxEnergy = tile.receiveEnergyFromEngine(oppositeSide, canExtract, true);
             return this.extractEnergy(maxEnergy, false);
         } else if (tile.canReceiveEnergy(oppositeSide, "RF")) {
-            const maxEnergy = tile.energyReceive("RF", this.data.energy, this.data.energy);
+            const maxEnergy = Math.min(this.getCurrentOutputLimit(), tile.getMaxEnergyStored() - tile.data.energy);
             return this.extractEnergy(maxEnergy, false);
         }
         return 0;
@@ -312,17 +314,17 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         const max = Math.min(energyMax, this.getCurrentOutputLimit());
 
         let extracted;
-        let energy = this.data.energy;
+        const energy = this.data.energy;
 
         if (energy >= max) {
             extracted = max;
             if (doExtract) {
-                energy -= max;
+                this.data.energy -= max;
             }
         } else {
             extracted = energy;
             if (doExtract) {
-                energy = 0;
+                this.data.energy = 0;
             }
         }
 

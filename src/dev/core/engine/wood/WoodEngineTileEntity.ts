@@ -20,26 +20,40 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
         // if (!worldObj.isRemote) { // ? is it again client-server?
             return Math.max(0.08 * this.getHeatLevel(), 0.01);
         // }
-
-        /*switch (getEnergyStage()) {
-            case GREEN:
-                return 0.02F;
-            case YELLOW:
-                return 0.04F;
-            case RED:
-                return 0.08F;
+        /* const stage = this.getEnergyStage();
+        switch (stage) {
+            case EngineHeat.GREEN:
+                return 0.02;
+            case EngineHeat.ORANGE:
+                return 0.04;
+            case EngineHeat.RED:
+                return 0.08;
             default:
-                return 0.01F;
+                return 0.01;
         }*/
     }
 
     public engineUpdate(): void {
         super.engineUpdate();
+        if (this.isRedstonePowered && World.getWorldTime() % 16 == 0) {
+            this.addEnergy(10);
+        }
+    }
 
-        if (this.isRedstonePowered) {
-            if (World.getThreadTime() % 16 == 0) {
-                this.addEnergy(10);
+    protected sendPower(): void {
+        if (this.progressPart == 2 && !this.hasSent) {
+            this.hasSent = true;
+
+            const tile = this.getEnergyProvider(this.orientation);
+
+            if (tile && tile.canReceiveEnergy(World.getInverseBlockSide(this.orientation), "RF") &&
+                tile.canConnectRedstoneEngine && tile.canConnectRedstoneEngine()) {
+                super.sendPower();
+            } else {
+                this.data.energy = 0;
             }
+        } else if (this.progressPart != 2) {
+            this.hasSent = false;
         }
     }
 
@@ -69,22 +83,5 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
 
     public getMaxEnergyStored(): number {
         return 0;
-    }
-
-    protected sendPower(): void {
-        if (this.progressPart == 2 && !this.hasSent) {
-            this.hasSent = true;
-
-            const tile = this.getEnergyProvider(this.orientation);
-
-            if (tile && tile.canReceiveEnergy(World.getInverseBlockSide(this.orientation), "RF") &&
-                tile.canConnectRedstoneEngine && tile.canConnectRedstoneEngine()) {
-                super.sendPower();
-            } else {
-                this.data.energy = 0;
-            }
-        } else if (this.progressPart != 2) {
-            this.hasSent = false;
-        }
     }
 }
