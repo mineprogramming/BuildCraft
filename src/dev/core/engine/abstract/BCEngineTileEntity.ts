@@ -2,7 +2,7 @@
 /// <reference path="../../energy.ts" />
 /// <reference path="../interface/IHeatable.ts" />
 /// <reference path="../interface/IEngine.ts" />
-const DEFAULT_ENGINE_ROTATION = 0;
+const DEFAULT_ENGINE_ROTATION = 1;
 abstract class BCEngineTileEntity implements IHeatable, IEngine {
     public readonly MIN_HEAT: number = 20;
     public readonly IDEAL_HEAT: number = 100;
@@ -94,7 +94,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     public init(){
         const stage = this.getEnergyStage();
         this.engineAnimation = new EngineAnimation(this, this.getTrunkTexture(stage), this.texture);
-        this.setOrientation(this.getConnectionSide());
+        this.engineAnimation.connectionSide = this.getConnectionSide();
     }
 
     // !TileEntity event

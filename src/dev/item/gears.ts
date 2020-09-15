@@ -17,31 +17,31 @@ Recipes.addShaped({id: ItemID.gear_wood, count: 1, data: 0}, [
     " x ",
     "x x",
     " x "
-], ['x', 280, 0]);
+], ["x", 280, 0]);
 
 Recipes.addShaped({id: ItemID.gear_stone, count: 1, data: 0}, [
     " x ",
     "xox",
     " x "
-], ['x', 4, -1, 'o', ItemID.gear_wood, 0]);
+], ["x", 4, -1, "o", ItemID.gear_wood, 0]);
 
 Recipes.addShaped({id: ItemID.gear_iron, count: 1, data: 0}, [
     " x ",
     "xox",
     " x "
-], ['x', 265, 0, 'o', ItemID.gear_stone, 0]);
+], ["x", 265, 0, "o", ItemID.gear_stone, 0]);
 
 Recipes.addShaped({id: ItemID.gear_gold, count: 1, data: 0}, [
     " x ",
     "xox",
     " x "
-], ['x', 266, 0, 'o', ItemID.gear_iron, 0]);
+], ["x", 266, 0, "o", ItemID.gear_iron, 0]);
 
 Recipes.addShaped({id: ItemID.gear_diamond, count: 1, data: 0}, [
     " x ",
     "xox",
     " x "
-], ['x', 264, 0, 'o', ItemID.gear_gold, 0]);
+], ["x", 264, 0, "o", ItemID.gear_gold, 0]);
 
 
 Callback.addCallback("BC-ICore", (ICore) => {
@@ -52,5 +52,5 @@ Callback.addCallback("BC-ICore", (ICore) => {
         " x ",
         "xox",
         " x "
-    ], ['x', ItemID.ingotTin, 0, 'o', ItemID.gear_stone, 0]);
+    ], ["x", ItemID.ingotTin, 0, "o", ItemID.gear_stone, 0]);
 });

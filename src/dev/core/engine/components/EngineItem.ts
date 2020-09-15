@@ -9,9 +9,6 @@ class EngineItem {
     }
     private registerItem(): void {
         IDRegistry.genItemID(this.stringId);
-        Item.createItem(this.stringId, this.getName(), {name: "engine_" + this.registryId});
+        Item.createItem(this.stringId, this.stringId, {name: "engine_" + this.registryId});
     }
-    public getName(): string {
-        return this.registryId + " Engine"
-    };
 }

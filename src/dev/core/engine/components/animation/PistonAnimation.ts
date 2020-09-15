@@ -8,6 +8,8 @@ class PistonAnimation extends AnimationComponent {
     constructor(pos: Vector, engineTexture: EngineTexture){
         const render = new PistonRender(engineTexture);
         super(pos, render);
+        const isInterpolationEnabled = __config__.getBool("animation_movement_interpolation");
+        this.animation.setInterpolationEnabled(isInterpolationEnabled);
     }
 
     public setPosition(pistonPosition: number): void {
