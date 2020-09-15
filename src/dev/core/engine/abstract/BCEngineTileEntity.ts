@@ -92,7 +92,8 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     // !TileEntity event
     public init(){
-        this.engineAnimation = new EngineAnimation(this, this.getEnergyStage(), this.texture);
+        const stage = this.getEnergyStage();
+        this.engineAnimation = new EngineAnimation(this, this.getTrunkTexture(stage), this.texture);
         this.setOrientation(this.getConnectionSide());
     }
 
@@ -109,8 +110,8 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     // !TileEntity event
     public tick(){
         if (this.lastTick < 4) this.lastTick++;
-
-        this.engineAnimation.update(this.data.progress, this.getEnergyStage());
+        const stage = this.getEnergyStage();
+        this.engineAnimation.update(this.data.progress, this.getTrunkTexture(stage));
 
         // from PC
         /* if (worldObj.isRemote) { // ? is it for client-server?
@@ -210,6 +211,10 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
             if(energyTypes?.RF) return i;
         }
         return DEFAULT_ENGINE_ROTATION;
+    }
+
+    protected getTrunkTexture(stage: EngineHeat): EngineHeat {
+        return stage;
     }
 
     public getEnergyProvider(orientation: number): any {

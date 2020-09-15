@@ -57,6 +57,10 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
         }
     }
 
+    protected getTrunkTexture(stage: EngineHeat): EngineHeat {
+        return super.getTrunkTexture((stage == EngineHeat.RED && this.data.progress < 0.5) ? EngineHeat.ORANGE : stage);
+    }
+
     public isBurning(): boolean {
         return this.isRedstonePowered;
     }
