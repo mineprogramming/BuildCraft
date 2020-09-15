@@ -18,7 +18,7 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
             Game.tipMessage(`Mode switched to ${this.data.powerMode}RF`);
             return true;
         }
-        this.engineAnimation.connectionSide = this.orientation = this.getConnectionSide(true);
+        this.setOrientation(this.getConnectionSide(true));
         return false;
     }
 
