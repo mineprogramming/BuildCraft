@@ -4,6 +4,7 @@ class PipeGold extends BCTransportPipe {
         super();
         this.pipeSpeed = new PipeSpeed(0.25, 0.07);
     }
+
     public get material(): string {
         return "gold"
     }
