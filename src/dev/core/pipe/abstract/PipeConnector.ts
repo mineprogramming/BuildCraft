@@ -8,6 +8,20 @@ abstract class PipeConnector {
     abstract canConnectToGroup(groupName: string): boolean;
     abstract getConnectionRules(): ConnectionRule[];
 
+    /**
+     * For vanila block ID
+     */
+    protected getBlacklistConnectedBlock(): Tile[] {
+        return []
+    }
+
+    public hasBlacklistBlockID(block: Tile): boolean {
+        for (const bl of this.getBlacklistConnectedBlock()) {
+            if (block.id == bl.id && (bl.data < 0 || bl.data == block.data)) return true;
+        }
+        return false;
+    }
+
     public canConnectToPipe(target: BCPipe): boolean {
         const targetGroups = target.renderGroups;
         for (const rule of this.getConnectionRules()) {

@@ -121,17 +121,18 @@ class TravelingItemMover {
     /**
      * @returns {object} which looks like {"sideIndex": pipeClass | container}
      */
+    // ! FIX
     private getRelativePaths(): object {
         const pipes = {};
         for (let i = 0; i < 6; i++) {
             const backVectorIndex = World.getInverseBlockSide(this.moveVectorIndex);
             if (i != backVectorIndex) {
-                const curX = Math.floor(this.Coords.x);
-                const curY = Math.floor(this.Coords.y);
-                const curZ = Math.floor(this.Coords.z);
+                const curX = this.AbsoluteCoords.x;
+                const curY = this.AbsoluteCoords.y;
+                const curZ = this.AbsoluteCoords.z;
                 const { x, y, z } = World.getRelativeCoords(curX, curY, curZ, i);
-                const pipeID = World.getBlockID(x, y, z);
-                const relativePipeClass = PipeIdMap.getClassById(pipeID);
+                const pipeBlock = World.getBlock(x, y, z);
+                const relativePipeClass = PipeIdMap.getClassById(pipeBlock.id);
                 const currentConnector = this.getClassOfCurrentPipe().pipeConnector;
 
                 if (relativePipeClass != null && currentConnector.canConnectToPipe(relativePipeClass)) {
@@ -140,7 +141,7 @@ class TravelingItemMover {
                 }
 
                 const container = World.getContainer(x, y, z);
-                if (container != null && this.isValidContainer(container)) {
+                if (container != null && this.isValidContainer(container) && !currentConnector.hasBlacklistBlockID(pipeBlock)) {
                     pipes[i] = container;
                 }
             }
