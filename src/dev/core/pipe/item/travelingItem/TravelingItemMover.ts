@@ -162,9 +162,9 @@ class TravelingItemMover {
      * @param {object} is returnable from getRelativePaths
      */
     private filterPaths(paths: object): object {
-        const { x, y, z } = this.Coords;
+        const { x, y, z } = this.AbsoluteCoords;
         const tileEntity = World.getTileEntity(x, y, z);
-        if (tileEntity && tileEntity.canItemGoFromSide) {
+        if (tileEntity && tileEntity.canItemGoToSide) {
             const keys = Object.keys(paths);
             for (const t of keys) {
                 const index = keys[t];
