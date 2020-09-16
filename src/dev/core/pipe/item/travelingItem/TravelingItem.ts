@@ -60,6 +60,10 @@ class TravelingItem {
 
         if (this.itemMover.TimeToDest <= 0) {
             const container = World.getContainer(x, y, z);
+            if (this.modifyByPipe()) {
+                this.destroy();
+                return;
+            }
             if (container != null && this.itemMover.isValidContainer(container)) {
                 StorageInterface.putItemToContainer(this.item, container, this.itemMover.MoveVectorIndex, this.item.count);
                 this.destroy();
@@ -73,6 +77,18 @@ class TravelingItem {
         this.itemMover.move();
         this.itemAnimation.updateCoords(this.itemMover.Coords);
     };
+
+    /**
+     * @returns {boolean} should destroy item
+     */
+    private modifyByPipe(): boolean {
+        const {x, y, z} = this.itemMover.AbsoluteCoords;
+        const tile = World.getTileEntity(x, y, z)
+        if (!tile) return false;
+
+        // ? modifyTravelingItem(item: TravelingItem): boolean
+        return tile.modifyTravelingItem ? tile.modifyTravelingItem(this) : false;
+    }
 
     private destroy(drop: boolean = false): void {
         if (drop) this.drop();
