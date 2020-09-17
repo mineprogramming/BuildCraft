@@ -26,7 +26,7 @@ declare namespace StorageInterface {
     function extractItemsFromContainer(inputTile: TileEntity, container: NativeTileEntity | UI.Container, side: number, maxCount?: number, oneStack?: boolean): number;
     function extractLiquid(liquid: string, maxAmount: number, input: TileEntity, output: TileEntity, inputSide: number): void;
     function transportLiquid(liquid: string, maxAmount: number, output: TileEntity, input: TileEntity, outputSide: number): void;
-    function getContainerSlots(container: NativeTileEntity | UI.Container, mode: number, side: number): (string | number)[];
+    function getContainerSlots(container: any, mode: number, side: number): (string | number)[];
     function checkHoppers(tile: TileEntity): void;
     function extractItems(items: ItemInstance[], containers: any, tile: TileEntity): void;
 }
