@@ -5,6 +5,7 @@
 /// <reference path="wooden/PipeWooden.ts" />
 /// <reference path="quartz/PipeQuartz.ts" />
 /// <reference path="void/PipeVoid.ts" />
+/// <reference path="diamond/PipeDiamond.ts" />
 
 const cobblePipe = new PipeCobble();
 const stonePipe = new PipeStone();
@@ -13,3 +14,4 @@ const quartzPipe = new PipeQuartz();
 const goldPipe = new PipeGold();
 const woodPipe = new PipeWooden();
 const voidPipe = new PipeVoid();
+const diamondPipe = new PipeDiamond();

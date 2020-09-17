@@ -167,7 +167,7 @@ class TravelingItemMover {
         const tileEntity = World.getTileEntity(x, y, z);
         if (tileEntity && tileEntity.canItemGoToSide) {
             const keys = Object.keys(paths);
-            for (const t of keys) {
+            for (const t in keys) {
                 const index = keys[t];
                 // ? canItemGoToSide(item: ItemInstance, index: number): boolean
                 if (!tileEntity.canItemGoToSide(this.item, index)) {

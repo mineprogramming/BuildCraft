@@ -65,10 +65,14 @@ class TravelingItem {
                 return;
             }
             if (container != null && this.itemMover.isValidContainer(container)) {
-                StorageInterface.putItemToContainer(this.item, container, this.itemMover.MoveVectorIndex, this.item.count);
-                this.destroy();
-                return;
-            } else if (!this.itemMover.findNewMoveVector()) {
+                const pushedCount = StorageInterface.putItemToContainer(this.item, container,
+                                    this.itemMover.MoveVectorIndex, this.item.count);
+                if (pushedCount > 0) {
+                    this.destroy();
+                    return;
+                }
+            }
+            if (!this.itemMover.findNewMoveVector()) {
                 this.destroy(true);
                 return;
             }
