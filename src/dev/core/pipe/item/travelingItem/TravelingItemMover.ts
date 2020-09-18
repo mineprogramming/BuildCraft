@@ -121,7 +121,6 @@ class TravelingItemMover {
     /**
      * @returns {object} which looks like {"sideIndex": pipeClass | container}
      */
-    // ! FIX
     private getRelativePaths(): object {
         const pipes = {};
         for (let i = 0; i < 6; i++) {

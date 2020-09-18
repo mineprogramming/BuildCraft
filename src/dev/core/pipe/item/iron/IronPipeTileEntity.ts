@@ -2,9 +2,8 @@ class IronPipeTileEntity {
     constructor(protected renderer: PipeRenderer, protected pipeConnector: PipeConnector, protected texture: PipeTexture) { }
     protected data: any = {}
 
-    protected defaultValues: any = {// * it will be rewriten during runtime
-        connectionSide: null,
-        energy: 0
+    public defaultValues: any = {
+        side: null
     }
 
     private connector: IronPipeRenderConnector;
@@ -14,14 +13,33 @@ class IronPipeTileEntity {
     public z: number;
 
     private changeOrientation(value: number) {
-        this.data.connectionSide = value;
+        this.data.side = value;
         this.connector.ConnectedSide = value;
     }
 
     // !TileEntity event
     public init(): void {
         this.connector = new IronPipeRenderConnector(this, this.renderer, this.pipeConnector, this.texture);
-        this.updateConnectionSide();
+        if (this.checkConnection()) this.connector.updateConnections();
+    }
+
+    /**
+     * @returns {boolean} need to update render
+     */
+    public checkConnection(): boolean {
+        if (!this.data.side){
+            this.updateConnectionSide();
+            return false;
+        }
+
+        const coords = World.getRelativeCoords(this.x, this.y, this.z, this.data.side);
+        if (!this.connector.canConnectTo(coords)) {
+            this.updateConnectionSide();
+            return false;
+        }
+
+        this.connector.ConnectedSide = this.data.side;
+        return true;
     }
 
     // !TileEntity event
@@ -32,7 +50,7 @@ class IronPipeTileEntity {
         return true;
     }
 
-    public updateConnectionSide(findNext: boolean = false): void {
+    private updateConnectionSide(findNext: boolean = false): void {
         const side = this.getConnectionSide(findNext);
         this.changeOrientation(side);
     }
@@ -51,7 +69,7 @@ class IronPipeTileEntity {
 
             if (findNext) {
 
-                if (this.data.connectionSide == t) {
+                if (this.connector.ConnectedSide == t) {
                     findNext = false
                 }
 

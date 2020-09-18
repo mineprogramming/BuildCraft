@@ -9,7 +9,7 @@ class PipeIron extends BCTransportPipe {
         Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords) => {
                 const tile = World.getTileEntity(coords.x, coords.y, coords.z);
                 if (tile && tile.connector) {
-                    tile.updateConnectionSide();
+                    tile.checkConnection();
                 }
             }
         );
