@@ -55,7 +55,7 @@ class WoodenPipeTileEntity {
     public init(): void {
         this.storageConnector = new WoodenPipeStorageConnector(this, this.renderer, this.texture);
         this.itemEjector = new WoodenPipeItemEjector(this.x, this.y, this.z);
-        this.updateConnectionSide();
+        if (this.checkConnection()) this.storageConnector.renderConnections();
     }
 
     // !TileEntity event
@@ -136,11 +136,30 @@ class WoodenPipeTileEntity {
 
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
 
-            if (this.storageConnector.canConnectTo(relCoords.x, relCoords.y, relCoords.z, i, 1)) {
+            if (this.storageConnector.canConnectTo(relCoords.x, relCoords.y, relCoords.z)) {
                 return i;
             }
         }
         // default value
         return null;
+    }
+
+    /**
+     * @returns {boolean} need to update render
+     */
+    public checkConnection(): boolean {
+        if (!this.data.connectionSide){
+            this.updateConnectionSide();
+            return false;
+        }
+
+        const { x, y, z } = World.getRelativeCoords(this.x, this.y, this.z, this.data.connectionSide);
+        if (!this.storageConnector.canConnectTo(x, y, z)) {
+            this.updateConnectionSide();
+            return false;
+        }
+
+        this.storageConnector.connectionSide = this.data.connectionSide;
+        return true;
     }
 }

@@ -17,7 +17,7 @@ class PipeWooden extends BCTransportPipe {
         Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords) => {
                 const tile = World.getTileEntity(coords.x, coords.y, coords.z);
                 if (tile && tile.storageConnector) {
-                    tile.updateConnectionSide();
+                    tile.checkConnection();
                 }
             }
         );
