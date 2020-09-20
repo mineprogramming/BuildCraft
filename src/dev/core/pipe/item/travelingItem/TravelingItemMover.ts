@@ -1,17 +1,19 @@
 /// <reference path="../../PipeSpeed.ts" />
 class TravelingItemMover {
     private coords: Vector;
-    private moveSpeed: number;
 
     constructor(
         initialCoords: Vector,
         private moveVectorIndex: number,
         private item: ItemInstance,
+        private moveSpeed: number = null,
         private pipeSpeed: PipeSpeed = BCPipe.StandartPipeSpeed,
         private timeToDest: number = 0
     ) {
         this.coords = this.coordsToFixed(initialCoords);
-        this.moveSpeed = this.pipeSpeed.Target;
+        if (this.moveSpeed == null) {
+            this.moveSpeed = this.pipeSpeed.Target;
+        }
         this.updateTimeToDest();
     }
 

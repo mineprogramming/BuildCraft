@@ -24,6 +24,7 @@ class TravelingItem {
                 scope.coords,
                 scope.item,
                 scope.moveIndex,
+                scope.moveSpeed,
                 new PipeSpeed(scope.targetSpeed, scope.deltaSpeed),
                 scope.timeToDest
             );
@@ -34,10 +35,11 @@ class TravelingItem {
         coords: Vector,
         private item: ItemInstance,
         moveVectorIndex: number,
+        moveSpeed: number = null,
         pipeSpeed: PipeSpeed = BCPipe.StandartPipeSpeed,
         timeToDest: number = 0
     ) {
-        this.itemMover = new TravelingItemMover(coords, moveVectorIndex, this.item, pipeSpeed, timeToDest);
+        this.itemMover = new TravelingItemMover(coords, moveVectorIndex, this.item, moveSpeed, pipeSpeed, timeToDest);
         this.itemAnimation = new TravelingItemAnimation(this.itemMover.Coords, item);
 
         Saver.registerObject(this, TravelingItem.saverId);
