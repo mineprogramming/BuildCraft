@@ -1,6 +1,22 @@
 /// <reference path="../abstract/BCTransportPipe.ts" />
 /// <reference path="ObsidianPipeConnector.ts" />
+/// <reference path="ObsidianPipeTileEntity.ts" />
 class PipeObsidian extends BCTransportPipe {
+    constructor() {
+        super();
+        TileEntity.registerPrototype(this.block.id,
+            new ObsidianPipeTileEntity(this.pipeConnector)
+        );
+        EnergyTileRegistry.addEnergyTypeForId(this.block.id, RF);
+        Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords) => {
+                const tile = World.getTileEntity(coords.x, coords.y, coords.z);
+                if (tile && tile.targetConnector) {
+                    tile.updateConnection();
+                }
+            }
+        );
+    }
+
     public get material(): string {
         return "obsidian"
     }
