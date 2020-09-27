@@ -1,5 +1,6 @@
 /// <reference path="ObsidianPipeTargetConnector.ts" />
 /// <reference path="ObsidianPipeItemEjector.ts" />
+/// <reference path="ObsidianPipeItemAccelerator.ts" />
 class ObsidianPipeTileEntity {
     constructor(protected pipeConnector: PipeConnector) { }
 
@@ -17,20 +18,21 @@ class ObsidianPipeTileEntity {
 
     private targetConnector: ObsidianPipeTargetConnector;
     private ejector: ObsidianPipeItemEjector;
+    private accelerator: ObsidianPipeItemAccelerator;
 
     // !TileEntity event
     public init(): void {
         this.targetConnector = new ObsidianPipeTargetConnector(this, this.pipeConnector);
         this.ejector = new ObsidianPipeItemEjector(this);
-        if (this.data.connectionSide) {
-            this.updateConnection();
-        }
+        this.accelerator = new ObsidianPipeItemAccelerator(this);
+        this.updateConnection();
     }
 
     // !TileEntity event
     public tick(): void {
-        if (!(this.ejector && this.data.connectionSide)) return;
+        if (!(this.ejector && this.data.connectionSide !== null)) return;
         this.ejector.collectEntities(this.maxEntitiesToCollect());
+        this.accelerator.accelerate(1);
     }
 
     // !TileEntity event
@@ -45,6 +47,12 @@ class ObsidianPipeTileEntity {
         const received = Math.min(readyToReceive, amount);
         this.data.energy += received;
         return received;
+    }
+
+    public updateConnection(): void {
+        this.data.connectionSide = this.targetConnector.getTargetSide();
+        this.ejector.ConnectionSide = this.data.connectionSide;
+        this.accelerator.ConnectionSide = this.data.connectionSide;
     }
 
     private maxEntitiesToCollect(): number {
@@ -65,10 +73,5 @@ class ObsidianPipeTileEntity {
 
     public getMaxEnergyReceive(): number {
         return 640;
-    }
-
-    public updateConnection(): void {
-        this.data.connectionSide = this.targetConnector.getTargetSide();
-        this.ejector.ConnectionSide = this.data.connectionSide;
     }
 }
