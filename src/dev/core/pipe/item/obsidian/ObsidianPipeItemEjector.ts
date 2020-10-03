@@ -27,7 +27,6 @@ class ObsidianPipeItemEjector {
             if (item.count <= maxCount) {
 				const speed = this.getItemSpeed(entity);
                 this.extractItem(item, speed);
-                Entity.remove(entity);
             }
         }
 	}

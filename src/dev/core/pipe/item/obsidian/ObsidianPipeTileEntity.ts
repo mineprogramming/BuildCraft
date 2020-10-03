@@ -30,9 +30,11 @@ class ObsidianPipeTileEntity {
 
     // !TileEntity event
     public tick(): void {
-        if (!(this.ejector && this.data.connectionSide !== null)) return;
-        this.ejector.collectEntities(this.maxEntitiesToCollect());
-        this.accelerator.accelerate(1);
+        if ((this.ejector && this.data.connectionSide !== null)) {
+            this.ejector.collectEntities(this.maxEntitiesToCollect());
+            this.accelerator.accelerate(this.maxEntitiesToPull());
+        }
+        this.data.energy = 0;
     }
 
     // !TileEntity event
