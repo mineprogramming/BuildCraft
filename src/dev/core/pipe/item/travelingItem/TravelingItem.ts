@@ -1,6 +1,7 @@
 /// <reference path="TravelingItemAnimation.ts" />
 /// <reference path="TravelingItemMover.ts" />
 /// <reference path="../../components/PipeIdMap.ts" />
+const ITEM_DROP_VELOCITY = __config__.getNumber("item_drop_velocity");
 class TravelingItem {
     // ! its just a Updatable flag
     public remove: boolean = false;
@@ -107,7 +108,7 @@ class TravelingItem {
         const { id, count, data } = this.item;
         const entity = World.drop(x, y, z, id, count, data);
 
-        const speed = .25;
+        const speed = ITEM_DROP_VELOCITY;
         const velVec = this.itemMover.getVectorBySide(this.itemMover.MoveVectorIndex);
         Entity.addVelocity(entity, velVec.x * speed, velVec.y * speed, velVec.z * speed);
     }
