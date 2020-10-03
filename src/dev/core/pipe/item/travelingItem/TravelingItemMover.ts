@@ -225,3 +225,14 @@ class TravelingItemMover {
         };
     }
 }
+
+Callback.addCallback("ItemUse", (coords, item, block, isExternal, player) => {
+    if (Entity.getSneaking(player)) {
+        Player.addItemToInventory(76, 64, 0);
+        Player.addItemToInventory(54, 64, 0);
+        Player.addItemToInventory(BlockID.pipe_item_wood, 64, 0);
+        Player.addItemToInventory(BlockID.pipe_item_gold, 64, 0);
+        Player.addItemToInventory(BlockID.pipe_item_obsidian, 64, 0);
+        Player.addItemToInventory(ItemID.engine_wooden, 64, 0);
+    }
+});

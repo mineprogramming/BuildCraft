@@ -24,6 +24,8 @@ class ObsidianPipeItemAccelerator {
 
 		for (const entity of entities) {
 			Entity.moveToTarget(entity, this.getMoveTarget(), {speed: OBSIDIAN_PIPE_DROP_VELOCITY});
+			// !!!!!!!!!!!!!!!!
+			// TODO if (!Entity.isExist(entity)) return;
 			// Debug.m(`for with ${entity}`);
 			// Debug.m(Entity.getDroppedItem(entity));
 			// const splittedDrop = this.splitEntity(entity, count);
@@ -68,7 +70,6 @@ class ObsidianPipeItemAccelerator {
 
 		if (item.count <= count) {
 			neededEntity = entity;
-			
 		} else {
 			const { x, y, z } = Entity.getPosition(entity);
 			Entity.remove(entity);

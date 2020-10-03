@@ -11,11 +11,6 @@ class ObsidianPipeItemEjector {
 
 	private side: number = null;
 	public collectEntities(maxCount: number): void {
-		const boxStart = {
-			x: this.coords.x - 1,
-			y: this.coords.y - 1,
-			z: this.coords.z - 1
-		};
 		const boxEnd = {
 			x: this.coords.x + 1,
 			y: this.coords.y + 1,
@@ -23,10 +18,13 @@ class ObsidianPipeItemEjector {
 		};
         const entitiesToCollect = Entity.getAllInsideBox(this.coords, boxEnd, 64, false);
         for (const entity of entitiesToCollect) {
+			if (!Entity.isExist(entity)) return;
+
 			const item = Entity.getDroppedItem(entity);
             if (item.count <= maxCount) {
 				const speed = this.getItemSpeed(entity);
-                this.extractItem(item, speed);
+				this.extractItem(item, speed);
+				Entity.remove(entity);
             }
         }
 	}
