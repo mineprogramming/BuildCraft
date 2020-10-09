@@ -1,68 +1,101 @@
 /// <reference path="TravelingItemAnimation.ts" />
 /// <reference path="TravelingItemMover.ts" />
 /// <reference path="../../components/PipeIdMap.ts" />
+/// <reference path="TravelingItemNetworkEntity.ts" />
 const ITEM_DROP_VELOCITY = __config__.getNumber("item_drop_velocity");
 class TravelingItem {
     // ! its just a Updatable flag
     public remove: boolean = false;
-    private readonly itemAnimation: TravelingItemAnimation;
     private readonly itemMover: TravelingItemMover;
+
+    public blockSource: BlockSource;
+    private networkEntity: NetworkEntity;
+
     public static saverId = Saver.registerObjectSaver("TravelingItemSaver", {
         save(travelingItem: TravelingItem) {
-            return {
+            const dataToSave = {
+                dimension: travelingItem.dimension,
                 coords: travelingItem.itemMover.Coords,
                 moveIndex: travelingItem.itemMover.MoveVectorIndex,
                 moveSpeed: travelingItem.itemMover.MoveSpeed,
                 targetSpeed: travelingItem.itemMover.PipeSpeed.Target,
                 deltaSpeed: travelingItem.itemMover.PipeSpeed.Delta,
-                timeToDest: travelingItem.itemMover.TimeToDest,
+                progressPart: travelingItem.itemMover.ProgressPart,
                 item: travelingItem.item,
             };
+            return dataToSave;
         },
 
         read(scope) {
             const item = new TravelingItem(
                 scope.coords,
+                scope.dimension,
                 scope.item,
                 scope.moveIndex,
                 scope.moveSpeed,
                 new PipeSpeed(scope.targetSpeed, scope.deltaSpeed),
-                scope.timeToDest
+                scope.ProgressPart
             );
         }
     });
 
     constructor(
         coords: Vector,
+        private dimension: number,
         private item: ItemInstance,
         moveVectorIndex: number,
         moveSpeed: number = null,
         pipeSpeed: PipeSpeed = BCPipe.StandartPipeSpeed,
-        timeToDest: number = 0
+        progressPart: number = 0
     ) {
-        this.itemMover = new TravelingItemMover(coords, moveVectorIndex, this.item, moveSpeed, pipeSpeed, timeToDest);
-        this.itemAnimation = new TravelingItemAnimation(this.itemMover.Coords, item);
-
+        this.itemMover = new TravelingItemMover(coords, progressPart, moveVectorIndex, this.item, pipeSpeed, moveSpeed);
         Saver.registerObject(this, TravelingItem.saverId);
         Updatable.addUpdatable(this);
     }
 
+    public get Coords(): Vector {
+        return this.itemMover.Coords;
+    }
+
+    public get VisualItem(): {id, count, data} {
+        return {
+            id: this.item.id,
+            count: this.item.count,
+            data: this.item.data
+        };
+    }
+
     // * We need this to pass this["update"] existing
     public update = () => {
+
+        if (!this.blockSource) {
+            this.blockSource = BlockSource.getDefaultForDimension(this.dimension);
+            if (!this.blockSource) return;
+        }
+
         const { x, y, z } = this.itemMover.AbsoluteCoords;
-        if (!World.isChunkLoadedAt(x, y, z)) return;
+        if (!this.blockSource.isChunkLoaded(Math.floor(x / 16), Math.floor(z / 16))) return;
         /*
          * checking for block destroy
          * I think this way is more convenient than array of travelingItems
          * and DestroyBlock check
          */
-        if (World.getBlockID(x, y, z) == 0) {
+        if (this.blockSource.getBlockId(x, y, z) == 0) {
             this.destroy(true);
             return;
         }
+        // !!!!!!!!!!!
+        if (!this.networkEntity) {
+            this.networkEntity = new NetworkEntity(travelingItemNetworkType, this);
+            this.updateMoveData();
+        }
+        if (World.getThreadTime() % 50 == 0) {
+            // @ts-ignore
+            this.networkEntity.getClients().setupDistancePolicy(x, y, z, this.blockSource.getDimension(), 32);
+        }
 
-        if (this.itemMover.TimeToDest <= 0) {
-            const container = World.getContainer(x, y, z);
+        if (this.itemMover.hasReached()) {
+            const container = World.getContainer(x, y, z, this.blockSource);
             if (this.modifyByPipe()) {
                 this.destroy();
                 return;
@@ -75,14 +108,15 @@ class TravelingItem {
                     return;
                 }
             }
-            if (!this.itemMover.findNewMoveVector()) {
+            if (this.itemMover.findNewMoveVector(this.blockSource)) {
+                this.updateMoveData();
+            } else {
                 this.destroy(true);
                 return;
             }
         }
 
         this.itemMover.move();
-        this.itemAnimation.updateCoords(this.itemMover.Coords);
     };
 
     /**
@@ -90,23 +124,32 @@ class TravelingItem {
      */
     private modifyByPipe(): boolean {
         const {x, y, z} = this.itemMover.AbsoluteCoords;
-        const tile = World.getTileEntity(x, y, z)
+        const tile = World.getTileEntity(x, y, z, this.blockSource)
         if (!tile) return false;
 
         // ? modifyTravelingItem(item: TravelingItem): boolean
         return tile.modifyTravelingItem ? tile.modifyTravelingItem(this) : false;
     }
 
+    private updateMoveData(): void {
+        const moveData: TravelingItemMoveData = {
+            coordsFrom: this.itemMover.PrevCoords,
+            vectorIndex: this.itemMover.MoveVectorIndex,
+            time: this.itemMover.TravelTime
+        };
+        this.networkEntity.send("moveData", moveData);
+    }
+
     private destroy(drop: boolean = false): void {
         if (drop) this.drop();
-        this.itemAnimation.destroy();
         this.remove = true;
+        this.networkEntity.remove();
     }
 
     private drop(): void {
         const { x, y, z } = this.itemMover.Coords;
-        const { id, count, data } = this.item;
-        const entity = World.drop(x, y, z, id, count, data);
+        const { id, count, data, extra} = this.item;
+        const entity = this.blockSource.spawnDroppedItem(x, y, z, id, count, data, extra || null);
 
         const speed = ITEM_DROP_VELOCITY;
         const velVec = this.itemMover.getVectorBySide(this.itemMover.MoveVectorIndex);

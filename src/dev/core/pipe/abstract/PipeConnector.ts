@@ -15,9 +15,9 @@ abstract class PipeConnector {
         return []
     }
 
-    public hasBlacklistBlockID(block: Tile): boolean {
+    public hasBlacklistBlockID(id: number, data: number): boolean {
         for (const bl of this.getBlacklistConnectedBlock()) {
-            if (block.id == bl.id && (bl.data < 0 || bl.data == block.data)) return true;
+            if (id == bl.id && (bl.data < 0 || bl.data == data)) return true;
         }
         return false;
     }

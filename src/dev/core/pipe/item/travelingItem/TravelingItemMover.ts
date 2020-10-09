@@ -1,24 +1,54 @@
 /// <reference path="../../PipeSpeed.ts" />
 class TravelingItemMover {
     private coords: Vector;
+    private prevCoords: Vector;
+
+    private prevCoordsTime: number;
+    private nextCoordsTime: number;
 
     constructor(
         initialCoords: Vector,
+        private progressPart: number,
         private moveVectorIndex: number,
         private item: ItemInstance,
-        private moveSpeed: number = null,
         private pipeSpeed: PipeSpeed = BCPipe.StandartPipeSpeed,
-        private timeToDest: number = 0
+        private moveSpeed: number
     ) {
         this.coords = this.coordsToFixed(initialCoords);
-        if (this.moveSpeed == null) {
+        if (!this.moveSpeed) {
             this.moveSpeed = this.pipeSpeed.Target;
         }
-        this.updateTimeToDest();
+        this.updateCoordsTime();
+        this.updatePrevCoords();
     }
 
     public get Coords(): Vector {
         return this.coords;
+    }
+
+    public get PrevCoords(): Vector {
+        return this.prevCoords;
+    }
+
+    public get NextCoords(): Vector {
+        const prev = this.PrevCoords;
+        const vec = this.getVectorBySide(this.MoveVectorIndex);
+        prev.x += vec.x;
+        prev.y += vec.y;
+        prev.z += vec.z;
+        return prev;
+    }
+
+    public get ProgressPart(): number {
+        return this.progressPart;
+    }
+
+    public get Time(): number {
+        return java.lang.System.currentTimeMillis();
+    }
+
+    public get TravelTime(): number {
+        return this.nextCoordsTime - this.prevCoordsTime;
     }
 
     public get PipeSpeed(): PipeSpeed {
@@ -27,10 +57,6 @@ class TravelingItemMover {
 
     public set PipeSpeed(speed: PipeSpeed) {
         this.pipeSpeed = speed;
-    }
-
-    public get TimeToDest(): number {
-        return this.timeToDest;
     }
 
     public get MoveSpeed(): number {
@@ -50,68 +76,69 @@ class TravelingItemMover {
         };
     }
 
+    public hasReached(): boolean {
+        return this.Time >= this.nextCoordsTime;
+    }
+
     public move(): void {
-        const moveVector = this.getVectorBySide(this.moveVectorIndex);
         if (this.moveSpeed <= 0 || this.moveVectorIndex == null) return;
+        const moveVector = this.getVectorBySide(this.MoveVectorIndex);
+
+        const moveTime = this.nextCoordsTime - this.prevCoordsTime;
+        const timePassed = this.Time - this.prevCoordsTime;
+        this.progressPart = Math.min(timePassed / moveTime, 1);
 
         const newCoords = {
-            x: this.coords.x + moveVector.x * this.moveSpeed,
-            y: this.coords.y + moveVector.y * this.moveSpeed,
-            z: this.coords.z + moveVector.z * this.moveSpeed,
+            x: this.prevCoords.x + moveVector.x * this.ProgressPart,
+            y: this.prevCoords.y + moveVector.y * this.ProgressPart,
+            z: this.prevCoords.z + moveVector.z * this.ProgressPart
         };
 
         this.coords = this.coordsToFixed(newCoords);
-
-        this.timeToDest--;
     }
 
-    public findNewMoveVector(): boolean {
-        const nextPipes = this.filterPaths(this.getRelativePaths());
+    public findNewMoveVector(region: BlockSource): boolean {
+        const nextPipes = this.filterPaths(this.getRelativePaths(region), region);
         const keys = Object.keys(nextPipes);
 
         if (keys.length > 0) {
             const keyIndex = this.random(keys.length);
             this.moveVectorIndex = parseInt(keys[keyIndex]);
             this.fitCoordsToCenter();
-            this.updateMoveSpeed();
-            this.updateTimeToDest();
+            this.prevCoords = this.Coords;
+            this.updateMoveSpeed(region);
+            this.updateCoordsTime();
             return true;
         }
 
         return false;
     }
 
-    private updateTimeToDest(): void {
-        const add = this.getVectorBySide(this.MoveVectorIndex);
-        const targetCoords = {
-            x: this.AbsoluteCoords.x + add.x + .5,
-            y: this.AbsoluteCoords.y + add.y + .5,
-            z: this.AbsoluteCoords.z + add.z + .5
+    /**
+     * @param progressPart use only saves reading
+     */
+    private updateCoordsTime(progressPart: number = 0): void {
+        const speedInMs = this.MoveSpeed / 50;
+        const totalTimeInMs = 1 / speedInMs;
+        this.prevCoordsTime = this.Time - totalTimeInMs * progressPart;
+        this.nextCoordsTime = this.Time + totalTimeInMs * (1 - progressPart);
+    }
+    /**
+     * use only saves reading
+     */
+    private updatePrevCoords(): void {
+        const moveVector = this.getVectorBySide(this.MoveVectorIndex);
+        const relativePrevCoords = {
+            x: this.Coords.x - moveVector.x * this.ProgressPart,
+            y: this.Coords.y - moveVector.y * this.ProgressPart,
+            z: this.Coords.z - moveVector.z * this.ProgressPart
         };
-        let travelDistance: number;
-
-        switch (this.MoveVectorIndex) {
-            case 0:
-            case 1:
-                travelDistance = targetCoords.y - this.Coords.y
-                break;
-            case 2:
-            case 3:
-                travelDistance = targetCoords.z - this.Coords.z
-                break;
-            case 4:
-            case 5:
-                travelDistance = targetCoords.x - this.Coords.x
-                break;
-        }
-
-        const travelTime = Math.floor(Math.abs(travelDistance) / this.MoveSpeed);
-        this.timeToDest = travelTime;
+        this.prevCoords = this.coordsToFixed(relativePrevCoords);
     }
 
-    public updateMoveSpeed(): void {
+    public updateMoveSpeed(region: BlockSource): void {
         // update pipeSpeed
-        this.pipeSpeed = this.getClassOfCurrentPipe().PipeSpeed;
+        this.pipeSpeed = this.getClassOfCurrentPipe(region).PipeSpeed;
 
         if (this.MoveSpeed < this.PipeSpeed.Target) {
             this.moveSpeed += this.PipeSpeed.Delta;
@@ -123,7 +150,7 @@ class TravelingItemMover {
     /**
      * @returns {object} which looks like {"sideIndex": pipeClass | container}
      */
-    private getRelativePaths(): object {
+    private getRelativePaths(region: BlockSource): object {
         const pipes = {};
         for (let i = 0; i < 6; i++) {
             const backVectorIndex = World.getInverseBlockSide(this.moveVectorIndex);
@@ -132,17 +159,18 @@ class TravelingItemMover {
                 const curY = this.AbsoluteCoords.y;
                 const curZ = this.AbsoluteCoords.z;
                 const { x, y, z } = World.getRelativeCoords(curX, curY, curZ, i);
-                const pipeBlock = World.getBlock(x, y, z);
-                const relativePipeClass = PipeIdMap.getClassById(pipeBlock.id);
-                const currentConnector = this.getClassOfCurrentPipe().pipeConnector;
+                const pipeBlockID = region.getBlockId(x, y, z);
+                const pipeBlockData = region.getBlockData(x, y, z);
+                const relativePipeClass = PipeIdMap.getClassById(pipeBlockID);
+                const currentConnector = this.getClassOfCurrentPipe(region).pipeConnector;
 
                 if (relativePipeClass != null && currentConnector.canConnectToPipe(relativePipeClass)) {
                     pipes[i] = relativePipeClass;
                     continue;
                 }
 
-                const container = World.getContainer(x, y, z);
-                if (container != null && this.isValidContainer(container) && !currentConnector.hasBlacklistBlockID(pipeBlock)) {
+                const container = World.getContainer(x, y, z, region);
+                if (container != null && this.isValidContainer(container) && !currentConnector.hasBlacklistBlockID(pipeBlockID, pipeBlockData)) {
                     pipes[i] = container;
                 }
             }
@@ -163,9 +191,9 @@ class TravelingItemMover {
     /**
      * @param {object} is returnable from getRelativePaths
      */
-    private filterPaths(paths: object): object {
+    private filterPaths(paths: object, region: BlockSource): object {
         const { x, y, z } = this.AbsoluteCoords;
-        const tileEntity = World.getTileEntity(x, y, z);
+        const tileEntity = World.getTileEntity(x, y, z, region);
         if (tileEntity && tileEntity.canItemGoToSide) {
             const keys = Object.keys(paths);
             for (const t in keys) {
@@ -188,16 +216,16 @@ class TravelingItemMover {
         };
     }
 
-    public getClassOfCurrentPipe(): BCPipe | null {
+    public getClassOfCurrentPipe(region: BlockSource): BCPipe | null {
         const {x, y, z} = this.AbsoluteCoords;
-        const blockID = World.getBlockID(x, y, z);
+        const blockID = region.getBlockId(x, y, z);
         return PipeIdMap.getClassById(blockID);
     }
 
-    public isInsidePipe(): boolean {
+    public isInsidePipe(region: BlockSource): boolean {
         const { x, y, z } = this.Coords;
-        const isChunkLoaded = World.isChunkLoadedAt(x, y, z);
-        return !isChunkLoaded || this.getClassOfCurrentPipe() != null;
+        const isChunkLoaded = region.isChunkLoaded(Math.floor(x / 16), Math.floor(z / 16));
+        return !isChunkLoaded || this.getClassOfCurrentPipe(region) != null;
     }
 
     private random(max: number): number {
