@@ -3,6 +3,7 @@ class WoodenPipeItemEjector {
     private side: number | null;
     private containerData: { source; slots } | null;
     constructor(
+        public readonly region: BlockSource,
         public readonly x: number,
         public readonly y: number,
         public readonly z: number
@@ -12,7 +13,8 @@ class WoodenPipeItemEjector {
         this.side = value;
         if (value != null) {
             const coords = World.getRelativeCoords(this.x, this.y, this.z, this.connectionSide);
-            const sourceContainer = World.getContainer(coords.x, coords.y, coords.z);
+            // update to BlockSource
+            const sourceContainer = World.getContainer(coords.x, coords.y, coords.z, this.region);
             const containerSide = World.getInverseBlockSide(value);
             this.containerData = {
                 source: sourceContainer,
@@ -74,7 +76,7 @@ class WoodenPipeItemEjector {
             y: containerCoords.y + 0.5 + offsetDistance * offsetVector.y,
             z: containerCoords.z + 0.5 + offsetDistance * offsetVector.z,
         };
-        const travelingItem = new TravelingItem(itemCoords, item, vectorIndex);
+        const travelingItem = new TravelingItem(itemCoords, this.region.getDimension(), item, vectorIndex);
     }
 
     public getExtractionPack(containerData: { source; slots }, count: number): ItemInstance {
@@ -95,6 +97,7 @@ class WoodenPipeItemEjector {
 
             const needToAdd = count - gettedItem.count;
             if (needToAdd > 0) {
+                // ! MineExplorer, update library please
                 StorageInterface.addItemToSlot(slot, gettedItem, needToAdd);
                 source.setSlot(i, slot.id, slot.count, slot.data, slot.extra);
             } else break;

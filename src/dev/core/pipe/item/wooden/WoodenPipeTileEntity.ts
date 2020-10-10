@@ -17,7 +17,11 @@ class WoodenPipeTileEntity {
     public y: number;
     public z: number;
 
+    public region: BlockSource;
+
     private ticksSincePull: number = 0;
+
+    public useNetworkItemContainer: true;
 
     private changeOrientation(value: number) {
         this.data.connectionSide = value;
@@ -27,20 +31,11 @@ class WoodenPipeTileEntity {
 
     // !TileEntity event
     public tick(): void {
-        /*
-        ? Oh, it looks like a client-server
-        if (container.getWorld().isRemote) {
-            return;
-        }
-        */
         this.ticksSincePull++;
 
         if (this.shouldTick()) {
             const maxExtractable = this.maxExtractable();
             const targets = this.itemEjector.getExtractionTargetsCount(maxExtractable);
-            // ! DEBUG VALUE
-            const maxPipeStack = 16;
-
             if (targets > 0) {
                 // * EXTRACT
                 this.itemEjector.extractItems(this.maxExtractable());
@@ -54,8 +49,7 @@ class WoodenPipeTileEntity {
     // !TileEntity event
     public init(): void {
         this.storageConnector = new WoodenPipeStorageConnector(this, this.renderer, this.texture);
-        this.itemEjector = new WoodenPipeItemEjector(this.x, this.y, this.z);
-        // if () this.storageConnector.renderConnections();
+        this.itemEjector = new WoodenPipeItemEjector(this.region,this.x, this.y, this.z);
         this.checkConnection()
     }
 
@@ -137,7 +131,7 @@ class WoodenPipeTileEntity {
 
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
 
-            if (this.storageConnector.canConnectTo(relCoords.x, relCoords.y, relCoords.z)) {
+            if (this.storageConnector.canConnectTo(relCoords.x, relCoords.y, relCoords.z, this.region)) {
                 return i;
             }
         }
@@ -155,7 +149,7 @@ class WoodenPipeTileEntity {
         }
 
         const { x, y, z } = World.getRelativeCoords(this.x, this.y, this.z, this.data.connectionSide);
-        if (!this.storageConnector.canConnectTo(x, y, z)) {
+        if (!this.storageConnector.canConnectTo(x, y, z, this.region)) {
             this.updateConnectionSide();
             return false;
         }

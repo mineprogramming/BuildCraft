@@ -19,7 +19,6 @@ class WoodenPipeStorageConnector {
         for (let i = 0; i < 6; i++) {
             const box = boxes[i];
             const renderModel = BlockRenderer.createModel();
-            const relCoords = World.getRelativeCoords(this.coords.x, this.coords.y, this.coords.z, i);
 
             if (i == this.connectionSide) {
                 const textre = this.texture.containerConnection;
@@ -28,11 +27,12 @@ class WoodenPipeStorageConnector {
             }
             standartModel.addEntry(renderModel);
         }
+        // TODO add region
         BlockRenderer.mapAtCoords(this.coords.x, this.coords.y, this.coords.z, standartModel);
     }
 
-    public canConnectTo(x: number, y: number, z: number): boolean {
-        const container = World.getContainer(x, y, z);
+    public canConnectTo(x: number, y: number, z: number, region: BlockSource): boolean {
+        const container = World.getContainer(x, y, z, region);
         if (!container) return false;
         // ! container.slots contain not only slots. It containt saverID too.
         // ! container.slots.length = 1 means that container has 0 slots
@@ -40,6 +40,7 @@ class WoodenPipeStorageConnector {
     }
 
     public destroy(): void {
+        // TODO add region
         BlockRenderer.unmapAtCoords(this.coords.x, this.coords.y, this.coords.z);
     }
 }
