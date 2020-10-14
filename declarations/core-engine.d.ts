@@ -7,7 +7,22 @@ declare namespace Particles {
     function registerParticleType(data: object);
 }
 
-
+declare class NetworkEntity {
+    constructor(type: any, target: any);
+    remove(): void;
+    send(string: any, pack: any): void;
+}
+declare namespace Network {
+    function serverToLocalId(id: number): number;
+}
+declare class BlockSource {
+    static getDefaultForDimension(dimension: any): BlockSource;
+    getDimension(): number;
+    isChunkLoaded(chunkX, chunkZ): boolean;
+    getBlockId(x, y, z): number;
+    getBlockData(x, y, z): number;
+    spawnDroppedItem(x: number, y: number, z: number, id: number, count: number, data: number, extra?: number|ItemExtra): number;
+}
 /**
  * Module used to manage armor's behavior
  */
@@ -253,6 +268,8 @@ declare class Config {
      * specified
      */
     public getBool(name: string): boolean;
+
+    public getFloat(name: string): number;
 
     /**
      * @param name option name, supports multi-layer calls, separated by '.'
@@ -3694,6 +3711,8 @@ interface Vector {
     z: number
 }
 
+
+
 /**
  * Object representing coordinate set with side data
  */
@@ -3791,6 +3810,8 @@ declare namespace Entity {
      * @returns an array of all loaded entities ids
      */
     function getAll(): number[];
+
+    function getAllInsideBox(pos1: Vector, pos2: Vector, type: number, mode: boolean): number[];
 
     /**
      * @returns an array of all loaded entities ids
@@ -4093,7 +4114,7 @@ declare namespace Entity {
     /**
      * @returns distance between specified entity and a fixed coordinate set
      */
-    function getDistanceToCoords(ent: number, coords: any): void;
+    function getDistanceToCoords(ent: number, coords: any): number;
 
     /**
      * @returns distance in blocks between two entities
@@ -4785,7 +4806,7 @@ declare namespace Game {
      * [[Native.ChatColor]] values
      * @param msg message to be displayed
      */
-    function tipMessage(msg: string): void;
+    function tipMessage(msg: any): void;
 
     /**
      * Displays android AlertDialog with given message and dialog title
@@ -7049,6 +7070,8 @@ declare namespace Updatable {
      */
     function addUpdatable(obj: any): any;
 
+    function addLocalUpdatable(obj: any): any;
+
     /**
      * @returns java.util.ArrayList instance containing all defined 
      * [[Updatable]] objects
@@ -8364,7 +8387,7 @@ declare namespace World {
     /**
      * @returns [[TileEntity]] located on the specified coordinates
      */
-    function getTileEntity(x: number, y: number, z: number): any;
+    function getTileEntity(x: number, y: number, z: number, region?: BlockSource): any;
 
     /**
      * If the block on the specified coordinates is a TileEntity block and is 
@@ -8386,7 +8409,7 @@ declare namespace World {
      * its container, if the block is a [[NativeTileEntity]], returns it, if 
      * none of above, returns null
      */
-    function getContainer(x: number, y: number, z: number): {getType: any , slots: any};
+    function getContainer(x: number, y: number, z: number, region?: BlockSource): {getType: any , slots: any};
 
     /**
      * @returns current world's time in ticks 

@@ -111,7 +111,7 @@ class TravelingItemAnimation {
 
     private describe(item: ItemInstance): void {
         this.animation.describeItem({
-            id: item.id,
+            id: Network.serverToLocalId(item.id),
             count: 1,
             data: item.data,
             notRandomize: true,
