@@ -36,6 +36,8 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     public y: number;
     public z: number;
 
+    public region: BlockSource;
+
     public readonly isEngine: boolean = true;
 
     public engineAnimation: EngineAnimation = null;
@@ -45,14 +47,6 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
      ! during I use new get set methods
      */
 
-    /*get orientation(){
-        if(!this.data.meta){
-            this.data.meta = this.getConnectionSide();
-        }
-        alert(`meta get ${this.data.meta}`);
-        return this.data.meta;
-    }*/
-
     public getOrientation(): number {
         if(!this.data.meta){
             this.data.meta = this.getConnectionSide();
@@ -60,46 +54,139 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         return this.data.meta;
     }
 
-    /* set orientation(value: number){
-        this.data.meta = value;
-        this.engineAnimation.connectionSide = value;
-    } */
-
     public setOrientation(value: number){
         this.data.meta = value;
-        this.engineAnimation.connectionSide = value;
+        // @ts-ignore
+        this.networkData.putInt("orientation", this.data.meta);
+        // @ts-ignore
+        this.networkData.sendChanges();
+        // this.engineAnimation.connectionSide = value;
     }
 
-    /*get pumping(): boolean{
-        return this.isPumping;
-    }*/
+    private setProgress(value: number){
+        this.data.progress = value;
+        // @ts-ignore
+        this.networkData.putFloat("progress", value);
+    }
+// @ts-ignore
+    private getProgress(): number {
+        return this.data.progress;
+    }
+
+    private setProgressPart(value: number){
+        this.progressPart = value;
+    }
+
+    private getProgressPart(): number {
+        return this.progressPart;
+    }
+
+    private setEnergyStage(value: EngineHeat){
+        this.energyStage = value;
+        // ? it can help syncing server and client tickrate gap
+        // @ts-ignore
+        this.networkData.putInt("energyStageIndex", HeatOrder.indexOf(this.energyStage));
+        // @ts-ignore
+        this.networkData.sendChanges();
+    }
 
     public getPumping(): boolean {
         return this.isPumping;
     }
 
-    /*set pumping(value: boolean){
-        if (this.isPumping == value) return;
-        this.isPumping = value;
-        this.lastTick = 0;
-    }*/
-
     public setPumping(value: boolean){
         if (this.isPumping == value) return;
         this.isPumping = value;
         this.lastTick = 0;
+        // @ts-ignore
+        this.networkData.putBoolean("isPumping", value);
+        // @ts-ignore
+        this.networkData.sendChanges();
+    }
+
+    public client = {
+        orientation: null,
+        energyStage: null,
+        isPumping: false,
+        progress: 0,
+        progressPart: 0,
+
+        engineAnimation: null,
+
+        // !TileEntity event
+        load() {
+            this.orientation = this.networkData.getInt("orientation");
+            this.energyStage = HeatOrder[this.networkData.getInt("energyStageIndex")];
+            this.isPumping = this.networkData.getBoolean("isPumping");
+            this.progress = this.networkData.getFloat("progress");
+            alert("load");
+
+            this.engineAnimation = new EngineAnimation(this, this.getTrunkTexture(this.energyStage, this.progress), this.getEngineTexture());
+            this.engineAnimation.ConnectionSide = this.orientation;
+            this.networkData.addOnDataChangedListener((networkData, isExternalChange) => {
+                this.orientation = networkData.getInt("orientation");
+                this.energyStage = HeatOrder[networkData.getInt("energyStageIndex")];
+                this.isPumping = this.networkData.getBoolean("isPumping");
+                this.engineAnimation.ConnectionSide = this.orientation;
+            });
+        },
+
+        // !TileEntity event
+        unload() {
+            alert("unload");
+            this.engineAnimation.destroy();
+        },
+
+        // !TileEntity event
+        tick() {
+            if (!this.engineAnimation) return;
+            if (this.progressPart != 0) {
+                this.progress += this.getPistonSpeed(this.energyStage);
+                if (this.progress > 1) {
+                    this.progressPart = 0;
+                    this.progress = 0;
+                }
+            }
+            else if (this.isPumping) {
+                this.progressPart = 1;
+            }
+            this.engineAnimation.update(this.progress, this.getTrunkTexture(this.energyStage, this.progress));
+        },
+
+        // ? please override in derived class
+        getEngineTexture(stage: EngineHeat) {
+            return null;
+        },
+
+        getTrunkTexture(stage: EngineHeat, progress: number): EngineHeat {
+            return stage;
+        },
+
+        getPistonSpeed(energyStage: EngineHeat): number {
+            switch (energyStage) {
+                case EngineHeat.BLUE:
+                    return 0.02;
+                case EngineHeat.GREEN:
+                    return 0.04;
+                case EngineHeat.ORANGE:
+                    return 0.08;
+                case EngineHeat.RED:
+                    return 0.16;
+                default:
+                    return 0;
+            }
+        }
+    }
+
+    public getClientPrototype() {
+        return this.client;
     }
 
     // !TileEntity event
     public init(){
-        const stage = this.getEnergyStage();
-        this.engineAnimation = new EngineAnimation(this, this.getTrunkTexture(stage), this.texture);
-        this.engineAnimation.connectionSide = this.getConnectionSide();
-    }
+        alert(`init`);
+        this.setOrientation(this.getConnectionSide());
 
-    // !TileEntity event
-    public destroy(){
-        this.engineAnimation.destroy();
     }
 
     // !TileEntity event
@@ -110,24 +197,6 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     // !TileEntity event
     public tick(){
         if (this.lastTick < 4) this.lastTick++;
-        const stage = this.getEnergyStage();
-        this.engineAnimation.update(this.data.progress, this.getTrunkTexture(stage));
-
-        // from PC
-        /* if (worldObj.isRemote) { // ? is it for client-server?
-            if (this.progressPart != 0) {
-                this.data.progress += this.getPistonSpeed();
-
-                if (this.data.progress > 1) {
-                    this.progressPart = 0;
-                    this.data.progress = 0;
-                }
-            } else if (this.isPumping) {
-                this.progressPart = 1;
-            }
-
-            return;
-        }*/
 
         this.updateHeat();
         this.getEnergyStage();
@@ -141,33 +210,28 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
         const tile = this.getEnergyProvider(this.getOrientation());
 
-        if (this.progressPart != 0) {
-            this.data.progress += this.getPistonSpeed();
-            if (this.data.progress > 0.5 && this.progressPart == 1) {
-                this.progressPart = 2;
-            } else if (this.data.progress >= 1) {
-                this.data.progress = 0;
-                this.progressPart = 0;
+        if (this.getProgressPart() != 0) {
+            this.setProgress(this.getProgress() + this.getPistonSpeed());
+            if (this.getProgress() > 0.5 && this.getProgressPart() == 1) {
+                this.setProgressPart(2);
+            } else if (this.getProgress() >= 1) {
+                this.setProgress(0);
+                this.setProgressPart(0);
             }
         } else if (this.isRedstonePowered && this.isActive()) {
             if (this.isPoweredTile(tile, this.getOrientation())) {
-                this.progressPart = 1;
-                // this.pumping = true;
-                this.setPumping(true)
+                this.setProgressPart(1);
+                this.setPumping(true);
                 if (this.getPowerToExtract() > 0) {
-                    this.progressPart = 1;
-                    // this.pumping = true;
+                    this.setProgressPart(1);
                     this.setPumping(true);
                 } else {
-                    // this.pumping = false;
                     this.setPumping(false);
                 }
             } else {
-                // this.pumping = false;
                 this.setPumping(false);
             }
         } else {
-            // this.pumping = false;
             this.setPumping(false);
         }
 
@@ -183,8 +247,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     public click(id, count, data) {
         if(id != ItemID.bc_wrench) return false;
         if (this.getEnergyStage() == EngineHeat.OVERHEAT) {
-            this.energyStage = this.computeEnergyStage();
-            // sendNetworkUpdate(); // ? again networking!
+            this.setEnergyStage(this.computeEnergyStage());
         }
         this.setOrientation(this.getConnectionSide(true));
         return true;
@@ -194,6 +257,8 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         return true;
     }
 
+    // ! @MineExplorer PLEASE make EnergyTileRegistry BlockSource support
+    // TODO move to blockSource getConnectionSide
     /** @param findNext - use true value if you want to rerotate engine like a wrench */
     protected getConnectionSide(findNext : boolean = false){
         // * In common situation ends when i gets max in 5 index
@@ -206,17 +271,15 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
                 continue;
             }
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
-            // ! ?. is new ESNext feature. Its amazing!
+            // * ?. is new ESNext feature. Its amazing!
             const energyTypes = EnergyTileRegistry.accessMachineAtCoords(relCoords.x, relCoords.y, relCoords.z)?.__energyTypes;
             if(energyTypes?.RF) return i;
         }
         return DEFAULT_ENGINE_ROTATION;
     }
 
-    protected getTrunkTexture(stage: EngineHeat): EngineHeat {
-        return stage;
-    }
-
+    // ! @MineExplorer PLEASE make EnergyTileRegistry BlockSource support
+    // TODO move to blockSource getEnergyProvider
     public getEnergyProvider(orientation: number): any {
         const coords = World.getRelativeCoords(this.x, this.y, this.z, orientation);
         return EnergyTileRegistry.accessMachineAtCoords(coords.x, coords.y, coords.z);
@@ -279,35 +342,16 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     public getPistonSpeed(): number {
         return Math.max(0.16 * this.getHeatLevel(), 0.01);
-        // ? for client-server
-        /*if (!worldObj.isRemote) {
-            return Math.max(0.16f * getHeatLevel(), 0.01f);
-        }
-        switch (getEnergyStage()) {
-            case BLUE:
-                return 0.02F;
-            case GREEN:
-                return 0.04F;
-            case YELLOW:
-                return 0.08F;
-            case RED:
-                return 0.16F;
-            default:
-                return 0;
-        }*/
     }
 
     public getEnergyStage(): EngineHeat {
-        // if (!worldObj.isRemote) { //? client-server
-            if (this.energyStage == EngineHeat.OVERHEAT) return this.energyStage;
+        if (this.energyStage == EngineHeat.OVERHEAT) return this.energyStage;
 
-            const newStage = this.computeEnergyStage();
-            if (this.energyStage !== newStage) {
-                this.energyStage = newStage;
-                if (this.energyStage === EngineHeat.OVERHEAT) this.overheat();
-                // sendNetworkUpdate(); //? client-server
-            }
-        // }
+        const newStage = this.computeEnergyStage();
+        if (this.energyStage !== newStage) {
+            this.setEnergyStage(newStage);
+            if (newStage == EngineHeat.OVERHEAT) this.overheat();
+        }
         return this.energyStage;
     }
 
@@ -395,7 +439,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     public overheat(): void {
         this.isPumping = false;
-        World.explode(this.x, this.y, this.z, 3, true);
+        this.region.explode(this.x, this.y, this.z, 3, true);
     }
 
     // ? why we need it? ask PC author about it. Maybe it should be overrided in future

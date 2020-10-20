@@ -21,12 +21,14 @@ class EngineAnimation {
         {rotation: EngineRotation.X, direction: -1}
     ];
 
-    public set connectionSide(value: number){
+    public set ConnectionSide(value: number){
+        let rotate = false;
+        if (this.side != value) rotate = true;
         this.side = value;
-        this.rotateByMeta();
+        if (rotate) this.rotateByMeta();
     }
 
-    public get connectionSide(): number {
+    public get ConnectionSide(): number {
         return this.side;
     }
 
@@ -69,7 +71,7 @@ class EngineAnimation {
     }
 
     private rotateByMeta(): void {
-        const data = this.directions[this.side]
+        const data = this.directions[this.side];
         this.createPiston(data.rotation, data.direction);
     }
 

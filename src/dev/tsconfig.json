@@ -29,6 +29,7 @@
 		"core/engine/creative",
 		"core/engine/EngineHeat.ts",
 		"core/engine/Engines.ts",
+		"core/engine/EngineTextures.ts",
 		"core/engine/interface",
 		"core/engine/model",
 		"core/engine/PowerMode.ts",

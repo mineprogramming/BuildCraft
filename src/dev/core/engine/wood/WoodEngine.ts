@@ -1,6 +1,6 @@
 /// <reference path="../abstract/BCEngine.ts" />
 /// <reference path="WoodEngineTileEntity.ts" />
-/// <reference path="../model/texture/EngineTexture.ts" />
+/// <reference path="../EngineTextures.ts" />
 
 class WoodEngine extends BCEngine {
     public get engineType(): string {
@@ -8,6 +8,6 @@ class WoodEngine extends BCEngine {
     }
 
     protected requireTileEntity(){
-        return new BCWoodEngineTileEntity(new EngineTexture(STANDART_TEXTURE, {x: 256, y: 0}, STANDART_SIZE));
+        return new BCWoodEngineTileEntity(EngineTextures.wood);
     }
 }

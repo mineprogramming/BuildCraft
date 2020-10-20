@@ -4,6 +4,28 @@
 class BCWoodEngineTileEntity extends BCEngineTileEntity {
     private hasSent: boolean = false;
 
+    constructor(protected texture: EngineTexture) {
+        super(texture);
+        this.client.getEngineTexture = (stage: EngineHeat) => {
+            return EngineTextures.wood;
+        };
+        this.client.getTrunkTexture = (stage: EngineHeat, progress: number) => {
+            return stage == EngineHeat.RED && progress < 0.5 ? EngineHeat.ORANGE : stage;
+        }
+        this.client.getPistonSpeed = (energyStage: EngineHeat) => {
+            switch (energyStage) {
+                case EngineHeat.GREEN:
+                    return 0.02;
+                case EngineHeat.ORANGE:
+                    return 0.04;
+                case EngineHeat.RED:
+                    return 0.08;
+                default:
+                    return 0.01;
+            }
+        }
+    }
+
     protected computeEnergyStage(): EngineHeat {
         const energyLevel = this.getEnergyLevel();
         if (energyLevel < 0.33) {
@@ -17,25 +39,12 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
     }
 
     public getPistonSpeed(): number {
-        // if (!worldObj.isRemote) { // ? is it again client-server?
-            return Math.max(0.08 * this.getHeatLevel(), 0.01);
-        // }
-        /* const stage = this.getEnergyStage();
-        switch (stage) {
-            case EngineHeat.GREEN:
-                return 0.02;
-            case EngineHeat.ORANGE:
-                return 0.04;
-            case EngineHeat.RED:
-                return 0.08;
-            default:
-                return 0.01;
-        }*/
+        return Math.max(0.08 * this.getHeatLevel(), 0.01);
     }
 
     public engineUpdate(): void {
         super.engineUpdate();
-        if (this.isRedstonePowered && World.getWorldTime() % 16 == 0) {
+        if (this.isRedstonePowered && World.getThreadTime() % 16 == 0) {
             this.addEnergy(10);
         }
     }
@@ -55,10 +64,6 @@ class BCWoodEngineTileEntity extends BCEngineTileEntity {
         } else if (this.progressPart != 2) {
             this.hasSent = false;
         }
-    }
-
-    protected getTrunkTexture(stage: EngineHeat): EngineHeat {
-        return super.getTrunkTexture((stage == EngineHeat.RED && this.data.progress < 0.5) ? EngineHeat.ORANGE : stage);
     }
 
     public isBurning(): boolean {
