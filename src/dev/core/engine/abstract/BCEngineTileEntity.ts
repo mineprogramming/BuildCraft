@@ -68,7 +68,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         // @ts-ignore
         this.networkData.putFloat("progress", value);
     }
-// @ts-ignore
+
     private getProgress(): number {
         return this.data.progress;
     }
@@ -83,7 +83,6 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     private setEnergyStage(value: EngineHeat){
         this.energyStage = value;
-        // ? it can help syncing server and client tickrate gap
         // @ts-ignore
         this.networkData.putInt("energyStageIndex", HeatOrder.indexOf(this.energyStage));
         // @ts-ignore
@@ -119,7 +118,6 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
             this.energyStage = HeatOrder[this.networkData.getInt("energyStageIndex")];
             this.isPumping = this.networkData.getBoolean("isPumping");
             this.progress = this.networkData.getFloat("progress");
-            alert("load");
 
             this.engineAnimation = new EngineAnimation(this, this.getTrunkTexture(this.energyStage, this.progress), this.getEngineTexture());
             this.engineAnimation.ConnectionSide = this.orientation;
@@ -133,7 +131,6 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
         // !TileEntity event
         unload() {
-            alert("unload");
             this.engineAnimation.destroy();
         },
 
@@ -184,9 +181,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     // !TileEntity event
     public init(){
-        alert(`init`);
         this.setOrientation(this.getConnectionSide());
-
     }
 
     // !TileEntity event
@@ -290,12 +285,10 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         if (this.isPoweredTile(tile, this.getOrientation())) {
             const extracted = this.getPowerToExtract();
             if (extracted <= 0) {
-                // this.pumping = false;
                 this.setPumping(false);
                 return;
             }
 
-            // this.pumping = true;
             this.setPumping(true);
             const oppositeSide = World.getInverseBlockSide(this.getOrientation());
 
