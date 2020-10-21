@@ -48,19 +48,19 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
      */
 
     public getOrientation(): number {
-        if(!this.data.meta){
-            this.data.meta = this.getConnectionSide();
-        }
         return this.data.meta;
     }
 
     public setOrientation(value: number){
         this.data.meta = value;
+        this.updateClientOrientation();
+    }
+
+    private updateClientOrientation() {
         // @ts-ignore
         this.networkData.putInt("orientation", this.data.meta);
         // @ts-ignore
         this.networkData.sendChanges();
-        // this.engineAnimation.connectionSide = value;
     }
 
     private setProgress(value: number){
@@ -175,13 +175,13 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         }
     }
 
-    public getClientPrototype() {
-        return this.client;
-    }
-
     // !TileEntity event
     public init(){
-        this.setOrientation(this.getConnectionSide());
+        if (this.data.meta == null){
+            this.setOrientation(this.getConnectionSide());
+        } else {
+            this.updateClientOrientation();
+        }
     }
 
     // !TileEntity event

@@ -50,7 +50,7 @@ class WoodenPipeTileEntity {
     public init(): void {
         this.storageConnector = new WoodenPipeStorageConnector(this, this.renderer, this.texture);
         this.itemEjector = new WoodenPipeItemEjector(this.region,this.x, this.y, this.z);
-        this.checkConnection()
+        this.checkConnection();
     }
 
     // !TileEntity event
@@ -143,7 +143,7 @@ class WoodenPipeTileEntity {
      * @returns {boolean} need to update render
      */
     public checkConnection(): boolean {
-        if (!this.data.connectionSide){
+        if (this.data.connectionSide == null){
             this.updateConnectionSide();
             return false;
         }
