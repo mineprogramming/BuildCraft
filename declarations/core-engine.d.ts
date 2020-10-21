@@ -17,6 +17,21 @@ declare namespace Network {
 }
 declare class BlockSource {
     static getDefaultForDimension(dimension: any): BlockSource;
+    explode(x: number, y: number, z: number, power: number, fire: boolean): void;
+    fetchEntitiesInAABB(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, type: number, blacklist: boolean): number[]
+    /**
+     * RETURNS JS ARRAY
+     * @param x1 
+     * @param y1 
+     * @param z1 
+     * @param x2 
+     * @param y2 
+     * @param z2 
+     * @param type 
+     * @param blacklist 
+     */
+    listEntitiesInAABB(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, type: number, blacklist: boolean): number[]
+    destroyBlock(x: number, y: number, z: number, [, drop]);
     getDimension(): number;
     isChunkLoaded(chunkX, chunkZ): boolean;
     getBlockId(x, y, z): number;

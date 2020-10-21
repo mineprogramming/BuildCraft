@@ -36,7 +36,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     public y: number;
     public z: number;
 
-    public region: BlockSource;
+    public blockSource: BlockSource;
 
     public readonly isEngine: boolean = true;
 
@@ -432,7 +432,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     public overheat(): void {
         this.isPumping = false;
-        this.region.explode(this.x, this.y, this.z, 3, true);
+        this.blockSource.explode(this.x, this.y, this.z, 3, true);
     }
 
     // ? why we need it? ask PC author about it. Maybe it should be overrided in future
