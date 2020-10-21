@@ -1,5 +1,5 @@
 class ObsidianPipeItemEjector {
-	constructor(private coords: Vector) { }
+	constructor(private region: BlockSource, private coords: Vector) { }
 
 	public set ConnectionSide(value: number) {
 		this.side = value;
@@ -16,7 +16,10 @@ class ObsidianPipeItemEjector {
 			y: this.coords.y + 1,
 			z: this.coords.z + 1
 		};
-        const entitiesToCollect = Entity.getAllInsideBox(this.coords, boxEnd, 64, false);
+
+		const { x, y, z } = this.coords;
+		const entitiesToCollect = this.region.listEntitiesInAABB(x, y, z, boxEnd.x, boxEnd.y, boxEnd.z, 64, false);
+        // const entitiesToCollect = Entity.getAllInsideBox(this.coords, boxEnd, 64, false);
         for (const entity of entitiesToCollect) {
 			if (!Entity.isExist(entity)) return;
 
@@ -46,7 +49,7 @@ class ObsidianPipeItemEjector {
             y: this.coords.y + 0.5 + offsetDistance * offsetVector.y,
             z: this.coords.z + 0.5 + offsetDistance * offsetVector.z,
 		};
-        const travelingItem = new TravelingItem(itemCoords, item, this.ConnectionSide, speed);
+		const travelingItem = new TravelingItem(itemCoords, this.region.getDimension(), item, this.ConnectionSide, speed);
 	}
 
 	private getItemSpeed(entity: number): number {

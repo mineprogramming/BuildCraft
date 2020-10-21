@@ -16,6 +16,8 @@ class ObsidianPipeTileEntity {
     public y: number;
     public z: number;
 
+    public blockSource: BlockSource;
+
     private targetConnector: ObsidianPipeTargetConnector;
     private ejector: ObsidianPipeItemEjector;
     private accelerator: ObsidianPipeItemAccelerator;
@@ -23,8 +25,8 @@ class ObsidianPipeTileEntity {
     // !TileEntity event
     public init(): void {
         this.targetConnector = new ObsidianPipeTargetConnector(this, this.pipeConnector);
-        this.ejector = new ObsidianPipeItemEjector(this);
-        this.accelerator = new ObsidianPipeItemAccelerator(this);
+        this.ejector = new ObsidianPipeItemEjector(this.blockSource, this);
+        this.accelerator = new ObsidianPipeItemAccelerator(this.blockSource, this);
         this.updateConnection();
     }
 

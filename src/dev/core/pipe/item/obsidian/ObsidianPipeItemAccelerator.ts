@@ -1,7 +1,7 @@
 /// <reference path="AxisBoxes.ts" />
 const OBSIDIAN_PIPE_DROP_VELOCITY = __config__.getNumber("obsidian_pipe_drop_velocity");
 class ObsidianPipeItemAccelerator {
-	constructor(private coords: Vector) { }
+	constructor(private region: BlockSource, private coords: Vector) { }
 
 	private side: number = null;
 
@@ -20,7 +20,7 @@ class ObsidianPipeItemAccelerator {
 		const box = this.getMovedAxisBoxBySide(target, side);
 		// Particles.addFarParticle(Native.ParticleType.flame, box.start.x, box.start.y, box.start.z, 0,0,0,0);
 		// Particles.addFarParticle(Native.ParticleType.flame, box.end.x, box.end.y, box.end.z, 0,0,0,0);
-		const entities = this.getItems(box);
+		const entities = this.getItems(box, this.region);
 
 		for (const entity of entities) {
 			Entity.moveToTarget(entity, this.getMoveTarget(), {speed: OBSIDIAN_PIPE_DROP_VELOCITY});
@@ -51,8 +51,10 @@ class ObsidianPipeItemAccelerator {
 		}
 	}
 
-	private getItems(box: BoxPoints): number[] {
-		return Entity.getAllInsideBox(box.start, box.end, 64, false);
+	private getItems(box: BoxPoints, region: BlockSource): number[] {
+		const { x, y, z } = box.start;
+		const end = box.end;
+		return region.listEntitiesInAABB(x, y, z, end.x, end.y, end.z, 64, false);
 	}
 
 	private getMoveTarget(): Vector {
