@@ -67,8 +67,7 @@ class WoodenPipeItemEjector {
             __config__.getNumber("travelingItem_offset_distance") || 0.01;
         /*
             If you want to create items not on source block center
-            change "offsetDistance" in extractItems(count: number)
-            and "timeBeforeContainerExit" in TravelingItemMover
+            change "travelingItem_offset_distance" in config
         */
 
         const itemCoords = {

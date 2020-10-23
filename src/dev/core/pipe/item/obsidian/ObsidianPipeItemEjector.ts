@@ -19,7 +19,6 @@ class ObsidianPipeItemEjector {
 
 		const { x, y, z } = this.coords;
 		const entitiesToCollect = this.region.listEntitiesInAABB(x, y, z, boxEnd.x, boxEnd.y, boxEnd.z, 64, false);
-        // const entitiesToCollect = Entity.getAllInsideBox(this.coords, boxEnd, 64, false);
         for (const entity of entitiesToCollect) {
 			if (!Entity.isExist(entity)) return;
 
@@ -38,11 +37,6 @@ class ObsidianPipeItemEjector {
         // ? should I add offsetDistance to config?
         const offsetDistance =
             __config__.getNumber("travelingItem_offset_distance") || 0.01;
-        /*
-            If you want to create items not on source block center
-            change "offsetDistance" in extractItems(count: number)
-            and "timeBeforeContainerExit" in TravelingItemMover
-        */
 
         const itemCoords = {
             x: this.coords.x + 0.5 + offsetDistance * offsetVector.x,
