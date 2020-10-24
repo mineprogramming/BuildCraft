@@ -1,45 +1,37 @@
+/// <reference path="IronPipeClient.ts" />
 class IronPipeTileEntity {
-    constructor(protected renderer: PipeRenderer, protected pipeConnector: PipeConnector, protected texture: PipeTexture) { }
+    private clientFactory: ClientFactory = new ClientFactory(IronPipeClient);
+
     protected data: any = {}
 
     public defaultValues: any = {
-        side: null
+        connectionSide: -1
     }
-
-    private connector: IronPipeRenderConnector;
 
     public x: number;
     public y: number;
     public z: number;
 
-    private changeOrientation(value: number) {
-        this.data.side = value;
-        this.connector.ConnectedSide = value;
+    public blockSource: BlockSource;
+
+    public client: IronPipeClient;
+
+
+    constructor(protected renderer: PipeRenderer, protected pipeConnector: PipeConnector, protected texture: PipeTexture) {
+        this.client = this.clientFactory.instantiate(renderer, texture, pipeConnector);
+    }
+
+    private changeOrientation() {
+        // ? if connection side is null put < 0 to syncData
+        // @ts-ignore
+        this.networkData.putInt("orientation", this.data.connectionSide);
+        // @ts-ignore
+        this.networkData.sendChanges();
     }
 
     // !TileEntity event
     public init(): void {
-        this.connector = new IronPipeRenderConnector(this, this.renderer, this.pipeConnector, this.texture);
-        if (this.checkConnection()) this.connector.updateConnections();
-    }
-
-    /**
-     * @returns {boolean} need to update render
-     */
-    public checkConnection(): boolean {
-        if (!this.data.side){
-            this.updateConnectionSide();
-            return false;
-        }
-
-        const coords = World.getRelativeCoords(this.x, this.y, this.z, this.data.side);
-        if (!this.connector.canConnectTo(coords)) {
-            this.updateConnectionSide();
-            return false;
-        }
-
-        this.connector.ConnectedSide = this.data.side;
-        return true;
+        this.checkConnection();
     }
 
     // !TileEntity event
@@ -51,38 +43,66 @@ class IronPipeTileEntity {
     }
 
     private updateConnectionSide(findNext: boolean = false): void {
-        const side = this.getConnectionSide(findNext);
-        this.changeOrientation(side);
+        this.data.connectionSide = this.getConnectionSide(findNext);
+        this.changeOrientation();
     }
 
     public canItemGoToSide(item: ItemInstance, index: number): boolean {
-        return index == this.connector.ConnectedSide;
+        return index == this.data.connectionSide;
     }
 
     /** @param findNext - use true value if you want to rerotate pipe like a wrench */
-    protected getConnectionSide(findNext: boolean = false): number | null {
+    protected getConnectionSide(findNext: boolean = false): number {
         // * In common situation ends when i gets max in 5 index
         // * But if fhis function calling by wrench index can go beyound
         // * I think this code is poor, but maybe i fix it in future
         for (let t = 0; t < 12; t++) {
             const i = t % 6;
-
             if (findNext) {
-
-                if (this.connector.ConnectedSide == t) {
+                if (this.data.connectionSide == t) {
                     findNext = false
                 }
-
                 continue;
             }
-
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
-
-            if (this.connector.canConnectTo(relCoords)) {
-                return i;
-            }
+            if (this.canConnectTo(relCoords)) return i;
         }
         // default value
-        return null;
+        return -1;
+    }
+
+    public checkConnection(): void {
+        if (this.data.connectionSide < 0){
+            this.updateConnectionSide();
+        } else {
+            const coords = World.getRelativeCoords(this.x, this.y, this.z, this.data.connectionSide);
+            if (!this.canConnectTo(coords)) {
+                this.updateConnectionSide();
+            } else {
+                this.changeOrientation();
+            }
+        }
+    }
+
+    private canConnectTo(coords: Vector): boolean {
+        const { x, y, z } = coords;
+        const blockID = World.getBlockID(x, y, z);
+        const relativePipe = PipeIdMap.getClassById(blockID);
+        if (relativePipe) {
+            return this.pipeConnector.canConnectToPipe(relativePipe)
+        }
+        const container = World.getContainer(x, y, z, this.blockSource);
+        return this.isValidContainer(container);
+    }
+
+    private isValidContainer(container): boolean {
+        if (!container) return false;
+
+        // ? if NativeTileEntity is NullObject
+        if (container.getSlot(0) == null) return false;
+
+        // ! container.slots contain not only slots. It containt saverID too.
+        // ! container.slots.length = 1 means that container has 0 slots
+        if (!container.slots || container.slots.length > 1) return true;
     }
 }

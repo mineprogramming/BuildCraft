@@ -92,6 +92,7 @@
 		"core/pipe/item/diamond/DiamondPipeTileEntity.ts",
 		"core/pipe/item/diamond/PipeDiamond.ts",
 		"core/pipe/item/gold/PipeGold.ts",
+		"core/pipe/item/iron/IronPipeClient.ts",
 		"core/pipe/item/iron/IronPipeRenderConnector.ts",
 		"core/pipe/item/iron/IronPipeTileEntity.ts",
 		"core/pipe/item/iron/PipeIron.ts",

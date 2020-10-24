@@ -4,11 +4,11 @@ class IronPipeRenderConnector {
 
     private side: number;
 
-    public get ConnectedSide(): number {
+    public get ConnectionSide(): number {
         return this.side;
     }
 
-    public set ConnectedSide(value: number) {
+    public set ConnectionSide(value: number) {
         this.side = value;
         this.updateConnections();
     }
@@ -37,8 +37,8 @@ class IronPipeRenderConnector {
                     condition = ICRender.OR(condition, additionCondition);
                 }
             }
-            let texture;
-            if (this.ConnectedSide != i) {
+            let texture: TexturePair;
+            if (this.ConnectionSide != i) {
                 texture = this.texture.containerConnection;
             } else {
                 texture = this.texture.connection;
@@ -58,19 +58,7 @@ class IronPipeRenderConnector {
         BlockRenderer.mapAtCoords(this.coords.x, this.coords.y, this.coords.z, render);
     }
 
-    public canConnectTo(coords: Vector): boolean {
-        const { x, y, z } = coords;
-        const blockID = World.getBlockID(x, y, z);
-        const relativePipe = PipeIdMap.getClassById(blockID);
-        if (relativePipe) {
-            return this.connector.canConnectToPipe(relativePipe)
-        }
-
-        const container = World.getContainer(x, y, z);
-        if (!container) return false;
-        // ! container.slots contain not only slots. It containt saverID too.
-        // ! container.slots.length = 1 means that container has 0 slots
-        if (!container.slots || container.slots.length > 1) return true;
-        return false;
+    public destroy(): void {
+        BlockRenderer.unmapAtCoords(this.coords.x, this.coords.y, this.coords.z);
     }
 }
