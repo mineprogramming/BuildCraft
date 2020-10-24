@@ -5,7 +5,7 @@
 type RenderGroups = {
     main: ICRenderGroup;
     addition?: ICRenderGroup;
-}
+};
 
 class PipeWooden extends BCTransportPipe {
     constructor() {
@@ -16,7 +16,7 @@ class PipeWooden extends BCTransportPipe {
         EnergyTileRegistry.addEnergyTypeForId(this.block.id, RF);
         Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords) => {
                 const tile = World.getTileEntity(coords.x, coords.y, coords.z);
-                if (tile && tile.storageConnector) {
+                if (tile && tile.isLoaded) {
                     tile.checkConnection();
                 }
             }
