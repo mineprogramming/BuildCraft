@@ -1,12 +1,14 @@
 /// <reference path="DiamondPipeGUI.ts" />
 class DiamondPipeTileEntity {
-    constructor(protected renderer: PipeRenderer, protected texture: PipeTexture) { }
+    public readonly useNetworkItemContainer = true;
     private container: any;
+    constructor(protected renderer: PipeRenderer, protected texture: PipeTexture) { }
 
     // !TileEntity event
-    public getGuiScreen(): UI.StandartWindow {
-        return diamondPipeUI;
-    }
+    public getScreenName = (player: number, coords: Vector) => "main";
+
+    // !TileEntity event
+    public getScreenByName = (screenName: string) => diamondPipeUI;
 
     public canItemGoToSide(item: ItemInstance, index: number): boolean {
         let hasFilter = false;
