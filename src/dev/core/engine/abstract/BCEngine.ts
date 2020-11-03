@@ -31,9 +31,14 @@ abstract class BCEngine {
     }
 
     private registerUse(): void {
-        Item.registerUseFunction(this.item.stringId, (coords, item, block) => {
-            Player.decreaseCarriedItem();
-            this.setBlock(coords.relative);
+        // TODO fix coords when update declarations
+        Item.registerUseFunction(this.item.stringId, (coords: any,  item: ItemInstance, block: Tile, player: number) => {
+            const { x, y, z } = coords.relative;
+            const region = BlockSource.getDefaultForActor(player);
+            if (region.getBlockId(x, y, z) == 0) {
+                Player.decreaseCarriedItem();
+                this.setBlock(coords.relative);
+            }
         });
     }
 
@@ -46,5 +51,6 @@ abstract class BCEngine {
     private setBlock(coords: Vector): void {
         World.setBlock(coords.x, coords.y, coords.z, this.block.id, 0);
         World.addTileEntity(coords.x, coords.y, coords.z);
+        World.playSound(coords.x, coords.y, coords.z, "dig.stone", 1, 0.8);
     }
 }
