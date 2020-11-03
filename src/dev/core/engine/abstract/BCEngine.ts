@@ -36,7 +36,7 @@ abstract class BCEngine {
             const { x, y, z } = coords.relative;
             const region = BlockSource.getDefaultForActor(player);
             if (region.getBlockId(x, y, z) == 0) {
-                Player.decreaseCarriedItem();
+                Entity.setCarriedItem(player, item.id, item.count - 1, item.data);
                 this.setBlock(coords.relative);
             }
         });

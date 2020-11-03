@@ -17,6 +17,7 @@ declare namespace Network {
 }
 declare class BlockSource {
     static getDefaultForDimension(dimension: any): BlockSource;
+    static getDefaultForActor(entityUid: number): BlockSource;
     explode(x: number, y: number, z: number, power: number, fire: boolean): void;
     fetchEntitiesInAABB(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, type: number, blacklist: boolean): number[]
     /**
@@ -94,15 +95,9 @@ declare namespace Callback {
     /**
      * Function used in "ItemUse" callback
      */
-    type ItemUseFunction = 
-    /**
-     * @param coords set of all coordinate values that can be useful to write 
-     * custom use logics
-     * @param item item that was in the player's hand when he touched the block
-     * @param block block that was touched
-     */
-    (coords: ItemUseCoordinates, item: ItemInstance, block: Tile) => void;
-
+    interface ItemUseFunction {
+        (coords: ItemUseCoordinates, item: ItemInstance, block: Tile, player: number): void
+    }
 
     /**
      * Function used in "ProjectileHit" callback
@@ -4802,13 +4797,15 @@ declare namespace FileTools {
 /**
  * Module that provides some general game-related functions
  */
+declare class Game {
+    public static isDeveloperMode: boolean;
+}
 declare namespace Game {
     /**
      * Prevents current callblack function from being called in Minecraft.
      * For most callbacks it prevents default game behaviour
      */
     function prevent(): void;
-
     /**
      * Writes message to the chat. Message can be formatted using 
      * [[Native.ChatColor]] values
@@ -5305,7 +5302,7 @@ declare namespace Logger {
      * @param message message to be logged
      * @param prefix prefix of the message, can be used to filter log
      */
-    function Log(message: string, prefix: string): void;
+    function Log(message: any, prefix: string): void;
 
     /**
      * Logs java Throwable with full stack trace to 
@@ -8424,7 +8421,7 @@ declare namespace World {
      * its container, if the block is a [[NativeTileEntity]], returns it, if 
      * none of above, returns null
      */
-    function getContainer(x: number, y: number, z: number, region?: BlockSource): {getType: any , slots: any};
+    function getContainer(x: number, y: number, z: number, region?: BlockSource): {getType: any , slots: any, getSlot:any};
 
     /**
      * @returns current world's time in ticks 
