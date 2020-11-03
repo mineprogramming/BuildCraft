@@ -104,6 +104,7 @@ class TravelingItemMover {
         if (keys.length > 0) {
             const keyIndex = this.random(keys.length);
             this.moveVectorIndex = parseInt(keys[keyIndex]);
+            // ? should I delete fitCoords?
             this.fitCoordsToCenter();
             this.prevCoords = this.Coords;
             this.updateMoveSpeed(region);
@@ -163,7 +164,6 @@ class TravelingItemMover {
                 const pipeBlockData = region.getBlockData(x, y, z);
                 const relativePipeClass = PipeIdMap.getClassById(pipeBlockID);
                 const currentConnector = this.getClassOfCurrentPipe(region).pipeConnector;
-
                 if (relativePipeClass != null && currentConnector.canConnectToPipe(relativePipeClass)) {
                     pipes[i] = relativePipeClass;
                     continue;
@@ -182,7 +182,7 @@ class TravelingItemMover {
         const slots = StorageInterface.getContainerSlots(container, 1, 0);
         let trueSlotsLength = slots.length;
         if (trueSlotsLength > 0 && typeof slots[0] == "string") {
-            // ! tileEntity container contain jsonSaverId in slots[0]
+            // ! tileEntity container has jsonSaverId in slots[0]
             trueSlotsLength -= 1;
         }
         return trueSlotsLength > 0;

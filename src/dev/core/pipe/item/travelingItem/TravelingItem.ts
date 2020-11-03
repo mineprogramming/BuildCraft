@@ -38,7 +38,7 @@ class TravelingItem {
                 scope.moveIndex,
                 scope.moveSpeed,
                 new PipeSpeed(scope.targetSpeed, scope.deltaSpeed),
-                scope.ProgressPart
+                scope.progressPart
             );
         }
     });
