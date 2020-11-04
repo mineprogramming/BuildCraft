@@ -24,7 +24,8 @@ class ObsidianPipeTileEntity {
 
     // !TileEntity event
     public init(): void {
-        this.targetConnector = new ObsidianPipeTargetConnector(this, this.pipeConnector);
+        const pipe = PipeIdMap.getClassById(this.blockSource.getBlockId(this.x, this.y, this.z));
+        this.targetConnector = new ObsidianPipeTargetConnector(pipe, this, this.pipeConnector);
         this.ejector = new ObsidianPipeItemEjector(this.blockSource, this);
         this.accelerator = new ObsidianPipeItemAccelerator(this.blockSource, this);
         this.updateConnection();

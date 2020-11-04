@@ -37,7 +37,7 @@ abstract class BCEngine {
             const region = BlockSource.getDefaultForActor(player);
             if (region.getBlockId(x, y, z) == 0) {
                 Entity.setCarriedItem(player, item.id, item.count - 1, item.data);
-                this.setBlock(coords.relative);
+                this.setBlock(region, coords.relative);
             }
         });
     }
@@ -48,9 +48,9 @@ abstract class BCEngine {
         });
     }
 
-    private setBlock(coords: Vector): void {
-        World.setBlock(coords.x, coords.y, coords.z, this.block.id, 0);
-        World.addTileEntity(coords.x, coords.y, coords.z);
+    private setBlock(region: BlockSource, coords: Vector): void {
+        region.setBlock(coords.x, coords.y, coords.z, this.block.id, 0);
+        World.addTileEntity(coords.x, coords.y, coords.z, region);
         World.playSound(coords.x, coords.y, coords.z, "dig.stone", 1, 0.8);
     }
 }

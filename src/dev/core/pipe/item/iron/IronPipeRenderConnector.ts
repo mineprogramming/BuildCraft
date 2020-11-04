@@ -1,5 +1,5 @@
 class IronPipeRenderConnector {
-    constructor(public coords: Vector, protected renderer: PipeRenderer, protected connector: PipeConnector,
+    constructor(public pipeClass: BCPipe, public coords: Vector, protected renderer: PipeRenderer, protected connector: PipeConnector,
         protected texture: PipeTexture) { }
 
     private side: number;
@@ -18,15 +18,11 @@ class IronPipeRenderConnector {
         const render = new ICRender.Model();
         const boxes = this.renderer.getBoxes(width);
 
-        const { x, y, z} = this.coords;
-        const blockID = World.getBlockID(x, y, z);
-        const currentPipe = PipeIdMap.getClassById(blockID);
-
         for (let i = 0; i < 6; i++) {
             const box = boxes[i];
             const renderModel = BlockRenderer.createModel();
 
-            let condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], currentPipe.renderGroups.main, false);
+            let condition = ICRender.BLOCK(box.side[0], box.side[1], box.side[2], this.pipeClass.renderGroups.main, false);
             const groupRules = this.connector.getConnectionRules();
             for (const rule of groupRules) {
                 const newGroup = ICRender.getGroup(rule.name);

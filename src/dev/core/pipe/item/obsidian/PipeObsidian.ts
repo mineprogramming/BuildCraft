@@ -8,8 +8,8 @@ class PipeObsidian extends BCTransportPipe {
             new ObsidianPipeTileEntity(this.pipeConnector)
         );
         EnergyTileRegistry.addEnergyTypeForId(this.block.id, RF);
-        Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords) => {
-                const tile = World.getTileEntity(coords.x, coords.y, coords.z);
+        Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords, region: BlockSource) => {
+                const tile = World.getTileEntity(coords.x, coords.y, coords.z, region);
                 if (tile && tile.targetConnector) {
                     tile.updateConnection();
                 }

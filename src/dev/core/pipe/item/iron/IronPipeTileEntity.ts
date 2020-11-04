@@ -86,7 +86,7 @@ class IronPipeTileEntity {
 
     private canConnectTo(coords: Vector): boolean {
         const { x, y, z } = coords;
-        const blockID = World.getBlockID(x, y, z);
+        const blockID = this.blockSource.getBlockId(x, y, z);
         const relativePipe = PipeIdMap.getClassById(blockID);
         if (relativePipe) {
             return this.pipeConnector.canConnectToPipe(relativePipe)

@@ -6,9 +6,9 @@ class PipeIron extends BCTransportPipe {
         TileEntity.registerPrototype(this.block.id,
             new IronPipeTileEntity(this.pipeRenderer, this.connector, this.texture)
         );
-        Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords) => {
-                const tile = World.getTileEntity(coords.x, coords.y, coords.z);
-                if (tile && tile.isLoaded) {
+        Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords, region: BlockSource) => {
+                const tile = World.getTileEntity(coords.x, coords.y, coords.z, region);
+                if (tile && TileEntity.isTileEntityLoaded(tile)) {
                     tile.checkConnection();
                 }
             }
