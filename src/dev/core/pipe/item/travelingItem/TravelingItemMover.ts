@@ -163,14 +163,14 @@ class TravelingItemMover {
                 const pipeBlockID = region.getBlockId(x, y, z);
                 const pipeBlockData = region.getBlockData(x, y, z);
                 const relativePipeClass = PipeIdMap.getClassById(pipeBlockID);
-                const currentConnector = this.getClassOfCurrentPipe(region).pipeConnector;
-                if (relativePipeClass != null && currentConnector.canConnectToPipe(relativePipeClass)) {
+                const currentConnector = this.getClassOfCurrentPipe(region)?.pipeConnector;
+                if (relativePipeClass != null && currentConnector?.canConnectToPipe(relativePipeClass)) {
                     pipes[i] = relativePipeClass;
                     continue;
                 }
 
                 const container = World.getContainer(x, y, z, region);
-                if (container != null && this.isValidContainer(container) && !currentConnector.hasBlacklistBlockID(pipeBlockID, pipeBlockData)) {
+                if (container != null && this.isValidContainer(container) && !currentConnector?.hasBlacklistBlockID(pipeBlockID, pipeBlockData)) {
                     pipes[i] = container;
                 }
             }
