@@ -22,7 +22,7 @@ class ObsidianPipeTargetConnector {
     }
 
     private isValidContainerAtCoords(region: BlockSource, x: number, y: number, z: number): boolean {
-        const container = World.getContainer(x, y, z, region);
+        const container = World.getContainer(x, y, z, region) as UI.Container;
         if (!container) return false;
         // ! container.slots contain not only slots. It containt saverID too.
         // ! container.slots.length = 1 means that container has 0 slots

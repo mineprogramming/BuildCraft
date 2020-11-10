@@ -68,7 +68,7 @@ class BaseRender extends EngineRender {
         this.render.setPart("head.chamber", this.chamberBoxes, this.engineTexture.size);
     };
 
-    protected getModelData(): PartObject[] {
+    protected getModelData(): Render.PartElement[] {
         return this.boxes;
     }
 }

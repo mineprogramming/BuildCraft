@@ -19,7 +19,7 @@ class PistonRender extends EngineRender {
         this.boxes[0].size = value;
     }
 
-    protected getModelData(): PartObject[] {
+    protected getModelData(): Render.PartElement[] {
         return this.boxes;
     }
 }

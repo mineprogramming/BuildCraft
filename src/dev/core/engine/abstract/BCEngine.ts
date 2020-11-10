@@ -24,6 +24,10 @@ abstract class BCEngine {
         TileEntity.registerPrototype(this.block.id, this.requireTileEntity());
         this.registerUse();
         this.registerDrop();
+        Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords, region: BlockSource) => {
+            const tile = World.getTileEntity(coords.x, coords.y, coords.z, region);
+            if (tile) tile.checkOrientation = true;
+        });
     }
 
     protected get texture(): EngineTexture {
@@ -49,7 +53,7 @@ abstract class BCEngine {
     }
 
     private setBlock(region: BlockSource, coords: Vector): void {
-        region.setBlock(coords.x, coords.y, coords.z, this.block.id, 0);
+        region.setBlock(coords.x, coords.y, coords.z, this.block.id, 1);
         World.addTileEntity(coords.x, coords.y, coords.z, region);
         World.playSound(coords.x, coords.y, coords.z, "dig.stone", 1, 0.8);
     }

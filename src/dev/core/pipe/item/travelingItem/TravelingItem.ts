@@ -2,7 +2,7 @@
 /// <reference path="TravelingItemMover.ts" />
 /// <reference path="../../components/PipeIdMap.ts" />
 /// <reference path="TravelingItemNetworkEntity.ts" />
-const ITEM_DROP_VELOCITY = __config__.getNumber("item_drop_velocity");
+const ITEM_DROP_VELOCITY = +__config__.getNumber("item_drop_velocity");
 const ITEM_COOLDOWN_TIME = 100;
 const DESTROY_CHECK_FREQUENCY = 3;
 class TravelingItem {
@@ -89,6 +89,7 @@ class TravelingItem {
                 this.cooldown = ITEM_COOLDOWN_TIME;
                 return;
             } else {
+                
                 this.networkEntity = new NetworkEntity(TravelingItemNetworkType, this);
                 this.updateMoveData();
             }
@@ -130,7 +131,7 @@ class TravelingItem {
                 }
             }
 
-            // @ts-ignore
+            
             this.networkEntity.getClients().setupDistancePolicy(x, y, z, this.blockSource.getDimension(), 32);
             if (this.itemMover.findNewMoveVector(this.blockSource)) {
                 this.updateMoveData();
@@ -156,6 +157,7 @@ class TravelingItem {
     }
 
     private updateMoveData(): void {
+        
         this.networkEntity.send("moveData", this.MoveData);
     }
 
@@ -163,6 +165,7 @@ class TravelingItem {
     private destroy(drop: boolean = false): void {
         if (drop) this.drop();
         this.remove = true;
+        
         this.networkEntity.remove();
     }
 

@@ -26,7 +26,7 @@ abstract class BCPipe {
             groups.addition.add(this.block.id, -1);
     }
 
-    protected get ICRenderGroup(): ICRenderGroup {
+    protected get ICRenderGroup(): ICRender.Group {
         return null
     }
 
@@ -35,7 +35,7 @@ abstract class BCPipe {
         return null;
     }
 
-    public get renderGroups(): {main: ICRenderGroup, addition?: ICRenderGroup} {
+    public get renderGroups(): RenderGroups {
         return {
             main: ICRender.getGroup("BCPipe")
         };

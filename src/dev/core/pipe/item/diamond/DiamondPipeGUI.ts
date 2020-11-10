@@ -6,22 +6,22 @@ const DIAMOND_PIPE_COLORS = [
     "blue",
     "red"
 ];
-
-const diamondPipeUI = new UI.StandartWindow({
-    standart: {
+const diamondPipeUIContext: UI.WindowContent = {
+    standard: {
         header: {
             text: {text: "Diamond Transporting Pipe"}
         },
         background: {
-            standart: true,
+            standard: true,
         },
         inventory: {
-            standart: true
+            standard: true
         }
     },
 
     elements: { }
-});
+};
+const diamondPipeUI = new UI.StandartWindow(diamondPipeUIContext);
 
 for (let i = 0; i < 6; i++){
     const color = DIAMOND_PIPE_COLORS[i];

@@ -9,16 +9,14 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
             return EngineTextures.creative;
         };
         this.client.getPistonSpeed = function(energyStage: EngineHeat) {
-            // @ts-ignore
             return 0.02 * (this.powerModeIndex+1);
         }
-        // @ts-ignore
+		// @ts-ignore
         this.client._load = this.client.load;
         this.client.load = function(){
             this._load();
             this.powerModeIndex = 0;
-            this.networkData.addOnDataChangedListener((networkData, isExternalChange) => {
-                // @ts-ignore
+            this.networkData.addOnDataChangedListener((networkData: SyncedNetworkData, isExternalChange) => {
                 this.powerModeIndex = networkData.getInt("powerModeIndex");
             });
         }
@@ -45,9 +43,7 @@ class BCCreativeEngineTileEntity extends BCEngineTileEntity {
     }
 
     private syncPowerMode(): void {
-        // @ts-ignore
         this.networkData.putInt("powerModeIndex", PowerModeOrder.indexOf(this.data.powerMode));
-        // @ts-ignore
         this.networkData.sendChanges();
     }
 

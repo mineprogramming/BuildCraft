@@ -10,7 +10,7 @@ class EngineAnimation {
     private readonly yOffset: number = 31;// magic const
     private coords: Vector;
 
-    private side: number = 1;// connected side index
+    private side: number = null;// connected side index
 
     private directions = [
         {rotation: EngineRotation.Y, direction: -1},
@@ -49,7 +49,7 @@ class EngineAnimation {
     private updateTrunkHeat(heat: EngineHeat): void {
         if(this.heatStage !== heat){
             this.heatStage = heat;
-            this.base.render.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, this.directions[this.side].rotation);
+            this.base.render.trunkUV = this.engineTexture.getTrunkUV(this.heatStage, this.directions[this.ConnectionSide].rotation);
             this.base.render.refresh();
         }
     }
@@ -71,7 +71,7 @@ class EngineAnimation {
     }
 
     private rotateByMeta(): void {
-        const data = this.directions[this.side];
+        const data = this.directions[this.ConnectionSide];
         this.createPiston(data.rotation, data.direction);
     }
 

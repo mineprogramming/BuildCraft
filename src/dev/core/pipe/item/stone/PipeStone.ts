@@ -10,7 +10,7 @@ class PipeStone extends BCTransportPipe {
         return this.connector;
     }
 
-    public get renderGroups(): {main: ICRenderGroup, addition?: ICRenderGroup} {
+    public get renderGroups(): RenderGroups {
         return {
             main: ICRender.getGroup("BCTransportPipe"),
             addition: ICRender.getGroup("BCPipeStone")

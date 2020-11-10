@@ -1,6 +1,6 @@
 /// <reference path="../abstract/PipeConnector.ts" />
 class PipeRenderer {
-    constructor(protected connector: PipeConnector, protected texture: PipeTexture, protected renderGroup: ICRenderGroup) { }
+    constructor(protected connector: PipeConnector, protected texture: PipeTexture, protected renderGroup: ICRender.Group) { }
 
     public readonly width = .5;
 

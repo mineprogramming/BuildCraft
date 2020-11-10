@@ -1,13 +1,13 @@
 /// <reference path="ObsidianPipeTargetConnector.ts" />
 /// <reference path="ObsidianPipeItemEjector.ts" />
 /// <reference path="ObsidianPipeItemAccelerator.ts" />
-class ObsidianPipeTileEntity {
+class ObsidianPipeTileEntity implements TileEntity.TileEntityPrototype {
     constructor(protected pipeConnector: PipeConnector) { }
 
     // * it will be rewriten during runtime
     protected data: any = {}
 
-    protected defaultValues: any = {// * it will be rewriten during runtime
+    public defaultValues: any = {// * it will be rewriten during runtime
         connectionSide: null,
         energy: 0
     }

@@ -25,11 +25,11 @@ abstract class PipeConnector {
     public canConnectToPipe(target: BCPipe): boolean {
         const targetGroups = target.renderGroups;
         for (const rule of this.getConnectionRules()) {
-            if (rule.name == targetGroups.main.name) {
+            if (rule.name == targetGroups.main.getName()) {
                 if (rule.exclude) return false;
             }
             const secondary = targetGroups.addition;
-            if (secondary && rule.name == secondary.name) {
+            if (secondary && rule.name == secondary.getName()) {
                 if (rule.exclude) return false;
             }
         }

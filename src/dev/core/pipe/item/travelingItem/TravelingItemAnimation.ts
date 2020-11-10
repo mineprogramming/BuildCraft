@@ -2,15 +2,15 @@
 const IS_INTERPOLATION_ENABLED = __config__.getBool(
     "animation_movement_interpolation"
 );
-const AVERAGE_PING = __config__.getFloat("relative_max_ping");
+const AVERAGE_PING = +__config__.getNumber("relative_max_ping");
 interface TimedVector extends Vector {
     time: number;
 }
 
-class TravelingItemAnimation {
+class TravelingItemAnimation implements Updatable {
     private readonly animation: any;
     private readonly randomOffset = Math.random() / 100;
-    private remove: boolean = false;
+    remove: boolean = false;
 
     private time: 0;
     private startPos: Vector;

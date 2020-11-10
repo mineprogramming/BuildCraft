@@ -3,8 +3,8 @@
 /// <reference path="WoodenPipeTileEntity.ts" />
 
 type RenderGroups = {
-    main: ICRenderGroup;
-    addition?: ICRenderGroup;
+    main: ICRender.Group;
+    addition?: ICRender.Group;
 };
 
 class PipeWooden extends BCTransportPipe {
@@ -16,7 +16,7 @@ class PipeWooden extends BCTransportPipe {
         EnergyTileRegistry.addEnergyTypeForId(this.block.id, RF);
         Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords, region: BlockSource) => {
                 const tile = World.getTileEntity(coords.x, coords.y, coords.z, region);
-                if (tile && TileEntity.isTileEntityLoaded(tile)) {
+                if (tile && tile.itemEjector) {
                     tile.checkConnection();
                 }
             }

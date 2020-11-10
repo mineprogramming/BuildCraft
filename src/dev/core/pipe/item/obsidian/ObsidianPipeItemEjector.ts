@@ -35,8 +35,7 @@ class ObsidianPipeItemEjector {
         const offsetVector = World.getRelativeCoords(0, 0, 0, this.ConnectionSide);
 
         // ? should I add offsetDistance to config?
-        const offsetDistance =
-            __config__.getNumber("travelingItem_offset_distance") || 0.01;
+        const offsetDistance = +__config__.getNumber("travelingItem_offset_distance") ?? 0.01;
 
         const itemCoords = {
             x: this.coords.x + 0.5 + offsetDistance * offsetVector.x,

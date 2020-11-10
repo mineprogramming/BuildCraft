@@ -1,5 +1,6 @@
 class WoodenPipeClient {
 	private storageConnector: WoodenPipeStorageConnector
+	public networkData: SyncedNetworkData;
 
 	public x: number;
 	public y: number;
@@ -9,9 +10,7 @@ class WoodenPipeClient {
 
 	public load() {
 		this.storageConnector = new WoodenPipeStorageConnector(this, this.renderer, this.texture);
-		// @ts-ignore
 		this.storageConnector.ConnectionSide = this.networkData.getInt("orientation");
-		// @ts-ignore
 		this.networkData.addOnDataChangedListener((networkData, isExternalChange) => {
 			this.storageConnector.ConnectionSide = networkData.getInt("orientation");
 		});

@@ -1,5 +1,6 @@
 class IronPipeClient {
 	private renderConnector: IronPipeRenderConnector
+	public networkData: SyncedNetworkData;
 
 	public readonly dimension: number;
 	public x: number;
@@ -12,9 +13,7 @@ class IronPipeClient {
 		const id = BlockSource.getDefaultForDimension(this.dimension).getBlockId(this.x, this.y, this.z);
 		const pipe = PipeIdMap.getClassById(id);
 		this.renderConnector = new IronPipeRenderConnector(pipe, this, this.renderer, this.connector, this.texture);
-		// @ts-ignore
 		this.renderConnector.ConnectionSide = this.networkData.getInt("orientation");
-		// @ts-ignore
 		this.networkData.addOnDataChangedListener((networkData, isExternalChange) => {
 			this.renderConnector.ConnectionSide = networkData.getInt("orientation");
 		});

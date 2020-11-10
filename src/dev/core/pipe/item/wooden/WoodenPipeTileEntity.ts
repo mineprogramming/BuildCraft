@@ -1,13 +1,13 @@
 /// <reference path="WoodenPipeStorageConnector.ts" />
 /// <reference path="WoodenPipeItemEjector.ts" />
 /// <reference path="WoodenPipeClient.ts" />
-class WoodenPipeTileEntity {
+class WoodenPipeTileEntity implements TileEntity.TileEntityPrototype {
     private clientFactory: ClientFactory = new ClientFactory(WoodenPipeClient);
 
     // * it will be rewriten during runtime
     protected data: any = {}
 
-    protected defaultValues: any = {// * it will be rewriten during runtime
+    public defaultValues: any = {// * it will be rewriten during runtime
         // ? I use -1 because we cant put null into java.int in SyncedData
         connectionSide: -1,
         energy: 0
@@ -21,6 +21,7 @@ class WoodenPipeTileEntity {
     public z: number;
 
     public blockSource: BlockSource;
+    public networkData: SyncedNetworkData;
 
     private ticksSincePull: number = 0;
 
@@ -33,9 +34,7 @@ class WoodenPipeTileEntity {
     private changeOrientation() {
         this.itemEjector.connectionSide = this.data.connectionSide;
         // ? if connection side is null put < 0 to syncData
-        // @ts-ignore
         this.networkData.putInt("orientation", this.data.connectionSide);
-        // @ts-ignore
         this.networkData.sendChanges();
     }
 
@@ -134,7 +133,7 @@ class WoodenPipeTileEntity {
     }
 
     public canConnectTo(x: number, y: number, z: number, region: BlockSource): boolean {
-        const container = World.getContainer(x, y, z, region);
+        const container = World.getContainer(x, y, z, region) as UI.Container;
         if (!container) return false;
 
         // ? if NativeTileEntity is NullObject

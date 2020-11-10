@@ -20,7 +20,7 @@ abstract class EngineRender {
         return this.render.getId();
     }
 
-    protected getModelData(): PartObject[] {
+    protected getModelData(): Render.PartElement[] {
         return this.boxes;
     }
 }

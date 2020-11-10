@@ -4,7 +4,7 @@
 		"lib": [
 			"ESNext"
 		],
-		"outFile": "C:\\Git_Projects\\BuildCraftProject\\toolchain\\build\\typescript\\main.js",
+		"outFile": "C:\\Git_Projects\\BuildCraftProject\\toolchain\\build\\project\\sources\\main.js",
 		"experimentalDecorators": true,
 		"downlevelIteration": true,
 		"allowJs": true
@@ -126,12 +126,12 @@
 		"item/wrench.ts"
 	],
 	"files": [
-		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\jslibs\\android-declarations.d.ts",
-		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\jslibs\\android.d.ts",
-		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\jslibs\\core-engine.d.ts",
-		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\jslibs\\lib\\energy-net.d.ts",
-		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\jslibs\\lib\\LiquidLib.d.ts",
-		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\jslibs\\lib\\numbers.d.ts",
-		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\jslibs\\lib\\StorageInterface.d.ts"
+		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\declarations\\android-declarations.d.ts",
+		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\declarations\\android.d.ts",
+		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\declarations\\core-engine.d.ts",
+		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\declarations\\lib\\energy-net.d.ts",
+		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\declarations\\lib\\LiquidLib.d.ts",
+		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\declarations\\lib\\numbers.d.ts",
+		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\declarations\\lib\\StorageInterface.d.ts"
 	]
 }

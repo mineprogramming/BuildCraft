@@ -2,8 +2,7 @@
 /// <reference path="../../energy.ts" />
 /// <reference path="../interface/IHeatable.ts" />
 /// <reference path="../interface/IEngine.ts" />
-const DEFAULT_ENGINE_ROTATION = 1;
-abstract class BCEngineTileEntity implements IHeatable, IEngine {
+abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHeatable, IEngine {
     public readonly MIN_HEAT: number = 20;
     public readonly IDEAL_HEAT: number = 100;
     public readonly MAX_HEAT: number = 250;
@@ -15,6 +14,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     protected progressPart: number = 0;
 
     protected isPumping: boolean = false; // Used for SMP synch // ?WTF is SMP
+    public checkOrientation: boolean = false;
     // How many ticks ago it gave out power, capped to 4.
     private lastTick: number = 0;
 
@@ -25,7 +25,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         heat: this.MIN_HEAT, // * this.heat in PC version
         progress: 0
     }
-    protected defaultValues: any = {
+    public defaultValues: any = {
         meta: null, // * this.orientation in PC version //? maybe we can use it instead of save value?
         energy: 0, // * this.energy in PC version
         heat: this.MIN_HEAT, // * this.heat in PC version
@@ -37,6 +37,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
     public z: number;
 
     public blockSource: BlockSource;
+    public networkData: SyncedNetworkData;
 
     public readonly isEngine: boolean = true;
 
@@ -48,24 +49,24 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
      */
 
     public getOrientation(): number {
-        return this.data.meta;
+        return this.blockSource.getBlockData(this.x, this.y, this.z);
     }
 
-    public setOrientation(value: number){
-        this.data.meta = value;
-        this.updateClientOrientation();
+    public setOrientation(value: number) {
+        if (typeof(value) == "number") {
+            const { x, y, z } = this;
+            this.blockSource.setBlock(x, y, z, this.blockSource.getBlockId(x, y, z), value);
+            this.updateClientOrientation();
+        }
     }
 
     private updateClientOrientation() {
-        // @ts-ignore
-        this.networkData.putInt("orientation", this.data.meta);
-        // @ts-ignore
+        this.networkData.putInt("orientation", this.blockSource.getBlockData(this.x, this.y, this.z));
         this.networkData.sendChanges();
     }
 
     private setProgress(value: number){
         this.data.progress = value;
-        // @ts-ignore
         this.networkData.putFloat("progress", value);
     }
 
@@ -83,9 +84,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     private setEnergyStage(value: EngineHeat){
         this.energyStage = value;
-        // @ts-ignore
         this.networkData.putInt("energyStageIndex", HeatOrder.indexOf(this.energyStage));
-        // @ts-ignore
         this.networkData.sendChanges();
     }
 
@@ -97,9 +96,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         if (this.isPumping == value) return;
         this.isPumping = value;
         this.lastTick = 0;
-        // @ts-ignore
         this.networkData.putBoolean("isPumping", value);
-        // @ts-ignore
         this.networkData.sendChanges();
     }
 
@@ -177,11 +174,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     // !TileEntity event
     public init(){
-        if (this.data.meta == null){
-            this.setOrientation(this.getConnectionSide());
-        } else {
-            this.updateClientOrientation();
-        }
+        this.checkOrientation = true;
     }
 
     // !TileEntity event
@@ -191,6 +184,7 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
 
     // !TileEntity event
     public tick(){
+        if (this.checkOrientation) this.updateConnectionSide();
         if (this.lastTick < 4) this.lastTick++;
 
         this.updateHeat();
@@ -259,10 +253,11 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
         // * In common situation ends when i gets max in 5 index
         // * But if fhis function calling by wrench index can go beyound
         // * I think this code is poor, but maybe i fix it in future
+        const orientation = this.getOrientation();
         for(let t = 0; t < 12; t++){
             const i = t % 6;
             if(findNext) {
-                if(this.getOrientation() == t) findNext = false;
+                if(orientation == t) findNext = false;
                 continue;
             }
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
@@ -270,7 +265,18 @@ abstract class BCEngineTileEntity implements IHeatable, IEngine {
             const energyTypes = EnergyTileRegistry.accessMachineAtCoords(relCoords.x, relCoords.y, relCoords.z)?.__energyTypes;
             if(energyTypes?.RF) return i;
         }
-        return DEFAULT_ENGINE_ROTATION;
+        return null;
+    }
+
+    public updateConnectionSide(): void {
+        this.checkOrientation = false;
+        const orientation = this.getOrientation();
+        if (!this.isPoweredTile(this.getEnergyProvider(orientation), orientation)) {
+            const side = this.getConnectionSide();
+            if (typeof(side) == "number") {
+                this.setOrientation(side);
+            } else this.updateClientOrientation();
+        } else this.updateClientOrientation();
     }
 
     // ! @MineExplorer PLEASE make EnergyTileRegistry BlockSource support

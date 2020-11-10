@@ -1,5 +1,5 @@
 /// <reference path="IronPipeClient.ts" />
-class IronPipeTileEntity {
+class IronPipeTileEntity implements TileEntity.TileEntityPrototype {
     private clientFactory: ClientFactory = new ClientFactory(IronPipeClient);
 
     protected data: any = {}
@@ -13,6 +13,7 @@ class IronPipeTileEntity {
     public z: number;
 
     public blockSource: BlockSource;
+    public networkData: SyncedNetworkData;
 
     public client: IronPipeClient;
 
@@ -23,9 +24,7 @@ class IronPipeTileEntity {
 
     private changeOrientation() {
         // ? if connection side is null put < 0 to syncData
-        // @ts-ignore
         this.networkData.putInt("orientation", this.data.connectionSide);
-        // @ts-ignore
         this.networkData.sendChanges();
     }
 

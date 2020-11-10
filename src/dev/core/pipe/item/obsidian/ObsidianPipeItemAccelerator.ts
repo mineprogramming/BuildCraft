@@ -1,5 +1,5 @@
 /// <reference path="AxisBoxes.ts" />
-const OBSIDIAN_PIPE_DROP_VELOCITY = __config__.getNumber("obsidian_pipe_drop_velocity");
+const OBSIDIAN_PIPE_DROP_VELOCITY = +__config__.getNumber("obsidian_pipe_drop_velocity");
 class ObsidianPipeItemAccelerator {
 	constructor(private region: BlockSource, private coords: Vector) { }
 

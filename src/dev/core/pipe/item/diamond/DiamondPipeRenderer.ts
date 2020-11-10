@@ -1,7 +1,7 @@
 /// <reference path="../../components/PipeRenderer.ts" />
 class DiamondPipeRenderer extends PipeRenderer {
 
-    constructor(protected connector: PipeConnector, protected texture: PipeTexture, protected renderGroup: ICRenderGroup) {
+    constructor(protected connector: PipeConnector, protected texture: PipeTexture, protected renderGroup: ICRender.Group) {
         super(connector, texture, renderGroup);
     }
 
