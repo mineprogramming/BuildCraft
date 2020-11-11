@@ -1,4 +1,5 @@
 /// <reference path="parts/EngineBaseModelPart.ts" />
+/// <reference path="parts/EngineTrunkModelPart.ts" />
 class EngineItemModel {
 	private model: BlockRenderer.Model;
 
@@ -19,7 +20,8 @@ class EngineItemModel {
 
 	private get Boxes(): ModelBox[] {
 		return [
-			this.baseModel.requireModelBox()
+			this.baseModel.requireModelBox(),
+			this.trunkModel.requireModelBox()
 		]
 	}
 
@@ -30,5 +32,6 @@ class EngineItemModel {
 	private setupModels(): void {
 		const texture = this.engineTexture.getItemModelTexture()
 		this.baseModel = new EngineBaseModelPart(texture.BaseBoxTextureSet);
+		this.trunkModel = new EngineTrunkModelPart(texture.TrunkBoxTextureSet);
 	}
 }
