@@ -23,4 +23,15 @@ class EngineItemModelTexture {
 			[this.trunkTextureName, 0]
 		]
 	}
+
+	get PistonBoxTextureSet(): BlockRenderer.ModelTextureSet {
+		return [
+			[this.textureName, 0],
+			[this.textureName, 0],
+			[this.textureName, 2],
+			[this.textureName, 2],
+			[this.textureName, 2],
+			[this.textureName, 2]
+		]
+	}
 }
