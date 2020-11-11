@@ -1,7 +1,7 @@
 class RenderManager {
     private static renders = [];
 
-    static getRender(groupName ?: string){
+    static getRender(groupName?: string) {
         return this.renders.pop();
     }
 

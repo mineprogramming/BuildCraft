@@ -7,7 +7,11 @@ class WoodEngine extends BCEngine {
         return "wooden"
     }
 
-    protected requireTileEntity(){
-        return new BCWoodEngineTileEntity(EngineTextures.wood);
+    protected get texture(): EngineTexture {
+        return EngineTextures.wood;
+    }
+
+    protected requireTileEntity() {
+        return new BCWoodEngineTileEntity(this.texture);
     }
 }

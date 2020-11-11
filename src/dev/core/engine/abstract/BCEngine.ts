@@ -1,5 +1,6 @@
 /// <reference path="../components/EngineBlock.ts" />
 /// <reference path="../components/EngineItem.ts" />
+/// <reference path="../components/model/EngineItemModel.ts" />
 /// <reference path="../EngineHeat.ts" />
 /// <reference path="../model/texture/EngineTexture.ts" />
 /// <reference path="BCEngineTileEntity.ts" />
@@ -9,7 +10,7 @@ abstract class BCEngine {
 
     protected maxHeat: number = 100;
 
-    protected engineTexture: EngineTexture;
+    protected engineItemModel: EngineItemModel;
 
     public get engineType(): string {
         return null
@@ -20,15 +21,17 @@ abstract class BCEngine {
     constructor() {
         this.block = new EngineBlock(this.engineType);
         this.item = new EngineItem(this.engineType, this.block);
+        this.engineItemModel = new EngineItemModel(this.texture);
         Block.setupAsRedstoneReceiver(this.block.stringId, true)
         TileEntity.registerPrototype(this.block.id, this.requireTileEntity());
         this.registerUse();
+        this.registerItemModel();
         this.registerDrop();
         this.registerNeighbourChangeFunction();
     }
 
     protected get texture(): EngineTexture {
-        return this.engineTexture;
+        return null;
     }
 
     private registerUse(): void {
@@ -41,6 +44,11 @@ abstract class BCEngine {
                 this.setBlock(region, coords.relative);
             }
         });
+    }
+
+    private registerItemModel(): void {
+        ItemModel.getFor(this.item.id, 0).setUiModel(this.engineItemModel.Model);
+        ItemModel.getFor(this.item.id, 0).setHandModel(this.engineItemModel.Model);
     }
 
     private registerNeighbourChangeFunction(): void {
