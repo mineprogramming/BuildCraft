@@ -17,17 +17,14 @@ abstract class BCEngine {
 
     protected abstract requireTileEntity(): object
 
-    constructor(){
+    constructor() {
         this.block = new EngineBlock(this.engineType);
         this.item = new EngineItem(this.engineType, this.block);
         Block.setupAsRedstoneReceiver(this.block.stringId, true)
         TileEntity.registerPrototype(this.block.id, this.requireTileEntity());
         this.registerUse();
         this.registerDrop();
-        Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords, region: BlockSource) => {
-            const tile = World.getTileEntity(coords.x, coords.y, coords.z, region);
-            if (tile) tile.checkOrientation = true;
-        });
+        this.registerNeighbourChangeFunction();
     }
 
     protected get texture(): EngineTexture {
@@ -36,13 +33,20 @@ abstract class BCEngine {
 
     private registerUse(): void {
         // TODO fix coords when update declarations
-        Item.registerUseFunction(this.item.stringId, (coords: any,  item: ItemInstance, block: Tile, player: number) => {
+        Item.registerUseFunction(this.item.stringId, (coords: any, item: ItemInstance, block: Tile, player: number) => {
             const { x, y, z } = coords.relative;
             const region = BlockSource.getDefaultForActor(player);
             if (region.getBlockId(x, y, z) == 0) {
                 Entity.setCarriedItem(player, item.id, item.count - 1, item.data);
                 this.setBlock(region, coords.relative);
             }
+        });
+    }
+
+    private registerNeighbourChangeFunction(): void {
+        Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords, region: BlockSource) => {
+            const tile = World.getTileEntity(coords.x, coords.y, coords.z, region);
+            if (tile) tile.checkOrientation = true;
         });
     }
 

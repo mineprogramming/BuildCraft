@@ -12,12 +12,16 @@ abstract class PipeConnector {
      * For vanila block ID
      */
     protected getBlacklistConnectedBlock(): Tile[] {
-        return []
+        return [
+            { id: VanillaTileID.ender_chest, data: -1 }
+        ]
     }
 
     public hasBlacklistBlockID(id: number, data: number): boolean {
         for (const bl of this.getBlacklistConnectedBlock()) {
-            if (id == bl.id && (bl.data < 0 || bl.data == data)) return true;
+            if (id == bl.id && (bl.data < 0 || bl.data == data)) {
+                return true;
+            }
         }
         return false;
     }

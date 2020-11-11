@@ -61,7 +61,7 @@ class TravelingItem {
         return this.itemMover.Coords;
     }
 
-    public get VisualItem(): {id, count, data} {
+    public get VisualItem(): { id, count, data } {
         return {
             id: this.item.id,
             count: this.item.count,
@@ -85,11 +85,10 @@ class TravelingItem {
 
         if (!this.blockSource) {
             this.blockSource = BlockSource.getDefaultForDimension(this.dimension);
-            if (!this.blockSource){
+            if (!this.blockSource) {
                 this.cooldown = ITEM_COOLDOWN_TIME;
                 return;
             } else {
-                
                 this.networkEntity = new NetworkEntity(TravelingItemNetworkType, this);
                 this.updateMoveData();
             }
@@ -101,7 +100,7 @@ class TravelingItem {
          * then it can exit its pipe network and fall into another
          * that is not connected to the past
          */
-        if (!this.blockSource.isChunkLoaded(Math.floor(x / 16), Math.floor(z / 16))){
+        if (!this.blockSource.isChunkLoaded(Math.floor(x / 16), Math.floor(z / 16))) {
             this.cooldown = ITEM_COOLDOWN_TIME;
             return;
         }
@@ -124,14 +123,13 @@ class TravelingItem {
             }
             if (container != null && this.itemMover.isValidContainer(container)) {
                 const pushedCount = StorageInterface.putItemToContainer(this.item, container,
-                                    this.itemMover.MoveVectorIndex, this.item.count);
+                    this.itemMover.MoveVectorIndex, this.item.count);
                 if (pushedCount > 0) {
                     this.destroy();
                     return;
                 }
             }
 
-            
             this.networkEntity.getClients().setupDistancePolicy(x, y, z, this.blockSource.getDimension(), 32);
             if (this.itemMover.findNewMoveVector(this.blockSource)) {
                 this.updateMoveData();
@@ -148,7 +146,7 @@ class TravelingItem {
      * @returns {boolean} should destroy item
      */
     private modifyByPipe(): boolean {
-        const {x, y, z} = this.itemMover.AbsoluteCoords;
+        const { x, y, z } = this.itemMover.AbsoluteCoords;
         const tile = World.getTileEntity(x, y, z, this.blockSource)
         if (!tile) return false;
 
@@ -157,7 +155,6 @@ class TravelingItem {
     }
 
     private updateMoveData(): void {
-        
         this.networkEntity.send("moveData", this.MoveData);
     }
 
@@ -165,13 +162,12 @@ class TravelingItem {
     private destroy(drop: boolean = false): void {
         if (drop) this.drop();
         this.remove = true;
-        
         this.networkEntity.remove();
     }
 
     private drop(): void {
         const { x, y, z } = this.itemMover.Coords;
-        const { id, count, data, extra} = this.item;
+        const { id, count, data, extra } = this.item;
         const entity = this.blockSource.spawnDroppedItem(x, y, z, id, count, data, extra || null);
 
         const speed = ITEM_DROP_VELOCITY;
