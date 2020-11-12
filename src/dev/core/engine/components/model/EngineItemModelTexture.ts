@@ -1,5 +1,6 @@
 class EngineItemModelTexture {
 	private trunkTextureName = "engine_trunk";
+	private chamberTextureName = "chamber";
 	constructor(private textureName: string) { }
 
 	get BaseBoxTextureSet(): BlockRenderer.ModelTextureSet {
@@ -32,6 +33,17 @@ class EngineItemModelTexture {
 			[this.textureName, 2],
 			[this.textureName, 2],
 			[this.textureName, 2]
+		]
+	}
+
+	get ChamberBoxTextureSet(): BlockRenderer.ModelTextureSet {
+		return [
+			[this.chamberTextureName, 0],
+			[this.chamberTextureName, 0],
+			[this.chamberTextureName, 0],
+			[this.chamberTextureName, 0],
+			[this.chamberTextureName, 0],
+			[this.chamberTextureName, 0]
 		]
 	}
 }

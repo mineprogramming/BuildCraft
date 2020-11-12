@@ -35,8 +35,7 @@ abstract class BCEngine {
     }
 
     private registerUse(): void {
-        // TODO fix coords when update declarations
-        Item.registerUseFunction(this.item.stringId, (coords: any, item: ItemInstance, block: Tile, player: number) => {
+        Item.registerUseFunction(this.item.stringId, (coords: Callback.ItemUseCoordinates, item: ItemInstance, block: Tile, player: number) => {
             const { x, y, z } = coords.relative;
             const region = BlockSource.getDefaultForActor(player);
             if (region.getBlockId(x, y, z) == 0) {
@@ -47,8 +46,7 @@ abstract class BCEngine {
     }
 
     private registerItemModel(): void {
-        ItemModel.getFor(this.item.id, 0).setUiModel(this.engineItemModel.Model);
-        ItemModel.getFor(this.item.id, 0).setHandModel(this.engineItemModel.Model);
+        ItemModel.getFor(this.item.id, 0).setModel(this.engineItemModel.Model);
     }
 
     private registerNeighbourChangeFunction(): void {

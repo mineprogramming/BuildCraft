@@ -51,6 +51,7 @@
 		"core/engine/components/model/ModelBox.ts",
 		"core/engine/components/model/parts",
 		"core/engine/components/model/parts/EngineBaseModelPart.ts",
+		"core/engine/components/model/parts/EngineChamberModelPart.ts",
 		"core/engine/components/model/parts/EnginePistonModelPart.ts",
 		"core/engine/components/model/parts/EngineTrunkModelPart.ts",
 		"core/engine/creative/CreativeEngine.ts",
