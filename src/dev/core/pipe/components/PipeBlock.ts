@@ -1,7 +1,9 @@
-const pipeBlockType = {
-    base: 1
+const BlockTypePipe: Block.SpecialType = {
+    base: 1,
+    destroytime: 0.2,
+    explosionres: 0.5,
+    renderlayer: 1
 };
-// TODO complete blockType before release
 
 class PipeBlock {
     public readonly id: number;
@@ -18,7 +20,7 @@ class PipeBlock {
         IDRegistry.genBlockID(this.stringId);
         Block.createBlock(this.stringId,
             [{ name: this.stringId, texture: [[this.texture.block.name, this.texture.block.data]], inCreative: true }],
-            pipeBlockType);
+            BlockTypePipe);
     }
 
     private registerShape(): void {
