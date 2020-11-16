@@ -15,4 +15,8 @@ class PipeSandstone extends BCTransportPipe {
         if(!this.texture) this.texture = new PipeTexture({name: textureName, data: 0}, {name: textureName, data: 1});
         return this.texture;
     }
+
+    protected getIngredientForRecipe(): ItemInstance {
+        return { id: VanillaBlockID.sandstone, count: 1, data: 0 }
+    }
 }

@@ -1,7 +1,7 @@
 /// <reference path="../abstract/BCTransportPipe.ts" />
 /// <reference path="QuartzPipeConnector.ts" />
 class PipeQuartz extends BCTransportPipe {
-    constructor () {
+    constructor() {
         super();
         this.pipeSpeed = new PipeSpeed(0.01, 0.002);
     }
@@ -11,7 +11,7 @@ class PipeQuartz extends BCTransportPipe {
     }
 
     public get pipeConnector(): PipeConnector {
-        if(!this.connector) this.connector = new QuartzPipeConnector();
+        if (!this.connector) this.connector = new QuartzPipeConnector();
         return this.connector;
     }
 
@@ -24,7 +24,11 @@ class PipeQuartz extends BCTransportPipe {
 
     protected get pipeTexture(): PipeTexture {
         const textureName = `pipe_${this.transportType}_${this.material}`
-        if(!this.texture) this.texture = new PipeTexture({name: textureName, data: 0}, {name: textureName, data: 1});
+        if (!this.texture) this.texture = new PipeTexture({ name: textureName, data: 0 }, { name: textureName, data: 1 });
         return this.texture;
+    }
+
+    protected getIngredientForRecipe(): ItemInstance {
+        return { id: VanillaItemID.quartz, count: 1, data: 0 }
     }
 }

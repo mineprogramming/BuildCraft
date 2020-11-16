@@ -15,11 +15,11 @@ class PipeWooden extends BCTransportPipe {
         );
         EnergyTileRegistry.addEnergyTypeForId(this.block.id, RF);
         Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords, region: BlockSource) => {
-                const tile = World.getTileEntity(coords.x, coords.y, coords.z, region);
-                if (tile && tile.itemEjector) {
-                    tile.checkConnection();
-                }
+            const tile = World.getTileEntity(coords.x, coords.y, coords.z, region);
+            if (tile && tile.itemEjector) {
+                tile.checkConnection();
             }
+        }
         );
     }
 
@@ -49,5 +49,9 @@ class PipeWooden extends BCTransportPipe {
             );
         }
         return this.texture;
+    }
+
+    protected getIngredientForRecipe(): ItemInstance {
+        return { id: VanillaBlockID.planks, count: 1, data: 0 }
     }
 }

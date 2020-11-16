@@ -7,11 +7,11 @@ class PipeIron extends BCTransportPipe {
             new IronPipeTileEntity(this.pipeRenderer, this.connector, this.texture)
         );
         Block.registerNeighbourChangeFunctionForID(this.block.id, (coords, block, changeCoords, region: BlockSource) => {
-                const tile = World.getTileEntity(coords.x, coords.y, coords.z, region);
-                if (tile && TileEntity.isTileEntityLoaded(tile)) {
-                    tile.checkConnection();
-                }
+            const tile = World.getTileEntity(coords.x, coords.y, coords.z, region);
+            if (tile && TileEntity.isTileEntityLoaded(tile)) {
+                tile.checkConnection();
             }
+        }
         );
     }
 
@@ -29,5 +29,9 @@ class PipeIron extends BCTransportPipe {
             );
         }
         return this.texture;
+    }
+
+    protected getIngredientForRecipe(): ItemInstance {
+        return { id: VanillaItemID.iron_ingot, count: 1, data: 0 }
     }
 }
