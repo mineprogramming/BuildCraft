@@ -1,5 +1,7 @@
 /// <reference path="../components/EngineBlock.ts" />
 /// <reference path="../components/model/EngineItemModel.ts" />
+/// <reference path="../components/recipe/EngineRecipe.ts" />
+/// <reference path="../components/recipe/EngineIngredients.ts" />
 /// <reference path="../EngineHeat.ts" />
 /// <reference path="../model/texture/EngineTexture.ts" />
 /// <reference path="BCEngineTileEntity.ts" />
@@ -7,6 +9,8 @@ abstract class BCEngine {
     protected block: EngineBlock;
 
     protected engineItemModel: EngineItemModel;
+
+    protected recipe: EngineRecipe;
 
     public get engineType(): string {
         return null
@@ -17,6 +21,8 @@ abstract class BCEngine {
     constructor() {
         this.block = new EngineBlock(this.engineType);
         this.engineItemModel = new EngineItemModel(this.texture);
+        this.recipe = this.getRecipe(this.getIngredientsForRecipe());
+        this.recipe.registerFor({ id: this.block.id, count: 1, data: 0 });
         Block.setupAsRedstoneReceiver(this.block.stringId, true)
         TileEntity.registerPrototype(this.block.id, this.requireTileEntity());
         this.registerHandModel();
@@ -27,6 +33,18 @@ abstract class BCEngine {
     protected get texture(): EngineTexture {
         return null;
     }
+
+    /**
+     * it a method because we need this in constructor
+     */
+    protected getRecipe(ingredients: EngineIngredients): EngineRecipe {
+        return new EngineRecipe(ingredients);
+    }
+
+    /**
+     * it a method because we need this in constructor
+     */
+    protected abstract getIngredientsForRecipe(): EngineIngredients
 
     private registerHandModel(): void {
         ItemModel.getFor(this.block.id, 1).setModel(this.engineItemModel.Model);
