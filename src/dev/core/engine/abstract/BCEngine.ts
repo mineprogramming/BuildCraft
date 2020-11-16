@@ -29,7 +29,7 @@ abstract class BCEngine {
     }
 
     private registerHandModel(): void {
-        ItemModel.getFor(this.block.id, 0).setModel(this.engineItemModel.Model);
+        ItemModel.getFor(this.block.id, 1).setModel(this.engineItemModel.Model);
     }
 
     private registerNeighbourChangeFunction(): void {
@@ -41,7 +41,7 @@ abstract class BCEngine {
 
     private registerDrop(): void {
         Block.registerDropFunction(this.block.stringId, () => {
-            return [[this.block.id, 1, 0]]
+            return [[this.block.id, 1, 1]]
         });
     }
 }
