@@ -16,6 +16,6 @@ class EngineBlock {
     private registerBlock(): void {
         IDRegistry.genBlockID(this.stringId);
         Block.createBlock(this.stringId,
-            [{ name: this.stringId, texture: [["empty", 0]], inCreative: false }], engineBlockType);
+            [{ name: this.stringId, texture: [["empty", 0]], inCreative: true }], engineBlockType);
     }
 }

@@ -1,3 +1,6 @@
+/**
+ * @deprecated
+ */
 class EngineItem {
     public readonly id: number;
     public readonly stringId: string;
