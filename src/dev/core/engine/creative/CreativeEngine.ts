@@ -6,7 +6,11 @@ class CreativeEngine extends BCEngine {
         return "creative"
     }
 
-    protected requireTileEntity(){
+    protected get texture(): EngineTexture {
+        return EngineTextures.creative;
+    }
+
+    protected requireTileEntity() {
         return new BCCreativeEngineTileEntity(EngineTextures.creative);
     }
 }

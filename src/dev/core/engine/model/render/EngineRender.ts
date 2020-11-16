@@ -4,8 +4,8 @@ abstract class EngineRender {
     protected readonly render: Render;
     protected boxes = [];
 
-    constructor(protected engineTexture: EngineTexture){
-        this.render = RenderManager.getRender() || new Render({skin: this.engineTexture.name});
+    constructor(protected engineTexture: EngineTexture) {
+        this.render = RenderManager.getRender() || new Render({ skin: this.engineTexture.name });
     }
 
     public refresh(): void {

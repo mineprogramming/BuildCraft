@@ -48,23 +48,18 @@ class BaseRender extends EngineRender {
 
     // Chamber
     public set chamberCoords(value: Vector) {
-        //Debug.m("chamber coords setted");
         this.chamberBoxes[0].coords = value;
     }
 
     public set chamberSize(value: Vector) {
-        //Debug.m("chamber size setted");
         this.chamberBoxes[0].size = value;
     }
 
     public set chamberUV(value: Vector2) {
-       // Debug.m("chamber uv setted");
         this.chamberBoxes[0].uv = value;
     }
 
     public refreshChamber(): void {
-        //Debug.m("chamber refreshed");
-        let part = this.render.addPart("head.chamber");
         this.render.setPart("head.chamber", this.chamberBoxes, this.engineTexture.size);
     };
 
