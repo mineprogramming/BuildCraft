@@ -15,11 +15,10 @@
 		"webpack"
 	],
 	"include": [
-		"block",
 		"core",
 		"item",
+		"misc",
 		"tsconfig.json",
-		"block/capacitor.ts",
 		"core/ClientFactory.ts",
 		"core/energy.ts",
 		"core/engine",
@@ -133,7 +132,8 @@
 		"core/pipe/item/wooden/WoodenPipeStorageConnector.ts",
 		"core/pipe/item/wooden/WoodenPipeTileEntity.ts",
 		"item/gears.ts",
-		"item/wrench.ts"
+		"item/wrench.ts",
+		"misc/Translations.ts"
 	],
 	"files": [
 		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\declarations\\android-declarations.d.ts",
