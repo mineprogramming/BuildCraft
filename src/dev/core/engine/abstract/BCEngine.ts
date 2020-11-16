@@ -5,7 +5,6 @@
 /// <reference path="BCEngineTileEntity.ts" />
 abstract class BCEngine {
     protected block: EngineBlock;
-    // protected item: EngineItem;
 
     protected engineItemModel: EngineItemModel;
 
@@ -17,11 +16,9 @@ abstract class BCEngine {
 
     constructor() {
         this.block = new EngineBlock(this.engineType);
-        // this.item = new EngineItem(this.engineType, this.block);
         this.engineItemModel = new EngineItemModel(this.texture);
         Block.setupAsRedstoneReceiver(this.block.stringId, true)
         TileEntity.registerPrototype(this.block.id, this.requireTileEntity());
-        // this.registerUse();
         this.registerHandModel();
         this.registerDrop();
         this.registerNeighbourChangeFunction();
@@ -30,17 +27,6 @@ abstract class BCEngine {
     protected get texture(): EngineTexture {
         return null;
     }
-
-    /* private registerUse(): void {
-        Item.registerUseFunction(this.item.stringId, (coords: Callback.ItemUseCoordinates, item: ItemInstance, block: Tile, player: number) => {
-            const { x, y, z } = coords.relative;
-            const region = BlockSource.getDefaultForActor(player);
-            if (region.getBlockId(x, y, z) == 0) {
-                Entity.setCarriedItem(player, item.id, item.count - 1, item.data);
-                this.setBlock(region, coords.relative);
-            }
-        });
-    }*/
 
     private registerHandModel(): void {
         ItemModel.getFor(this.block.id, 0).setModel(this.engineItemModel.Model);
@@ -58,10 +44,4 @@ abstract class BCEngine {
             return [[this.block.id, 1, 0]]
         });
     }
-
-    /* private setBlock(region: BlockSource, coords: Vector): void {
-        region.setBlock(coords.x, coords.y, coords.z, this.block.id, 1);
-        World.addTileEntity(coords.x, coords.y, coords.z, region);
-        World.playSound(coords.x, coords.y, coords.z, "dig.stone", 1, 0.8);
-    }*/
 }
