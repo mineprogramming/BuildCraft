@@ -16,6 +16,7 @@
 	],
 	"include": [
 		"core",
+		"Header.ts",
 		"item",
 		"misc",
 		"tsconfig.json",

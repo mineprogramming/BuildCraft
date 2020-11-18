@@ -22,7 +22,7 @@ abstract class BCEngine {
         this.block = new EngineBlock(this.engineType);
         this.engineItemModel = new EngineItemModel(this.texture);
         this.recipe = this.getRecipe(this.getIngredientsForRecipe());
-        this.recipe.registerFor({ id: this.block.id, count: 1, data: 0 });
+        this.recipe.registerFor({ id: this.block.id, count: 1, data: 1 });
         Block.setupAsRedstoneReceiver(this.block.stringId, true)
         TileEntity.registerPrototype(this.block.id, this.requireTileEntity());
         this.registerHandModel();

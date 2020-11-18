@@ -18,6 +18,6 @@ class WoodEngine extends BCEngine {
     }
 
     protected getIngredientsForRecipe(): EngineIngredients {
-        return new EngineIngredients({ id: ItemID.gear_wood, count: 1, data: 0 }, { id: VanillaBlockID.planks, count: 1, data: 0 });
+        return new EngineIngredients({ id: ItemID.gear_wood, count: 1, data: 0 }, { id: VanillaBlockID.planks, count: 1, data: -1 });
     }
 }
