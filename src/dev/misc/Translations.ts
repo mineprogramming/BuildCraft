@@ -1,5 +1,5 @@
 Translation.addTranslation("engine_creative", { ru: "Двигатель для творческого режима", en: "Creative Engine" });
-Translation.addTranslation("engine_wooden", { ru: "Двигатель внутреннего сгорания", en: "Wooden Engine" });
+Translation.addTranslation("engine_wooden", { ru: "Двигатель на красном камне", en: "Wooden Engine" });
 
 Translation.addTranslation("pipe_item_cobble", { ru: "Булыжниковая транспортная труба", en: "Cobblestone Transport Pipe" });
 Translation.addTranslation("pipe_item_stone", { ru: "Каменная транспортная труба", en: "Stone Transport Pipe" });
