@@ -1,0 +1,15 @@
+*.bat
+*.zip
+*.rar
+*.icmod
+
+.vscode/*
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
+toolchain/*
+output
+**/__pycache__
+test.ts
