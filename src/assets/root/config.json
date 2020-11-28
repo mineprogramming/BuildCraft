@@ -1,0 +1,8 @@
+{
+    "enabled": true,
+    "animation_movement_interpolation": false,
+    "travelingItem_offset_distance": 0,
+    "obsidian_pipe_drop_velocity": 1.2,
+    "item_drop_velocity": 0.25,
+    "relative_max_ping": 100
+}

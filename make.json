@@ -1,0 +1,83 @@
+{
+    "global": {
+        "info": {
+            "name": "BuildCraft PE",
+            "author": "Nikolay Savenko",
+            "version": "1.0",
+            "description": "Port of PC version of BuildCraft"
+        },
+        "api": "CoreEngine"
+    },
+    "make": {
+        "debugAbi": "armeabi-v7a",
+        "abis": [
+            "armeabi-v7a",
+            "x86"
+        ],
+        "linkNative": [
+            "minecraftpe",
+            "innercore",
+            "nativejs"
+        ],
+        "excludeFromRelease": [],
+        "pushTo": "storage/emulated/0/games/horizon/packs/innercore-dev/innercore/mods/BuildCraft",
+        "ndkPath": null
+    },
+    "resources": [
+        {
+            "path": "src/assets/resource_packs/*",
+            "type": "minecraft_resource_pack"
+        },
+        {
+            "path": "src/assets/behavior_packs/*",
+            "type": "minecraft_behavior_pack"
+        },
+        {
+            "path": "src/assets/assets",
+            "type": "resource_directory"
+        },
+        {
+            "path": "src/assets/gui",
+            "type": "gui"
+        }
+    ],
+    "sources": [
+        {
+            "source": "src/lib/*",
+            "type": "library",
+            "language": "javascript"
+        },
+        {
+            "source": "src/preloader/*",
+            "type": "preloader",
+            "language": "javascript"
+        },
+        {
+			"source": "src/dev",
+			"target": "main.js",
+            "type": "main",
+            "language": "typescript"
+        },
+        {
+            "type": "launcher",
+            "language": "javascript",
+            "source": "src/launcher.js"
+        }
+    ],
+    "compile": [
+        {
+            "source": "src/native/*",
+            "type": "native"
+        },
+        {
+            "source": "src/java/*",
+            "type": "java"
+        }
+    ],
+    "additional": [
+        {
+            "source": "src/assets/root/*",
+            "targetDir": "."
+        }
+    ]
+}
