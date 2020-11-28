@@ -15,11 +15,11 @@
 		"webpack"
 	],
 	"include": [
-		"block",
 		"core",
+		"Header.ts",
 		"item",
+		"misc",
 		"tsconfig.json",
-		"block/capacitor.ts",
 		"core/ClientFactory.ts",
 		"core/energy.ts",
 		"core/engine",
@@ -42,6 +42,7 @@
 		"core/engine/components/EngineBlock.ts",
 		"core/engine/components/EngineItem.ts",
 		"core/engine/components/model",
+		"core/engine/components/recipe",
 		"core/engine/components/animation/AnimationComponent.ts",
 		"core/engine/components/animation/BaseAnimation.ts",
 		"core/engine/components/animation/PistonAnimation.ts",
@@ -54,7 +55,10 @@
 		"core/engine/components/model/parts/EngineChamberModelPart.ts",
 		"core/engine/components/model/parts/EnginePistonModelPart.ts",
 		"core/engine/components/model/parts/EngineTrunkModelPart.ts",
+		"core/engine/components/recipe/EngineIngredients.ts",
+		"core/engine/components/recipe/EngineRecipe.ts",
 		"core/engine/creative/CreativeEngine.ts",
+		"core/engine/creative/CreativeEngineRecipe.ts",
 		"core/engine/creative/CreativeEngineTileEntity.ts",
 		"core/engine/interface/IEngine.ts",
 		"core/engine/interface/IHeatable.ts",
@@ -76,7 +80,9 @@
 		"core/pipe/abstract/BCPipe.ts",
 		"core/pipe/abstract/PipeConnector.ts",
 		"core/pipe/components/PipeBlock.ts",
+		"core/pipe/components/PipeDoubleRecipe.ts",
 		"core/pipe/components/PipeIdMap.ts",
+		"core/pipe/components/PipeRecipe.ts",
 		"core/pipe/components/PipeRenderer.ts",
 		"core/pipe/components/PipeTexture.ts",
 		"core/pipe/item/abstract",
@@ -133,7 +139,8 @@
 		"core/pipe/item/wooden/WoodenPipeStorageConnector.ts",
 		"core/pipe/item/wooden/WoodenPipeTileEntity.ts",
 		"item/gears.ts",
-		"item/wrench.ts"
+		"item/wrench.ts",
+		"misc/Translations.ts"
 	],
 	"files": [
 		"C:\\Git_Projects\\BuildCraftProject\\toolchain\\declarations\\android-declarations.d.ts",

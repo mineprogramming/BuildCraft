@@ -6,7 +6,7 @@ class PipeStone extends BCTransportPipe {
     }
 
     public get pipeConnector(): PipeConnector {
-        if(!this.connector) this.connector = new StonePipeConnector();
+        if (!this.connector) this.connector = new StonePipeConnector();
         return this.connector;
     }
 
@@ -19,7 +19,11 @@ class PipeStone extends BCTransportPipe {
 
     protected get pipeTexture(): PipeTexture {
         const textureName = `pipe_${this.transportType}_${this.material}`
-        if(!this.texture) this.texture = new PipeTexture({name: textureName, data: 0}, {name: textureName, data: 1});
+        if (!this.texture) this.texture = new PipeTexture({ name: textureName, data: 0 }, { name: textureName, data: 1 });
         return this.texture;
+    }
+
+    protected getIngredientForRecipe(): ItemInstance {
+        return { id: VanillaBlockID.stone, count: 1, data: 0 }
     }
 }

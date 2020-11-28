@@ -1,8 +1,8 @@
 /// <reference path="../../abstract/BCPipe.ts" />
 /// <reference path="../../abstract/PipeConnector.ts" />
-class BCTransportPipe extends BCPipe {
+abstract class BCTransportPipe extends BCPipe {
     public get pipeConnector(): PipeConnector {
-        if(!this.connector) this.connector = new TransportPipeConnector();
+        if (!this.connector) this.connector = new TransportPipeConnector();
         return this.connector;
     }
 

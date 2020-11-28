@@ -1,7 +1,7 @@
-const engineBlockType = {
-    base: 1
+const BlockTypeEngine: Block.SpecialType = {
+    base: 1,
+    destroytime: 1.5
 };
-// TODO complete blockType before release
 
 class EngineBlock {
     public readonly id: number;
@@ -15,7 +15,9 @@ class EngineBlock {
 
     private registerBlock(): void {
         IDRegistry.genBlockID(this.stringId);
-        Block.createBlock(this.stringId,
-            [{ name: this.stringId, texture: [["empty", 0]], inCreative: true }], engineBlockType);
+        Block.createBlock(this.stringId, [
+            { name: this.stringId, texture: [["empty", 0]], inCreative: false },
+            { name: this.stringId, texture: [["empty", 0]], inCreative: true }
+        ], BlockTypeEngine);
     }
 }

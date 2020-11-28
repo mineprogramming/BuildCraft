@@ -30,4 +30,8 @@ class PipeDiamond extends BCTransportPipe {
         }
         return this.texture;
     }
+
+    protected getIngredientForRecipe(): ItemInstance {
+        return { id: VanillaItemID.diamond, count: 1, data: 0 }
+    }
 }
