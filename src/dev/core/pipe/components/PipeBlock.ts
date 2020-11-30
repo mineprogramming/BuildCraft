@@ -1,8 +1,7 @@
 const BlockTypePipe: Block.SpecialType = {
     base: 1,
     destroytime: 0.2,
-    explosionres: 0.5,
-    renderlayer: 1
+    explosionres: 0.5
 };
 
 class PipeBlock {
