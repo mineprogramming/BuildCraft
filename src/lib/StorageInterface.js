@@ -1,6 +1,6 @@
 LIBRARY({
 	name: "StorageInterface",
-	version: 7,
+	version: 8,
 	shared: true,
 	api: "CoreEngine"
 });
@@ -9,7 +9,7 @@ let LIQUID_STORAGE_MAX_LIMIT = 99999999;
 
 let StorageInterface = {
 	data: {},
-	
+
 	directionsBySide: [
 		{x: 0, y: -1, z: 0}, // down
 		{x: 0, y: 1, z: 0}, // up
@@ -18,12 +18,30 @@ let StorageInterface = {
 		{x: -1, y: 0, z: 0}, // east
 		{x: 1, y: 0, z: 0} // west
 	],
-	
+
 	getRelativeCoords: function(coords, side) {
 		let dir = this.directionsBySide[side];
 		return {x: coords.x + dir.x, y: coords.y + dir.y, z: coords.z + dir.z};
 	},
-	
+
+	setSlotMaxStackPolicy: function(container, slotName, maxCount) {
+		container.setSlotAddTransferPolicy(slotName, function(container, name, id, amount, data) {
+			return Math.max(0, Math.min(amount, maxCount - container.getSlot(name).count));
+		});
+	},
+
+	setSlotValidatePolicy: function(container, slotName, func) {
+		container.setSlotAddTransferPolicy(slotName, function(container, name, id, amount, data, extra, playerUid) {
+			return func(name, id, amount, data, extra, container, playerUid) ? amount : 0;
+		});
+	},
+
+	setGlobalValidatePolicy: function(container, func) {
+		container.setGlobalAddTransferPolicy(function(container, name, id, amount, data, extra, playerUid) {
+			return func(name, id, amount, data, extra, container, playerUid) ? amount : 0;
+		});
+	},
+
 	newInstance: function(id, tileEntity) {
 		let instance = {};
 		let obj = this.data[id];
@@ -35,7 +53,7 @@ let StorageInterface = {
 		instance.liquidStorage = tileEntity.liquidStorage;
 		return instance;
 	},
-	
+
 	createInterface: function(id, interface) {
 		tilePrototype = TileEntity.getPrototype(id);
 		if (tilePrototype) {
@@ -44,7 +62,7 @@ let StorageInterface = {
 				this.interface = StorageInterface.newInstance(id, this);
 				this._init();
 			}
-			
+
 			if (interface.slots) {
 				for (let name in interface.slots) {
 					if (name.includes('^')) {
@@ -72,11 +90,11 @@ let StorageInterface = {
 			else {
 				interface.slots = {};
 			}
-			
+
 			tilePrototype.addTransportedItem = function(obj, item, side) {
 				this.interface.addItem(item, side);
 			}
-			
+
 			interface.isValidInput = interface.isValidInput || function(item, side, tileEntity) {
 				return true;
 			}
@@ -95,7 +113,7 @@ let StorageInterface = {
 				}
 				return sideEnum[slotSideTag] == side;
 			}
-			
+
 			interface.addItem = interface.addItem || function(item, side, maxCount) {
 				if (!this.isValidInput(item)) return 0;
 				let count = 0;
@@ -109,7 +127,7 @@ let StorageInterface = {
 				}
 				return count;
 			}
-			
+
 			interface.getOutputSlots = interface.getOutputSlots || function(side) {
 				let slots = [];
 				for (let name in this.slots) {
@@ -123,7 +141,7 @@ let StorageInterface = {
 				}
 				return slots;
 			}
-			
+
 			interface.canReceiveLiquid = interface.canReceiveLiquid || function(liquid, side) {
 				return false;
 			}
@@ -143,10 +161,10 @@ let StorageInterface = {
 			interface.getLiquidStored = interface.getLiquidStored || function(storage, side) {
 				return this.liquidStorage.getLiquidStored();
 			}
-			
-			this.data[id] = interface;			
+
+			this.data[id] = interface;
 		} else {
-			Logger.Log("failed to create storage interface: no tile entity for id "+id, "ERROR");
+			Logger.Log("Failed to create storage interface: cannot find tile entity prototype for id "+id, "ERROR");
 		}
 	},
 
@@ -170,12 +188,13 @@ let StorageInterface = {
 		}
 		return 0;
 	},
-	
-	getNearestContainers: function(coords, side, excludeSide) {
+
+	getNearestContainers: function(coords, side, excludeSide, region) {
+		region = region || BlockSource.getDefaultForActor(Player.get());
 		let containers = {};
 		if (side >= 0 && !excludeSide) {
 			let dir = this.getRelativeCoords(coords, side);
-			let container = World.getContainer(dir.x, dir.y, dir.z);
+			let container = World.getContainer(dir.x, dir.y, dir.z, region);
 			if (container) {
 				containers[side] = container;
 			}
@@ -183,19 +202,20 @@ let StorageInterface = {
 		else for (let s = 0; s < 6; s++) {
 			if (excludeSide && s == side) continue;
 			let dir = this.getRelativeCoords(coords, s);
-			let container = World.getContainer(dir.x, dir.y, dir.z);
+			let container = World.getContainer(dir.x, dir.y, dir.z, region);
 			if (container) {
 				containers[s] = container;
 			}
 		}
 		return containers;
 	},
-	
-	getNearestLiquidStorages: function(coords, side, excludeSide) {
+
+	getNearestLiquidStorages: function(coords, side, excludeSide, region) {
+		region = region || BlockSource.getDefaultForActor(Player.get());
 		let storages = {};
 		if (side >= 0 && !excludeSide) {
 			let dir = this.getRelativeCoords(coords, side);
-			let tileEntity = World.getTileEntity(dir.x, dir.y, dir.z);
+			let tileEntity = World.getTileEntity(dir.x, dir.y, dir.z, region);
 			if (tileEntity && tileEntity.liquidStorage) {
 				storages[side] = tileEntity;
 			}
@@ -203,14 +223,14 @@ let StorageInterface = {
 		else for (let s = 0; s < 6; s++) {
 			if (excludeSide && s == side) continue;
 			let dir = this.getRelativeCoords(coords, s);
-			let tileEntity = World.getTileEntity(dir.x, dir.y, dir.z);
+			let tileEntity = World.getTileEntity(dir.x, dir.y, dir.z, region);
 			if (tileEntity && tileEntity.liquidStorage) {
 				storages[s] = tileEntity;
 			}
 		}
 		return storages;
 	},
-	
+
 	putItems: function(items, containers) {
 		for (let i in items) {
 			let item = items[i];
@@ -221,14 +241,14 @@ let StorageInterface = {
 			}
 		}
 	},
-	
+
 	putItemToContainer: function(item, container, side, maxCount) {
 		let tileEntity = container.tileEntity;
 		let count = 0;
 		let slots = [];
 		let slotsInitialized = false;
 		side ^= 1; // opposite side
-		
+
 		if (tileEntity) {
 			if (tileEntity.interface) {
 				return tileEntity.interface.addItem(item, side, maxCount);
@@ -254,14 +274,14 @@ let StorageInterface = {
 		}
 		return count;
 	},
-	
+
 	extractItemsFromContainer: function(inputTile, container, side, maxCount, oneStack) {
 		let outputTile = container.tileEntity;
 		let count = 0;
 		let slots = [];
 		let slotsInitialized = false;
 		let outputSide = side ^ 1;
-		
+
 		if (outputTile) {
 			if (outputTile.interface) {
 				slots = outputTile.interface.getOutputSlots(outputSide);
@@ -290,7 +310,7 @@ let StorageInterface = {
 		}
 		return count;
 	},
-	
+
 	extractLiquid: function(liquid, maxAmount, input, output, inputSide) {
 		if (!liquid) {
 			if (output.interface) {
@@ -306,7 +326,7 @@ let StorageInterface = {
 			}
 		}
 	},
-	
+
 	transportLiquid: function(liquid, maxAmount, output, input, outputSide) {
 		if (liquid) {
 			let inputSide = outputSide ^ 1;
@@ -319,7 +339,7 @@ let StorageInterface = {
 			}
 		}
 	},
-	
+
 	getContainerSlots: function(container, mode, side) {
 		let slots = [];
 		if (container.slots) {
@@ -361,11 +381,12 @@ let StorageInterface = {
 	// require storage interface for tile entity
 	checkHoppers: function(tile) {
 		if (World.getThreadTime()%8 > 0) return;
+		let region = tile.blockSource;
 		for (let side = 1; side < 6; side++) {
 			let dir = this.getRelativeCoords(tile, side);
-			let block = World.getBlock(dir.x, dir.y, dir.z);
+			let block = region.getBlock(dir.x, dir.y, dir.z);
 			if (block.id == 154 && block.data == side + Math.pow(-1, side)) {
-				let container = World.getContainer(dir.x, dir.y, dir.z);
+				let container = World.getContainer(dir.x, dir.y, dir.z, region);
 				for (let s = 0; s < container.getSize(); s++) {
 					let slot = container.getSlot(s);
 					if (slot.id > 0 && tile.interface.addItem(slot, side, 1)) {
@@ -376,8 +397,8 @@ let StorageInterface = {
 			}
 		}
 
-		if (World.getBlockID(tile.x, tile.y-1, tile.z) == 154) {
-			let container = World.getContainer(tile.x, tile.y-1, tile.z);
+		if (region.getBlockID(tile.x, tile.y-1, tile.z) == 154) {
+			let container = World.getContainer(tile.x, tile.y-1, tile.z, region);
 			let slots = tile.interface.getOutputSlots(0);
 			for (let i in slots) {
 				let item = tile.container.getSlot(slots[i]);
@@ -393,7 +414,7 @@ let StorageInterface = {
 			}
 		}
 	},
-	
+
 	// legacy
 	extractItems: function(items, containers, tile) {
 		for (let i in items) {
@@ -405,7 +426,7 @@ let StorageInterface = {
 				let slots = [];
 				let slotsInitialized = false;
 				let outputSide = parseInt(side) ^ 1;
-				
+
 				if (tileEntity) {
 					if (tileEntity.interface) {
 						slots = tileEntity.interface.getOutputSlots(outputSide);
@@ -426,7 +447,7 @@ let StorageInterface = {
 						if (tile.interface) {
 							added = tile.interface.addItem(slot, parseInt(side));
 						} else {
-							added = this.addItemToSlot(slot, item) 
+							added = this.addItemToSlot(slot, item);
 						}
 						if (added > 0 && !container.slots) {
 							container.setSlot(slots[i], slot.id, slot.count, slot.data);
