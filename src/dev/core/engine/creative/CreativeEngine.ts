@@ -25,3 +25,4 @@ class CreativeEngine extends BCEngine {
         return null;
     }
 }
+const creativeEngine = new CreativeEngine();

@@ -35,3 +35,4 @@ class PipeIron extends BCTransportPipe {
         return { id: VanillaItemID.iron_ingot, count: 1, data: 0 }
     }
 }
+const ironPipe = new PipeIron();

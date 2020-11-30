@@ -19,3 +19,4 @@ class PipeGold extends BCTransportPipe {
         return { id: VanillaItemID.gold_ingot, count: 1, data: 0 }
     }
 }
+const goldPipe = new PipeGold();

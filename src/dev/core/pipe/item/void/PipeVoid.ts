@@ -36,3 +36,4 @@ class PipeVoid extends BCTransportPipe {
         return null
     }
 }
+const voidPipe = new PipeVoid();

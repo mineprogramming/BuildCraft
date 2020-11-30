@@ -35,3 +35,4 @@ class PipeDiamond extends BCTransportPipe {
         return { id: VanillaItemID.diamond, count: 1, data: 0 }
     }
 }
+const diamondPipe = new PipeDiamond();

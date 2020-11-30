@@ -32,3 +32,4 @@ class PipeQuartz extends BCTransportPipe {
         return { id: VanillaItemID.quartz, count: 1, data: 0 }
     }
 }
+const quartzPipe = new PipeQuartz();

@@ -27,3 +27,4 @@ class PipeCobble extends BCTransportPipe {
         return { id: VanillaBlockID.cobblestone, count: 1, data: 0 }
     }
 }
+const cobblePipe = new PipeCobble();
