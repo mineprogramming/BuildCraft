@@ -6,13 +6,13 @@ class PipeSandstone extends BCTransportPipe {
     }
 
     public get pipeConnector(): PipeConnector {
-        if(!this.connector) this.connector = new SandstonePipeConnector();
+        if (!this.connector) this.connector = new SandstonePipeConnector();
         return this.connector;
     }
 
     protected get pipeTexture(): PipeTexture {
         const textureName = `pipe_${this.transportType}_${this.material}`
-        if(!this.texture) this.texture = new PipeTexture({name: textureName, data: 0}, {name: textureName, data: 1});
+        if (!this.texture) this.texture = new PipeTexture({ name: textureName, data: 0 }, { name: textureName, data: 1 });
         return this.texture;
     }
 
@@ -20,3 +20,4 @@ class PipeSandstone extends BCTransportPipe {
         return { id: VanillaBlockID.sandstone, count: 1, data: 0 }
     }
 }
+const sandstonePipe = new PipeSandstone();

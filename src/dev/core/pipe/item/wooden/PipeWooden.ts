@@ -55,3 +55,4 @@ class PipeWooden extends BCTransportPipe {
         return { id: VanillaBlockID.planks, count: 1, data: 0 }
     }
 }
+const woodPipe = new PipeWooden();

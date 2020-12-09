@@ -27,3 +27,4 @@ class PipeStone extends BCTransportPipe {
         return { id: VanillaBlockID.stone, count: 1, data: 0 }
     }
 }
+const stonePipe = new PipeStone();

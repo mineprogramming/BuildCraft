@@ -3,6 +3,7 @@
 /// <reference path="../components/recipe/EngineIngredients.ts" />
 /// <reference path="WoodEngineTileEntity.ts" />
 /// <reference path="../EngineTextures.ts" />
+/// <reference path="../../../item/gears.ts" />
 
 class WoodEngine extends BCEngine {
     public get engineType(): string {
@@ -21,3 +22,4 @@ class WoodEngine extends BCEngine {
         return new EngineIngredients({ id: ItemID.gear_wood, count: 1, data: 0 }, { id: VanillaBlockID.planks, count: 1, data: -1 });
     }
 }
+const woodenEngine = new WoodEngine();

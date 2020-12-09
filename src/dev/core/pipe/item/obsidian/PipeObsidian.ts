@@ -43,3 +43,4 @@ class PipeObsidian extends BCTransportPipe {
         return { id: VanillaBlockID.obsidian, count: 1, data: 0 }
     }
 }
+const obsidianPipe = new PipeObsidian();
