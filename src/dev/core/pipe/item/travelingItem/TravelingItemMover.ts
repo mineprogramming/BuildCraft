@@ -179,7 +179,7 @@ class TravelingItemMover {
     }
 
     public isValidContainer(container): boolean {
-        const slots = StorageInterface.getContainerSlots(container, 1, 0);
+        const slots = StorageInterface.getContainerSlots(container);
         let trueSlotsLength = slots.length;
         if (trueSlotsLength > 0 && typeof slots[0] == "string") {
             // ! tileEntity container has jsonSaverId in slots[0]
