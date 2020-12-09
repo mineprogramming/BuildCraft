@@ -3,6 +3,8 @@
 /// <reference path="../components/recipe/EngineIngredients.ts" />
 /// <reference path="CreativeEngineTileEntity.ts" />
 /// <reference path="../EngineTextures.ts" />
+// * only for engine order in creative tab
+/// <reference path="../wood/WoodEngine.ts" />
 class CreativeEngine extends BCEngine {
 
     public get engineType(): string {

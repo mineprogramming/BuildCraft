@@ -2,6 +2,12 @@
 /// <reference path="../../energy.ts" />
 /// <reference path="../interface/IHeatable.ts" />
 /// <reference path="../interface/IEngine.ts" />
+/**
+ * !WARNING
+ * this code adapted from JAVA source of PC mod
+ * this structure created not by me
+ * dont punch me pls
+ */
 abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHeatable, IEngine {
     public readonly MIN_HEAT: number = 20;
     public readonly IDEAL_HEAT: number = 100;
@@ -18,7 +24,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
     // How many ticks ago it gave out power, capped to 4.
     private lastTick: number = 0;
 
-    constructor(protected texture: EngineTexture){}
+    constructor(protected texture: EngineTexture) { }
     protected data: any = {// * it will be rewriten during runtime
         meta: null, // * this.orientation in PC version
         energy: 0, // * this.energy in PC version
@@ -53,7 +59,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
     }
 
     public setOrientation(value: number) {
-        if (typeof(value) == "number") {
+        if (typeof (value) == "number") {
             const { x, y, z } = this;
             this.blockSource.setBlock(x, y, z, this.blockSource.getBlockId(x, y, z), value);
             this.updateClientOrientation();
@@ -65,7 +71,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
         this.networkData.sendChanges();
     }
 
-    private setProgress(value: number){
+    private setProgress(value: number) {
         this.data.progress = value;
         this.networkData.putFloat("progress", value);
     }
@@ -74,7 +80,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
         return this.data.progress;
     }
 
-    private setProgressPart(value: number){
+    private setProgressPart(value: number) {
         this.progressPart = value;
     }
 
@@ -82,7 +88,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
         return this.progressPart;
     }
 
-    private setEnergyStage(value: EngineHeat){
+    private setEnergyStage(value: EngineHeat) {
         this.energyStage = value;
         this.networkData.putInt("energyStageIndex", HeatOrder.indexOf(this.energyStage));
         this.networkData.sendChanges();
@@ -92,7 +98,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
         return this.isPumping;
     }
 
-    public setPumping(value: boolean){
+    public setPumping(value: boolean) {
         if (this.isPumping == value) return;
         this.isPumping = value;
         this.lastTick = 0;
@@ -173,24 +179,24 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
     }
 
     // !TileEntity event
-    public init(){
+    public init() {
         this.checkOrientation = true;
     }
 
     // !TileEntity event
-    public redstone(params){
+    public redstone(params) {
         this.isRedstonePowered = params.signal > 0;
     }
 
     // !TileEntity event
-    public tick(){
+    public tick() {
         if (this.checkOrientation) this.updateConnectionSide();
         if (this.lastTick < 4) this.lastTick++;
 
         this.updateHeat();
         this.getEnergyStage();
 
-        if (this.getEnergyStage() === EngineHeat.OVERHEAT){
+        if (this.getEnergyStage() === EngineHeat.OVERHEAT) {
             this.data.energy = Math.max(this.data.energy - 50, 0);
             return;
         }
@@ -234,7 +240,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
     }
 
     public click(id, count, data) {
-        if(id != ItemID.bc_wrench) return false;
+        if (id != ItemID.bc_wrench) return false;
         if (this.getEnergyStage() == EngineHeat.OVERHEAT) {
             this.setEnergyStage(this.computeEnergyStage());
         }
@@ -249,21 +255,21 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
     // ! @MineExplorer PLEASE make EnergyTileRegistry BlockSource support
     // TODO move to blockSource getConnectionSide
     /** @param findNext - use true value if you want to rerotate engine like a wrench */
-    protected getConnectionSide(findNext : boolean = false){
+    protected getConnectionSide(findNext: boolean = false) {
         // * In common situation ends when i gets max in 5 index
         // * But if fhis function calling by wrench index can go beyound
         // * I think this code is poor, but maybe i fix it in future
         const orientation = this.getOrientation();
-        for(let t = 0; t < 12; t++){
+        for (let t = 0; t < 12; t++) {
             const i = t % 6;
-            if(findNext) {
-                if(orientation == t) findNext = false;
+            if (findNext) {
+                if (orientation == t) findNext = false;
                 continue;
             }
             const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
             // * ?. is new ESNext feature. Its amazing!
             const energyTypes = EnergyTileRegistry.accessMachineAtCoords(relCoords.x, relCoords.y, relCoords.z)?.__energyTypes;
-            if(energyTypes?.RF) return i;
+            if (energyTypes?.RF) return i;
         }
         return null;
     }
@@ -273,7 +279,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
         const orientation = this.getOrientation();
         if (!this.isPoweredTile(this.getEnergyProvider(orientation), orientation)) {
             const side = this.getConnectionSide();
-            if (typeof(side) == "number") {
+            if (typeof (side) == "number") {
                 this.setOrientation(side);
             } else this.updateClientOrientation();
         } else this.updateClientOrientation();
@@ -310,7 +316,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
 
     private getPowerToExtract(): number {
         const tile = this.getEnergyProvider(this.getOrientation());
-        if(!tile) return 0;
+        if (!tile) return 0;
 
         const oppositeSide = World.getInverseBlockSide(this.getOrientation());
 
@@ -327,7 +333,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
     }
 
     public isPoweredTile(tile: any, side: number): boolean {
-        if(!tile) return false;
+        if (!tile) return false;
         const oppositeSide = World.getInverseBlockSide(this.getOrientation());
 
         if (tile.isEngine) {
@@ -442,7 +448,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
     }
 
     // ? why we need it? ask PC author about it. Maybe it should be overrided in future
-    protected burn(): void {}
+    protected burn(): void { }
 
     // abstract methods
     public abstract isBurning(): boolean
