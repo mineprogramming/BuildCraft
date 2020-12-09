@@ -3,7 +3,7 @@
         "info": {
             "name": "BuildCraft PE",
             "author": "Nikolay Savenko",
-            "version": "1.0",
+            "version": "1.0.1",
             "description": "Port of PC version of BuildCraft"
         },
         "api": "CoreEngine"
@@ -53,8 +53,8 @@
             "language": "javascript"
         },
         {
-			"source": "src/dev",
-			"target": "main.js",
+            "source": "src/dev",
+            "target": "main.js",
             "type": "main",
             "language": "typescript"
         },
