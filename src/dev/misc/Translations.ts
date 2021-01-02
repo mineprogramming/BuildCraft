@@ -1,21 +1,18 @@
-Translation.addTranslation("engine_creative", { ru: "Двигатель для творческого режима", en: "Creative Engine" });
-Translation.addTranslation("engine_wooden", { ru: "Двигатель на красном камне", en: "Wooden Engine" });
-
-Translation.addTranslation("pipe_item_cobble", { ru: "Булыжниковая транспортная труба", en: "Cobblestone Transport Pipe" });
-Translation.addTranslation("pipe_item_stone", { ru: "Каменная транспортная труба", en: "Stone Transport Pipe" });
-Translation.addTranslation("pipe_item_sandstone", { ru: "Песчаниковая транспортная труба", en: "Sandstone Transport Pipe" });
-Translation.addTranslation("pipe_item_quartz", { ru: "Кварцевая транспортная труба", en: "Quartz Transport Pipe" });
-Translation.addTranslation("pipe_item_gold", { ru: "Золотая транспортная труба", en: "Golden Transport Pipe" });
-Translation.addTranslation("pipe_item_wood", { ru: "Деревянная транспортная труба", en: "Wooden Transport Pipe" });
-Translation.addTranslation("pipe_item_void", { ru: "Пустотная транспортная труба", en: "Void Transport Pipe" });
-Translation.addTranslation("pipe_item_iron", { ru: "Железная транспортная труба", en: "Iron Transport Pipe" });
-Translation.addTranslation("pipe_item_diamond", { ru: "Алмазная транспортная труба", en: "Diamond Transport Pipe" });
-Translation.addTranslation("pipe_item_obsidian", { ru: "Обсидиановая транспортная труба", en: "Obsidian Transport Pipe" });
-
-Translation.addTranslation("gear_diamond", { ru: "Алмазная шестерня", en: "Diamond Gear" });
-Translation.addTranslation("gear_gold", { ru: "Золотая шестерня", en: "Gold Gear" });
-Translation.addTranslation("gear_iron", { ru: "Железная шестерня", en: "Iron Gear" });
-Translation.addTranslation("gear_stone", { ru: "Каменная шестерня", en: "Stone Gear" });
-Translation.addTranslation("gear_wood", { ru: "Деревянная шестерня", en: "Wood Gear" });
-
-Translation.addTranslation("bc_wrench", { ru: "Гаечный ключ", en: "Wrench" });
+Translation.addTranslation("engine_creative", { ru: "Двигатель для творческого режима", en: "Creative Engine", zh:"创造引擎"});
+Translation.addTranslation("engine_wooden", { ru: "Двигатель на красном камне", en: "Wooden Engine", zh:"红石引擎"});
+Translation.addTranslation("pipe_item_cobble", { ru: "Булыжниковая транспортная труба", en: "Cobblestone Transport Pipe", zh:"圆石管道"});
+Translation.addTranslation("pipe_item_stone", { ru: "Каменная транспортная труба", en: "Stone Transport Pipe", zh:"石头管道"});
+Translation.addTranslation("pipe_item_sandstone", { ru: "Песчаниковая транспортная труба", en: "Sandstone Transport Pipe", zh:"沙石管道"});
+Translation.addTranslation("pipe_item_quartz", { ru: "Кварцевая транспортная труба", en: "Quartz Transport Pipe", zh:"石英管道"});
+Translation.addTranslation("pipe_item_gold", { ru: "Золотая транспортная труба", en: "Golden Transport Pipe", zh:"金质管道"});
+Translation.addTranslation("pipe_item_wood", { ru: "Деревянная транспортная труба", en: "Wooden Transport Pipe", zh:"木质管道"});
+Translation.addTranslation("pipe_item_void", { ru: "Пустотная транспортная труба", en: "Void Transport Pipe", zh:"虚空管道"});
+Translation.addTranslation("pipe_item_iron", { ru: "Железная транспортная труба", en: "Iron Transport Pipe", zh:"铁质管道"});
+Translation.addTranslation("pipe_item_diamond", { ru: "Алмазная транспортная труба", en: "Diamond Transport Pipe", zh:"钻石管道"});
+Translation.addTranslation("pipe_item_obsidian", { ru: "Обсидиановая транспортная труба", en: "Obsidian Transport Pipe", zh:"黑曜石管道"});
+Translation.addTranslation("gear_diamond", { ru: "Алмазная шестерня", en: "Diamond Gear", zh:"钻石齿轮"});
+Translation.addTranslation("gear_gold", { ru: "Золотая шестерня", en: "Gold Gear", zh:"金齿轮"});
+Translation.addTranslation("gear_iron", { ru: "Железная шестерня", en: "Iron Gear", zh:"铁齿轮"});
+Translation.addTranslation("gear_stone", { ru: "Каменная шестерня", en: "Stone Gear", zh:"石齿轮"});
+Translation.addTranslation("gear_wood", { ru: "Деревянная шестерня", en: "Wood Gear", zh:"木齿轮"});
+Translation.addTranslation("bc_wrench", { ru: "Гаечный ключ", en: "Wrench", zh:"扳手"});
