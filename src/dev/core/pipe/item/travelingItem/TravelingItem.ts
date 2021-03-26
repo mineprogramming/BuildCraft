@@ -116,14 +116,15 @@ class TravelingItem {
                 return;
             }
 
-            const container = World.getContainer(x, y, z, this.blockSource);
+
             if (this.modifyByPipe()) {
                 this.destroy();
                 return;
             }
-            if (container != null && this.itemMover.isValidContainer(container)) {
-                const pushedCount = StorageInterface.putItemToContainer(this.item, container,
-                    this.itemMover.MoveVectorIndex, this.item.count);
+            const storage = StorageInterface.getStorage(this.blockSource, x, y, z);
+            if (this.itemMover.isValidStorage(storage)) {
+                const pushedCount = storage.addItem(this.item, World.getInverseBlockSide(this.itemMover.MoveVectorIndex));
+
                 if (pushedCount > 0) {
                     this.destroy();
                     return;

@@ -113,18 +113,18 @@ class WoodenPipeTileEntity implements TileEntity.TileEntityPrototype {
                 continue;
             }
             const { x, y, z } = World.getRelativeCoords(this.x, this.y, this.z, i);
-            if (this.canConnectTo(x, y, z, this.blockSource)) return i;
+            if (this.canConnectTo(x, y, z, this.blockSource, i)) return i;
         }
         // default value
         return -1;
     }
 
     public checkConnection(): void {
-        if (this.data.connectionSide < 0){
+        if (this.data.connectionSide < 0) {
             this.updateConnectionSide();
         } else {
             const { x, y, z } = World.getRelativeCoords(this.x, this.y, this.z, this.data.connectionSide);
-            if (!this.canConnectTo(x, y, z, this.blockSource)) {
+            if (!this.canConnectTo(x, y, z, this.blockSource, this.data.connectionSide)) {
                 this.updateConnectionSide();
             } else {
                 this.changeOrientation();
@@ -132,16 +132,26 @@ class WoodenPipeTileEntity implements TileEntity.TileEntityPrototype {
         }
     }
 
-    public canConnectTo(x: number, y: number, z: number, region: BlockSource): boolean {
-        const container = World.getContainer(x, y, z, region) as UI.Container;
-        if (!container) return false;
+    public canConnectTo(x: number, y: number, z: number, region: BlockSource, side: number): boolean {
+        /*const tileEnt = World.getTileEntity(x, y, z, region);
+        if (!tileEnt) return false;*/
+        const storage = StorageInterface.getStorage(region, x, y, z);
+        if (!storage) return false;
 
-        // ? if NativeTileEntity is NullObject
+        /* // ? if NativeTileEntity is NullObject
         if (container.getSlot(0) == null) return false;
-
+        */
         // ! container.slots contain not only slots. It containt saverID too.
         // ! container.slots.length = 1 means that container has 0 slots
-        if (!container.slots || container.slots.length > 1) return true;
+        const slots = storage.getOutputSlots(World.getInverseBlockSide(side));
+        if (!slots) return false;
+
+        let trueSlotsLength = slots.length;
+        if (trueSlotsLength > 0 && slots[0] == "_json_saver_id") {
+            // ! tileEntity container has jsonSaverId in slots[0]
+            trueSlotsLength -= 1;
+        }
+        return trueSlotsLength > 0;
     }
 
     private maxExtractable(): number {

@@ -266,10 +266,13 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
                 if (orientation == t) findNext = false;
                 continue;
             }
-            const { x, y ,z } = World.getRelativeCoords(this.x, this.y, this.z, i);
+            const { x, y, z } = World.getRelativeCoords(this.x, this.y, this.z, i);
             // * ?. is new ESNext feature. Its amazing!
-            const energyTypes = World.getTileEntity(x, y, z, this.blockSource)?.__energyTypes;
-            if (energyTypes?.RF) return i;
+            let node = EnergyNet.getNodeOnCoords(this.blockSource, x, y, z);
+            let thisNode = EnergyNet.getNodeOnCoords(this.blockSource, this.x, this.y, this.z);
+            if (node && thisNode.isCompatible(node)) {
+                return i;
+            }
         }
         return null;
     }
