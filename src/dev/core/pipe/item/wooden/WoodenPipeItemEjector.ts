@@ -80,7 +80,7 @@ class WoodenPipeItemEjector {
         const gettedItem = {
             id: 0,
             count: 0,
-            data: null,
+            data: 0,
             extra: null,
         };
 
