@@ -133,25 +133,8 @@ class WoodenPipeTileEntity implements TileEntity.TileEntityPrototype {
     }
 
     public canConnectTo(x: number, y: number, z: number, region: BlockSource, side: number): boolean {
-        /*const tileEnt = World.getTileEntity(x, y, z, region);
-        if (!tileEnt) return false;*/
         const storage = StorageInterface.getStorage(region, x, y, z);
-        if (!storage) return false;
-
-        /* // ? if NativeTileEntity is NullObject
-        if (container.getSlot(0) == null) return false;
-        */
-        // ! container.slots contain not only slots. It containt saverID too.
-        // ! container.slots.length = 1 means that container has 0 slots
-        const slots = storage.getOutputSlots(World.getInverseBlockSide(side));
-        if (!slots) return false;
-
-        let trueSlotsLength = slots.length;
-        if (trueSlotsLength > 0 && slots[0] == "_json_saver_id") {
-            // ! tileEntity container has jsonSaverId in slots[0]
-            trueSlotsLength -= 1;
-        }
-        return trueSlotsLength > 0;
+        return storage ? storage.getOutputSlots().length > 0 : false;
     }
 
     private maxExtractable(): number {
