@@ -55,7 +55,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
      */
 
     public getOrientation(): number {
-        return this.blockSource.getBlockData(this.x, this.y, this.z);
+        return this.blockSource?.getBlockData(this.x, this.y, this.z);
     }
 
     public setOrientation(value: number) {
