@@ -122,7 +122,7 @@ class TravelingItem {
                 return;
             }
             const storage = StorageInterface.getStorage(this.blockSource, x, y, z);
-            if (this.itemMover.isValidStorage(storage)) {
+            if (this.itemMover.isValidStorage(storage, World.getInverseBlockSide(this.itemMover.MoveVectorIndex))) {
                 const pushedCount = storage.addItem(this.item, World.getInverseBlockSide(this.itemMover.MoveVectorIndex));
 
                 if (pushedCount > 0) {

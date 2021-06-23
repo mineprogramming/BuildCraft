@@ -98,7 +98,8 @@ class TravelingItemMover {
     }
 
     public findNewMoveVector(region: BlockSource): boolean {
-        const nextPipes = this.filterPaths(this.getRelativePaths(region), region);
+        var relativePaths = this.getRelativePaths(region);
+        const nextPipes = this.filterPaths(relativePaths, region);
         const keys = Object.keys(nextPipes);
 
         if (keys.length > 0) {
@@ -170,7 +171,7 @@ class TravelingItemMover {
                 }
 
                 const storage = StorageInterface.getStorage(region, x, y, z);
-                if (this.isValidStorage(storage) && !currentConnector?.hasBlacklistBlockID(pipeBlockID, pipeBlockData)) {
+                if (this.isValidStorage(storage, World.getInverseBlockSide(i)) && !currentConnector?.hasBlacklistBlockID(pipeBlockID, pipeBlockData)) {
                     targets[i] = storage;
                 }
             }
@@ -178,8 +179,8 @@ class TravelingItemMover {
         return targets;
     }
 
-    public isValidStorage(storage: Storage): boolean {
-        const slots = storage?.getInputSlots();
+    public isValidStorage(storage: Storage, side: number): boolean {
+        const slots = storage?.getInputSlots(side);
         if (!slots) return false;
 
         let trueSlotsLength = slots.length;
