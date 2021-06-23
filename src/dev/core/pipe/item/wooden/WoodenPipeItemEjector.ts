@@ -11,7 +11,7 @@ class WoodenPipeItemEjector {
 
     public set connectionSide(value: number) {
         this.side = value;
-        if (value > 0) {
+        if (value >= 0) {
             const coords = World.getRelativeCoords(this.x, this.y, this.z, this.connectionSide);
             // update to BlockSource
             const storage = StorageInterface.getStorage(this.region, coords.x, coords.y, coords.z);
