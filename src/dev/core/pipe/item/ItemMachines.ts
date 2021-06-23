@@ -8,9 +8,11 @@ for (const instance of ITEM_MACHINES) {
 	ICRender.getGroup(basicRule.name).add(instance.id, instance.data);
 }
 
-// For StorageInterface containers
-// @ts-ignore
-for (const blockID in StorageInterface.data) {
+Callback.addCallback("PostLoaded", () => {
+	// For StorageInterface containers
 	// @ts-ignore
-	ICRender.getGroup(basicRule.name).add(blockID, -1);
-}
+	for (const blockID in StorageInterface.data) {
+		// @ts-ignore
+		ICRender.getGroup(basicRule.name).add(blockID, -1);
+	}
+});

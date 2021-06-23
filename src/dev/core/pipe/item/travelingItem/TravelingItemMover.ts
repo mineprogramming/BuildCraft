@@ -98,7 +98,8 @@ class TravelingItemMover {
     }
 
     public findNewMoveVector(region: BlockSource): boolean {
-        const nextPipes = this.filterPaths(this.getRelativePaths(region), region);
+        var relativePaths = this.getRelativePaths(region);
+        const nextPipes = this.filterPaths(relativePaths, region);
         const keys = Object.keys(nextPipes);
 
         if (keys.length > 0) {
@@ -152,7 +153,7 @@ class TravelingItemMover {
      * @returns {object} which looks like {"sideIndex": pipeClass | container}
      */
     private getRelativePaths(region: BlockSource): object {
-        const pipes = {};
+        const targets = {};
         for (let i = 0; i < 6; i++) {
             const backVectorIndex = World.getInverseBlockSide(this.moveVectorIndex);
             if (i != backVectorIndex) {
@@ -165,23 +166,25 @@ class TravelingItemMover {
                 const relativePipeClass = PipeIdMap.getClassById(pipeBlockID);
                 const currentConnector = this.getClassOfCurrentPipe(region)?.pipeConnector;
                 if (relativePipeClass != null && currentConnector?.canConnectToPipe(relativePipeClass)) {
-                    pipes[i] = relativePipeClass;
+                    targets[i] = relativePipeClass;
                     continue;
                 }
 
-                const container = World.getContainer(x, y, z, region);
-                if (container != null && this.isValidContainer(container) && !currentConnector?.hasBlacklistBlockID(pipeBlockID, pipeBlockData)) {
-                    pipes[i] = container;
+                const storage = StorageInterface.getStorage(region, x, y, z);
+                if (this.isValidStorage(storage, World.getInverseBlockSide(i)) && !currentConnector?.hasBlacklistBlockID(pipeBlockID, pipeBlockData)) {
+                    targets[i] = storage;
                 }
             }
         }
-        return pipes;
+        return targets;
     }
 
-    public isValidContainer(container): boolean {
-        const slots = StorageInterface.getContainerSlots(container);
+    public isValidStorage(storage: Storage, side: number): boolean {
+        const slots = storage?.getInputSlots(side);
+        if (!slots) return false;
+
         let trueSlotsLength = slots.length;
-        if (trueSlotsLength > 0 && typeof slots[0] == "string") {
+        if (trueSlotsLength > 0 && slots[0] == "_json_saver_id") {
             // ! tileEntity container has jsonSaverId in slots[0]
             trueSlotsLength -= 1;
         }

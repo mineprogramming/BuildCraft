@@ -1,7 +1,7 @@
 /// <reference path="../travelingItem/TravelingItem.ts" />
 class WoodenPipeItemEjector {
     private side: number | null;
-    private containerData: { source; slots } | null;
+    private containerData: { source: Storage; slots } | null;
     constructor(
         public readonly region: BlockSource,
         public readonly x: number,
@@ -9,15 +9,15 @@ class WoodenPipeItemEjector {
         public readonly z: number
     ) { }
 
-    public set connectionSide(value: number | null) {
+    public set connectionSide(value: number) {
         this.side = value;
-        if (value != null) {
+        if (value >= 0) {
             const coords = World.getRelativeCoords(this.x, this.y, this.z, this.connectionSide);
             // update to BlockSource
-            const sourceContainer = World.getContainer(coords.x, coords.y, coords.z, this.region);
+            const storage = StorageInterface.getStorage(this.region, coords.x, coords.y, coords.z);
             this.containerData = {
-                source: sourceContainer,
-                slots: StorageInterface.getContainerSlots(sourceContainer),
+                source: storage,
+                slots: storage.getOutputSlots(),
             };
         } else {
             this.containerData = null;
@@ -80,7 +80,7 @@ class WoodenPipeItemEjector {
         const gettedItem = {
             id: 0,
             count: 0,
-            data: null,
+            data: 0,
             extra: null,
         };
 

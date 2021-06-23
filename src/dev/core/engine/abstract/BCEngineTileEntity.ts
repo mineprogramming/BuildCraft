@@ -55,7 +55,7 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
      */
 
     public getOrientation(): number {
-        return this.blockSource.getBlockData(this.x, this.y, this.z);
+        return this.blockSource?.getBlockData(this.x, this.y, this.z);
     }
 
     public setOrientation(value: number) {
@@ -266,10 +266,13 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
                 if (orientation == t) findNext = false;
                 continue;
             }
-            const relCoords = World.getRelativeCoords(this.x, this.y, this.z, i);
+            const { x, y, z } = World.getRelativeCoords(this.x, this.y, this.z, i);
             // * ?. is new ESNext feature. Its amazing!
-            const energyTypes = EnergyTileRegistry.accessMachineAtCoords(relCoords.x, relCoords.y, relCoords.z)?.__energyTypes;
-            if (energyTypes?.RF) return i;
+            let node = EnergyNet.getNodeOnCoords(this.blockSource, x, y, z);
+            let thisNode = EnergyNet.getNodeOnCoords(this.blockSource, this.x, this.y, this.z);
+            if (node && thisNode.isCompatible(node)) {
+                return i;
+            }
         }
         return null;
     }
@@ -288,8 +291,8 @@ abstract class BCEngineTileEntity implements TileEntity.TileEntityPrototype, IHe
     // ! @MineExplorer PLEASE make EnergyTileRegistry BlockSource support
     // TODO move to blockSource getEnergyProvider
     public getEnergyProvider(orientation: number): any {
-        const coords = World.getRelativeCoords(this.x, this.y, this.z, orientation);
-        return EnergyTileRegistry.accessMachineAtCoords(coords.x, coords.y, coords.z);
+        const { x, y, z } = World.getRelativeCoords(this.x, this.y, this.z, orientation);
+        return World.getTileEntity(x, y, z, this.blockSource);
     }
 
     protected sendPower(): void {

@@ -60,7 +60,6 @@ abstract class BCPipe {
     }
 
     protected get pipeTexture(): PipeTexture {
-        alert("BCpipeTexture");
         return null;
     }
 

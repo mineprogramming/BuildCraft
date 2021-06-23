@@ -15,7 +15,7 @@ class WoodenPipeStorageConnector {
     public renderConnections(): void {
         const boxes = this.renderer.getBoxes(this.renderer.width);
         const standartModel = this.renderer.standartModel;
-        if (this.ConnectionSide > 0) {
+        if (this.ConnectionSide >= 0) {
             for (let i = 0; i < 6; i++) {
                 const box = boxes[i];
                 const renderModel = BlockRenderer.createModel();
