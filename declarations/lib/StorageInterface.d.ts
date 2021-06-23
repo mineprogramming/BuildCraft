@@ -1,20 +1,20 @@
-/// <reference path="../core-engine.d.ts" />
-
+/// <reference path="./core-engine.d.ts" />
 declare type Container = NativeTileEntity | UI.Container | ItemContainer;
 interface StorageDescriptor {
     slots?: {
         [key: string]: SlotData;
     };
+    liquidUnitRatio?: number;
     isValidInput?(item: ItemInstance, side: number, tileEntity: TileEntity): boolean;
     addItem?(item: ItemInstance, side?: number, maxCount?: number): number;
     getInputSlots?(side?: number): string[] | number[];
     getOutputSlots?(side?: number): string[] | number[];
-    canReceiveLiquid?(liquid: string, side?: number): boolean;
-    canTransportLiquid?(liquid: string, side?: number): boolean;
-    addLiquid?(liquid: string, amount: number): number;
-    getLiquid?(liquid: string, amount: number): number;
-    getLiquidStored?(storageName: string): string;
-    getLiquidStorage?(storageName: string): string;
+    canReceiveLiquid?(liquid: string, side: number): boolean;
+    canTransportLiquid?(liquid: string, side: number): boolean;
+    receiveLiquid?(liquidStorage: ILiquidStorage, liquid: string, amount: number): number;
+    extractLiquid?(liquidStorage: ILiquidStorage, liquid: string, amount: number): number;
+    getInputTank?(side: number): ILiquidStorage;
+    getOutputTank?(side: number): ILiquidStorage;
 }
 interface Storage extends StorageDescriptor {
     container: Container;
@@ -23,10 +23,10 @@ interface Storage extends StorageDescriptor {
     setSlot(name: string | number, id: number, count: number, data: number, extra?: ItemExtraData): void;
     getContainerSlots(): string[] | number[];
     getInputSlots(side?: number): string[] | number[];
+    getOutputSlots(side?: number): string[] | number[];
     getReceivingItemCount(item: ItemInstance, side?: number): number;
     addItemToSlot(name: string | number, item: ItemInstance, maxCount?: number): number;
     addItem(item: ItemInstance, side?: number, maxCount?: number): number;
-    getOutputSlots(side?: number): string[] | number[];
     clearContainer(): void;
 }
 interface SlotData {
@@ -36,6 +36,15 @@ interface SlotData {
     maxStack?: number;
     isValid?(item: ItemInstance, side: number, tileEntity: TileEntity): boolean;
     canOutput?(item: ItemInstance, side: number, tileEntity: TileEntity): boolean;
+}
+interface ILiquidStorage {
+    getLiquidStored(): string;
+    getLimit(liquid: string): number;
+    getAmount(liquid: string): number;
+    getLiquid(liquid: string, amount: number): number;
+    addLiquid(liquid: string, amount: number): number;
+    isFull(): boolean;
+    isEmpty(): boolean;
 }
 declare class NativeContainerInterface implements Storage {
     readonly container: NativeTileEntity;
@@ -52,6 +61,7 @@ declare class NativeContainerInterface implements Storage {
     clearContainer(): void;
 }
 declare class TileEntityInterface implements Storage {
+    readonly liquidUnitRatio: number;
     readonly slots?: {
         [key: string]: SlotData;
     };
@@ -74,12 +84,12 @@ declare class TileEntityInterface implements Storage {
     addItem(item: ItemInstance, side?: number, maxCount?: number): number;
     getOutputSlots(side?: number): string[];
     clearContainer(): void;
-    canReceiveLiquid(liquid: string, side?: number): boolean;
-    canTransportLiquid(liquid: string, side?: number): boolean;
-    addLiquid(liquid: string, amount: number): number;
-    getLiquid(liquid: string, amount: number): number;
-    getLiquidStored(storageName?: string): string;
-    getLiquidStorage(storageName?: string): any;
+    canReceiveLiquid(liquid: string, side: number): boolean;
+    canTransportLiquid(liquid: string, side: number): boolean;
+    receiveLiquid(liquidStorage: ILiquidStorage, liquid: string, amount: number): number;
+    extractLiquid(liquidStorage: ILiquidStorage, liquid: string, amount: number): number;
+    getInputTank(side: number): ILiquidStorage;
+    getOutputTank(side: number): ILiquidStorage;
 }
 declare namespace StorageInterface {
     type ContainersMap = {
@@ -102,7 +112,7 @@ declare namespace StorageInterface {
     export function setSlotValidatePolicy(container: ItemContainer, slotName: string, func: (name: string, id: number, amount: number, data: number, extra: ItemExtraData, container: ItemContainer, playerUid: number) => boolean): void;
     export function setGlobalValidatePolicy(container: ItemContainer, func: (name: string, id: number, amount: number, data: number, extra: ItemExtraData, container: ItemContainer, playerUid: number) => boolean): void;
     /** Creates new interface instance for TileEntity or Container */
-    export function newStorage(storage: TileEntity | Container): Storage;
+    export function getInterface(storage: TileEntity | Container): Storage;
     /** Registers interface for block container */
     export function createInterface(id: number, descriptor: StorageDescriptor): void;
     /** Trasfers item to slot
@@ -163,7 +173,8 @@ declare namespace StorageInterface {
      * @maxAmount max amount of liquid that can be transfered
      * @inputStorage storage to input liquid
      * @outputStorage storage to extract liquid
-     * @inputSide block side of input storage which is receiving liquid
+     * @inputSide block side of input storage which is receiving
+     * @returns left liquid amount
     */
     export function extractLiquid(liquid: Nullable<string>, maxAmount: number, inputStorage: TileEntity | Storage, outputStorage: Storage, inputSide: number): number;
     /** Similar to StorageInterface.extractLiquid, but liquid must be specified */
