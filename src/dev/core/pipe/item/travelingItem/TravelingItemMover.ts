@@ -97,8 +97,11 @@ class TravelingItemMover {
         this.coords = this.coordsToFixed(newCoords);
     }
 
-    public findNewMoveVector(region: BlockSource): boolean {
+    public findNewMoveVector(region: BlockSource): number {
         var relativePaths = this.getRelativePaths(region);
+        if (relativePaths === null) {
+            return -1;
+        }
         const nextPipes = this.filterPaths(relativePaths, region);
         const keys = Object.keys(nextPipes);
 
@@ -110,10 +113,10 @@ class TravelingItemMover {
             this.prevCoords = this.Coords;
             this.updateMoveSpeed(region);
             this.updateCoordsTime();
-            return true;
+            return 1;
         }
 
-        return false;
+        return 0;
     }
 
     /**
@@ -150,9 +153,9 @@ class TravelingItemMover {
     }
 
     /**
-     * @returns {object} which looks like {"sideIndex": pipeClass | container}
+     * @returns {object} which looks like {"sideIndex": pipeClass | container} or null if chunk unloaded
      */
-    private getRelativePaths(region: BlockSource): object {
+    private getRelativePaths(region: BlockSource): object | null {
         const targets = {};
         for (let i = 0; i < 6; i++) {
             const backVectorIndex = World.getInverseBlockSide(this.moveVectorIndex);
@@ -161,6 +164,9 @@ class TravelingItemMover {
                 const curY = this.AbsoluteCoords.y;
                 const curZ = this.AbsoluteCoords.z;
                 const { x, y, z } = World.getRelativeCoords(curX, curY, curZ, i);
+
+                if (!region.isChunkLoadedAt(x, z)) return null;
+
                 const pipeBlockID = region.getBlockId(x, y, z);
                 const pipeBlockData = region.getBlockData(x, y, z);
                 const relativePipeClass = PipeIdMap.getClassById(pipeBlockID);
@@ -169,6 +175,9 @@ class TravelingItemMover {
                     targets[i] = relativePipeClass;
                     continue;
                 }
+
+                let tile = TileEntity.getTileEntity(x, y, z, region);
+                if (tile?.__initialized === false) return null;
 
                 const storage = StorageInterface.getStorage(region, x, y, z);
                 if (this.isValidStorage(storage, World.getInverseBlockSide(i)) && !currentConnector?.hasBlacklistBlockID(pipeBlockID, pipeBlockData)) {
