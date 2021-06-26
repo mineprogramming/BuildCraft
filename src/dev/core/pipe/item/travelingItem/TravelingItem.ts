@@ -115,7 +115,11 @@ class TravelingItem {
                 this.destroy(true);
                 return;
             }
-
+            const tileEntity = World.getTileEntity(x, y, z, this.blockSource);
+            if (tileEntity?.__initialized === false) {
+                this.cooldown = ITEM_COOLDOWN_TIME;
+                return;
+            }
 
             if (this.modifyByPipe()) {
                 this.destroy();
@@ -132,8 +136,11 @@ class TravelingItem {
             }
 
             this.networkEntity.getClients().setupDistancePolicy(x, y, z, this.blockSource.getDimension(), 32);
-            if (this.itemMover.findNewMoveVector(this.blockSource)) {
+            const findResult = this.itemMover.findNewMoveVector(this.blockSource);
+            if (findResult > 0) {
                 this.updateMoveData();
+            } else if (findResult < 0) {
+                this.cooldown = ITEM_COOLDOWN_TIME;
             } else {
                 this.destroy(true);
                 return;
